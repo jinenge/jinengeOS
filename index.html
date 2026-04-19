@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>进恩哥系统</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system}
+
+.boot{
+  position:fixed;
+  inset:0;
+  background:linear-gradient(135deg,#0d0d1a,#12123a,#1a1a5c);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+
+.logo{
+  font-size:24px;
+  font-weight:bold;
+  margin-bottom:40px;
+  opacity:0;
+  animation:logoFade 2s ease-in-out forwards;
+}
+
+.progress-wrap{
+  width:220px;
+  height:6px;
+  background:rgba(255,255,255,0.15);
+  border-radius:999px;
+  overflow:hidden;
+}
+
+.progress{
+  width:0%;
+  height:100%;
+  background:#ffffff;
+  border-radius:999px;
+  animation:progress 5s linear forwards;
+}
+
+.tip{
+  margin-top:12px;
+  font-size:12px;
+  color:#aaa;
+  opacity:0;
+  animation:fade 5.5s ease forwards;
+}
+
+@keyframes logoFade{
+  0%{opacity:0;transform:scale(0.8);}
+  100%{opacity:1;transform:scale(1);}
+}
+
+@keyframes progress{
+  0%{width:0%;}
+  100%{width:100%;}
+}
+
+@keyframes fade{
+  0%{opacity:0;}
+  100%{opacity:1;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="boot">
+  <div class="logo">系统启动中</div>
+  <div class="progress-wrap">
+    <div class="progress"></div>
+  </div>
+  <div class="tip">正在加载核心服务…</div>
+</div>
+
+<audio id="startAudio" loop="false">
+  <source src="https://cdn.jsdelivr.net/gh/felix-original/audios/startup.mp3" type="audio/mpeg">
+
+
+<script>
+const audio = document.getElementById('startAudio');
+
+// 开机音效
+setTimeout(() => {
+  audio.volume = 0.7;
+  audio.play().catch(err => {});
+}, 500);
+
+// 开机完成 → 跳转到 Launcher.html
+setTimeout(() => {
+  window.location.href = "Launcher.html";
+}, 5500);
+</script>
+
+</body>
+</html>

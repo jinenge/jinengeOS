@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>短信</title>
+<style>
+*{box-sizing:border-box;font-family:'Roboto',sans-serif}
+body{margin:0;background:#0f172a;color:#fff}
+.container{max-width:480px;margin:auto}
+
+.nav{display:flex;gap:2px;padding:12px;background:#1e293b;border-radius:18px;margin:12px}
+.nav button{flex:1;padding:10px;border:none;border-radius:14px;background:transparent;color:#94a3b8}
+.nav button.active{background:#3b82f6;color:#fff}
+
+.top-bar{
+  display:flex;justify-content:space-between;padding:0 12px;margin-bottom:10px
+}
+.top-bar button{
+  background:#1e293b;color:#fff;border:none;padding:8px 12px;border-radius:12px
+}
+
+.content{padding:12px}
+
+/* 短信列表 */
+.sms-item{
+  background:#1e293b;padding:16px;border-radius:16px;margin-bottom:10px;
+  border:1px solid #3b82f622;cursor:pointer
+}
+.sms-item.unread{
+  border-color:#3b82f6;
+  box-shadow:0 0 0 1px #3b82f6;
+}
+.sms-title{font-size:16px;font-weight:500;margin-bottom:4px}
+.sms-preview{font-size:14px;color:#94a3b8;white-space:nowrap;overflow:hidden}
+.sms-time{font-size:12px;color:#666;text-align:right}
+.sms-del{
+  background:#ef4444;color:white;border:none;padding:6px 10px;border-radius:8px;margin-top:6px
+}
+
+/* 查看详情 + 回复 */
+.view-box{
+  background:#1e293b;padding:16px;border-radius:16px;
+  border:1px solid #3b82f6;margin-bottom:12px;display:none
+}
+.view-to{font-size:16px;margin-bottom:8px}
+.view-content{
+  font-size:16px;line-height:1.6;background:#0f172a;
+  padding:12px;border-radius:12px;margin-bottom:10px
+}
+.reply-box{
+  margin-top:12px;padding-top:12px;border-top:1px solid #3b82f633
+}
+.reply-box textarea{
+  width:100%;padding:10px;border-radius:10px;border:none;
+  background:#0f172a;color:#fff;resize:none;height:80px;margin-bottom:8px
+}
+.action-btn{
+  padding:10px 14px;border:none;border-radius:12px;
+  background:#3b82f6;color:#fff;width:100%;margin-top:6px
+}
+.action-btn.red{background:#ef4444}
+
+/* 发送框 */
+.send-box{
+  background:#1e293b;padding:16px;border-radius:16px;
+  border:1px solid #3b82f622;margin-top:12px
+}
+.send-box input,.send-box textarea{
+  width:100%;padding:12px;margin-bottom:8px;
+  border-radius:12px;border:none;background:#0f172a;color:#fff
+}
+.send-box textarea{height:100px;resize:none}
+.send-box button{
+  width:100%;padding:12px;border:none;border-radius:12px;
+  background:#3b82f6;color:#fff
+}
+
+/* 回收站空提示 */
+.empty-tip{
+  text-align:center;color:#999;padding:40px 20px
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <div class="nav">
+    <button onclick="location.href='phone.html'">拨号</button>
+    <button onclick="location.href='contacts.html'">通讯录</button>
+    <button class="active">短信</button>
+  </div>
+
+  <div class="top-bar">
+    <button id="btnInbox" class="active" onclick="showInbox()">收件箱</button>
+    <button id="btnRecycle" onclick="showRecycle()">回收站</button>
+  </div>
+
+  <div class="content">
+    <!-- 收件箱 -->
+    <div id="inboxWrapper">
+      <div id="smsList"></div>
+
+      <div class="send-box">
+        <input id="to" placeholder="接收号码">
+        <textarea id="msg" placeholder="短信内容"></textarea>
+        <button onclick="send()">发送短信</button>
+      </div>
+    </div>
+
+    <!-- 回收站 -->
+    <div id="recycleWrapper" style="display:none">
+      <div id="recycleList"></div>
+    </div>
+
+    <!-- 查看详情 + 回复 -->
+    <div class="view-box" id="viewBox">
+      <div class="view-to" id="viewTo"></div>
+      <div class="view-content" id="viewContent"></div>
+      <div class="sms-time" id="viewTime"></div>
+
+      <!-- 回复框 -->
+      <div class="reply-box" id="replyBox">
+        <textarea id="replyText" placeholder="回复短信..."></textarea>
+        <button class="action-btn" onclick="replySms()">发送回复</button>
+      </div>
+
+      <button class="action-btn" id="actionBtn" onclick="doAction()"></button>
+      <button class="action-btn red" id="deletePermanentBtn" onclick="deletePermanent()" style="display:none;">彻底删除</button>
+      <button class="action-btn red" onclick="backToList()">返回列表</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// 收件箱
+let smsList = JSON.parse(localStorage.getItem('sms')) || [
+  { to:'10086', content:'尊敬的客户，您本月流量已使用80%，请合理使用。', time:'2025-04-13 08:20', unread:true },
+  { to:'妈妈', content:'晚上回家吃饭吗？给你做了你爱吃的菜。', time:'2025-04-13 11:45', unread:true },
+  { to:'快递驿站', content:'您的包裹已到达，请凭取件码123456领取。', time:'2025-04-13 14:10', unread:true },
+  { to:'10010', content:'您的话费余额不足10元，请及时充值。', time:'2025-04-12 20:00' }
+]
+
+// 回收站
+let recycleList = JSON.parse(localStorage.getItem('smsRecycle')) || []
+
+let currentMode = 'inbox'
+let currentIndex = -1
+let currentData = null
+
+// 保存
+function saveSms(){
+  localStorage.setItem('sms', JSON.stringify(smsList))
+}
+function saveRecycle(){
+  localStorage.setItem('smsRecycle', JSON.stringify(recycleList))
+}
+
+// 渲染
+function renderInbox(){
+  document.getElementById('smsList').innerHTML = smsList.map((i,k)=>`
+    <div class="sms-item ${i.unread?'unread':''}">
+      <div onclick="viewSms('inbox',${k})">
+        <div class="sms-title">${i.to}</div>
+        <div class="sms-preview">${i.content}</div>
+        <div class="sms-time">${i.time}</div>
+      </div>
+      <button class="sms-del" onclick="deleteToRecycle(${k})">移入回收站</button>
+    </div>
+  `).join('')
+}
+
+function renderRecycle(){
+  const list = recycleList
+  if(list.length===0){
+    document.getElementById('recycleList').innerHTML='<div class="empty-tip">回收站暂无短信</div>'
+    return
+  }
+  document.getElementById('recycleList').innerHTML = list.map((i,k)=>`
+    <div class="sms-item" onclick="viewSms('recycle',${k})">
+      <div class="sms-title">${i.to}</div>
+      <div class="sms-preview">${i.content}</div>
+      <div class="sms-time">${i.time}</div>
+    </div>
+  `).join('')
+}
+
+// 查看
+function viewSms(mode, index){
+  currentMode = mode
+  currentIndex = index
+  if(mode==='inbox'){
+    currentData = smsList[index]
+    // 标记已读
+    currentData.unread = false
+    saveSms()
+    document.getElementById('actionBtn').textContent='移入回收站'
+    document.getElementById('replyBox').style.display='block'
+    document.getElementById('deletePermanentBtn').style.display='none'
+  } else {
+    currentData = recycleList[index]
+    document.getElementById('actionBtn').textContent='还原到收件箱'
+    document.getElementById('replyBox').style.display='none'
+    document.getElementById('deletePermanentBtn').style.display='block'
+  }
+  document.getElementById('viewTo').textContent='发件人：'+currentData.to
+  document.getElementById('viewContent').textContent=currentData.content
+  document.getElementById('viewTime').textContent=currentData.time
+  document.getElementById('replyText').value = ''
+
+  document.getElementById('inboxWrapper').style.display = 'none'
+  document.getElementById('recycleWrapper').style.display = 'none'
+  document.getElementById('viewBox').style.display = 'block'
+}
+
+// 回复短信
+function replySms(){
+  const replyContent = document.getElementById('replyText').value.trim()
+  if(!replyContent) return alert('请输入回复内容')
+  smsList.unshift({
+    to: currentData.to,
+    content: '回复：' + replyContent,
+    time: new Date().toLocaleString()
+  })
+  saveSms()
+  alert('回复已发送')
+  backToList()
+}
+
+// 还原 / 移入回收站
+function doAction(){
+  if(currentMode==='inbox'){
+    const item = smsList.splice(currentIndex,1)[0]
+    recycleList.unshift(item)
+    saveSms()
+    saveRecycle()
+    alert('已移入回收站')
+  } else {
+    const item = recycleList.splice(currentIndex,1)[0]
+    smsList.unshift(item)
+    saveSms()
+    saveRecycle()
+    alert('已还原到收件箱')
+  }
+  backToList()
+}
+
+// 彻底删除（回收站专用）
+function deletePermanent(){
+  if(!confirm('确定要彻底删除这条短信？删除后将无法恢复！')) return
+  recycleList.splice(currentIndex, 1)
+  saveRecycle()
+  alert('已彻底删除')
+  backToList()
+}
+
+// 删除到回收站
+function deleteToRecycle(index){
+  if(!confirm('确定移入回收站？')) return
+  const item = smsList.splice(index,1)[0]
+  recycleList.unshift(item)
+  saveSms()
+  saveRecycle()
+  renderInbox()
+}
+
+// 返回列表
+function backToList(){
+  document.getElementById('viewBox').style.display = 'none'
+  if(currentMode === 'inbox'){
+    showInbox()
+  } else {
+    showRecycle()
+  }
+}
+
+// 切换
+function showInbox(){
+  document.getElementById('btnInbox').classList.add('active')
+  document.getElementById('btnRecycle').classList.remove('active')
+  document.getElementById('inboxWrapper').style.display = 'block'
+  document.getElementById('recycleWrapper').style.display = 'none'
+  renderInbox()
+}
+function showRecycle(){
+  document.getElementById('btnInbox').classList.remove('active')
+  document.getElementById('btnRecycle').classList.add('active')
+  document.getElementById('inboxWrapper').style.display = 'none'
+  document.getElementById('recycleWrapper').style.display = 'block'
+  renderRecycle()
+}
+
+// 发送短信
+function send(){
+  const to=document.getElementById('to').value.trim()
+  const content=document.getElementById('msg').value.trim()
+  if(!to || !content) return alert('请填写完整')
+  smsList.unshift({
+    to, content, time: new Date().toLocaleString()
+  })
+  saveSms()
+  document.getElementById('msg').value=''
+  renderInbox()
+}
+
+// 自动带入号码
+const p = new URLSearchParams(location.search)
+if(p.get('to')){
+  document.getElementById('to').value = p.get('to')
+}
+
+// 初始化
+renderInbox()
+</script>
+</body>
+</html>

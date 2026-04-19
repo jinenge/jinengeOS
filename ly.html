@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>时间日历蓝牙发送工具</title>
+  <style>
+    *{
+      box-sizing:border-box;
+      font-family:system-ui, sans-serif;
+      margin:0;
+      padding:0;
+    }
+    body{
+      margin:0;
+      padding:16px;
+      background:#f5f7fa;
+      color:#222;
+    }
+    .container{
+      max-width:520px;
+      margin:0 auto;
+    }
+    .card{
+      background:#fff;
+      border-radius:14px;
+      padding:20px;
+      margin-bottom:16px;
+      box-shadow:0 3px 10px rgba(0,0,0,0.05);
+    }
+
+    .time-panel{
+      text-align:center;
+      padding:24px 12px;
+      background:#e8f4ff;
+      border-radius:12px;
+      margin-bottom:16px;
+    }
+    .time{
+      font-size:36px;
+      font-weight:700;
+      color:#007bff;
+      margin-bottom:10px;
+      letter-spacing:2px;
+    }
+    .date{
+      font-size:17px;
+      color:#555;
+    }
+
+    .calendar-title{
+      font-size:18px;
+      margin:12px 0 8px;
+      text-align:center;
+      font-weight:600;
+    }
+    .week-row{
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      text-align:center;
+      font-size:13px;
+      color:#666;
+      font-weight:bold;
+      margin-bottom:6px;
+    }
+    .day-grid{
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:5px;
+      margin-top:6px;
+    }
+    .day{
+      padding:10px 0;
+      border-radius:6px;
+      background:#f1f3f5;
+      font-size:14px;
+      text-align:center;
+    }
+    .day.today{
+      background:#007bff;
+      color:white;
+      font-weight:bold;
+    }
+
+    .custom-text-area{
+      margin:20px 0;
+    }
+    .custom-input{
+      width:100%;
+      padding:12px;
+      border:1px solid #ddd;
+      border-radius:8px;
+      font-size:15px;
+      margin-bottom:10px;
+      outline:none;
+    }
+    .custom-input:focus{
+      border-color:#007bff;
+    }
+
+    .btn-box{
+      margin-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      justify-content:center;
+    }
+    .btn{
+      padding:12px 18px;
+      border:none;
+      border-radius:8px;
+      color:white;
+      cursor:pointer;
+      font-size:14px;
+      flex:1;
+      min-width:110px;
+    }
+    .btn-ble{
+      background:#0066cc;
+    }
+    .btn-time{
+      background:#007bff;
+    }
+    .btn-cal{
+      background:#28a745;
+    }
+    .btn-custom{
+      background:#fd7e14;
+    }
+    .btn:disabled{
+      background:#ccc;
+      cursor:not-allowed;
+    }
+
+    .status{
+      padding:10px;
+      border-radius:8px;
+      text-align:center;
+      margin-bottom:10px;
+      font-weight:bold;
+    }
+    .status-disconnect{
+      background:#ffebee;
+      color:#b71c1c;
+    }
+    .status-connect{
+      background:#e8f5e9;
+      color:#1b5e20;
+    }
+
+    .log-box{
+      background:#1e1e1e;
+      color:#ccc;
+      padding:12px;
+      border-radius:8px;
+      height:140px;
+      overflow-y:auto;
+      font-size:13px;
+      margin-top:10px;
+      line-height:1.4;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <div class="time-panel">
+      <div class="time" id="showTime">00:00:00</div>
+      <div class="date" id="showDate">2026年01月01日 星期三</div>
+    </div>
+
+    <div class="calendar-title">当月日历</div>
+    <div class="week-row">日 一 二 三 四 五 六</div>
+    <div class="day-grid" id="calendar"></div>
+
+    <div id="status" class="status status-disconnect">未连接蓝牙</div>
+
+    <div class="btn-box">
+      <button class="btn btn-ble" id="bleBtn">搜索并连接蓝牙</button>
+    </div>
+
+    <div class="custom-text-area">
+      <input type="text" class="custom-input" id="customText" placeholder="输入要发送的自定义文字">
+    </div>
+
+    <div class="btn-box">
+      <button class="btn btn-time" id="sendTimeBtn" disabled>发送时间校准</button>
+      <button class="btn btn-cal" id="sendCalBtn" disabled>发送日历校准</button>
+      <button class="btn btn-custom" id="sendCustomBtn" disabled>发送自定义文字</button>
+    </div>
+
+    <div class="log-box" id="log"></div>
+  </div>
+</div>
+
+<script>
+  let device = null;
+  let gattServer = null;
+  let charac = null;
+
+  // 常用蓝牙UUID
+  const SERVICE_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb";
+  const CHAR_UUID    = "0000ffe1-0000-1000-8000-00805f9b34fb";
+
+  // ========== 时间与日历 ==========
+  function startTime() {
+    function update() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2,0);
+      const m = String(now.getMinutes()).padStart(2,0);
+      const s = String(now.getSeconds()).padStart(2,0);
+      document.getElementById("showTime").innerText = `${h}:${m}:${s}`;
+
+      const week = ["日","一","二","三","四","五","六"][now.getDay()];
+      const y = now.getFullYear();
+      const mon = String(now.getMonth()+1).padStart(2,0);
+      const d = String(now.getDate()).padStart(2,0);
+      document.getElementById("showDate").innerText = `${y}年${mon}月${d}日 星期${week}`;
+    }
+    update();
+    setInterval(update, 1000);
+  }
+
+  function buildCalendar() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = now.getMonth();
+    const today = now.getDate();
+    const first = new Date(y,m,1).getDay();
+    const days = new Date(y,m+1,0).getDate();
+    const box = document.getElementById("calendar");
+    box.innerHTML = "";
+
+    for(let i=0;i<first;i++){
+      let e = document.createElement("div");
+      e.className = "day";
+      box.appendChild(e);
+    }
+    for(let i=1;i<=days;i++){
+      let e = document.createElement("div");
+      e.className = "day " + (i===today?"today":"");
+      e.innerText = i;
+      box.appendChild(e);
+    }
+  }
+
+  // ========== 日志 ==========
+  function log(msg) {
+    const t = new Date().toLocaleTimeString();
+    const logBox = document.getElementById("log");
+    logBox.innerHTML += `[${t}] ${msg}\n`;
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+
+  // ========== 蓝牙连接 ==========
+  document.getElementById("bleBtn").onclick = async () => {
+    try {
+      log("开始搜索蓝牙设备...");
+      device = await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true,
+        optionalServices: [SERVICE_UUID]
+      });
+
+      device.addEventListener('gattserverdisconnected', () => {
+        setConnected(false);
+        log("蓝牙已断开");
+      });
+
+      gattServer = await device.gatt.connect();
+      const service = await gattServer.getPrimaryService(SERVICE_UUID);
+      charac = await service.getCharacteristic(CHAR_UUID);
+      setConnected(true);
+      log("蓝牙连接成功！");
+    } catch (e) {
+      log("连接失败：" + e.message);
+    }
+  };
+
+  function setConnected(c) {
+    const st = document.getElementById("status");
+    if (c) {
+      st.innerText = "已连接蓝牙";
+      st.className = "status status-connect";
+      document.getElementById("sendTimeBtn").disabled = false;
+      document.getElementById("sendCalBtn").disabled = false;
+      document.getElementById("sendCustomBtn").disabled = false;
+    } else {
+      st.innerText = "未连接蓝牙";
+      st.className = "status status-disconnect";
+      document.getElementById("sendTimeBtn").disabled = true;
+      document.getElementById("sendCalBtn").disabled = true;
+      document.getElementById("sendCustomBtn").disabled = true;
+    }
+  }
+
+  // 发送数据
+  async function send(str) {
+    if (!charac) { log("未连接蓝牙"); return; }
+    try {
+      await charac.writeValue(new TextEncoder().encode(str + "\r\n"));
+      log("发送成功：" + str);
+    } catch (e) {
+      log("发送失败：" + e.message);
+    }
+  }
+
+  // 发送时间
+  document.getElementById("sendTimeBtn").onclick = () => {
+    const now = new Date();
+    const str = `TIME${now.getFullYear()}${now.getMonth()+1}${now.getDate()}${now.getHours()}${now.getMinutes()}`;
+    send(str);
+  };
+
+  // 发送日历
+  document.getElementById("sendCalBtn").onclick = () => {
+    const now = new Date();
+    const str = `DATE${now.getFullYear()}${now.getMonth()+1}${now.getDate()}`;
+    send(str);
+  };
+
+  // 发送自定义文字
+  document.getElementById("sendCustomBtn").onclick = () => {
+    const txt = document.getElementById("customText").value.trim();
+    if (!txt) { log("请输入文字"); return; }
+    send("TEXT" + txt);
+  };
+
+  // 初始化
+  startTime();
+  buildCalendar();
+</script>
+</body>
+</html>

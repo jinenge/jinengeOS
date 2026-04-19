@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>拨号</title>
+<style>
+* {
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #0b1020;
+  color: #fff;
+  height: 100%;
+}
+
+.container {
+  max-width: 480px;
+  margin: 0 auto;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #0b1020;
+}
+
+.tabs {
+  display: flex;
+  padding: 12px 8px 8px;
+  gap: 6px;
+  background: #0b1020;
+  flex-shrink: 0;
+}
+.tab-btn {
+  flex: 1;
+  padding: 10px 6px;
+  border: none;
+  border-radius: 14px;
+  background: #131a33;
+  color: #ccc;
+  font-size: 14px;
+  cursor: pointer;
+}
+.tab-btn.active {
+  background: #007aff;
+  color: white;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+.page {
+  display: none;
+}
+.page.active {
+  display: block;
+}
+
+/* 拨号 */
+.dial-input {
+  width: 100%;
+  height: 70px;
+  text-align: center;
+  font-size: 38px;
+  border: none;
+  outline: none;
+  background: #131a33;
+  color: #fff;
+  border-radius: 16px;
+  margin-bottom: 16px;
+}
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.key {
+  aspect-ratio: 1/1;
+  border: none;
+  border-radius: 12px;
+  background: #131a33;
+  color: #fff;
+  font-size: 22px; /* 缩小字体 */
+  text-shadow: 0 0 8px #4fa8ff;
+  cursor: pointer;
+  width: 80%; /* 按钮宽度缩为80% */
+  margin: 0 auto; /* 居中 */
+}
+.key:active {
+  background: #1e294d;
+}
+.dial-actions {
+  display: flex;
+  gap: 12px;
+}
+.dial-actions button {
+  flex: 1;
+  padding: 16px;
+  border: none;
+  border-radius: 14px;
+  font-size: 17px;
+  cursor: pointer;
+}
+.btn-clear { background: #ff2d55; color: white; }
+.btn-call { background: #34c759; color: white; }
+
+/* 联系人 */
+.add-form {
+  background: #131a33;
+  padding: 14px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+.add-form input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: #0b1020;
+  color: #fff;
+}
+.add-form button {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: #007aff;
+  color: white;
+  cursor: pointer;
+}
+.contact-item {
+  background: #131a33;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.contact-name { font-size: 16px; }
+.contact-num { font-size: 14px; color: #aaa; }
+.contact-actions { display: flex; gap: 8px; }
+.contact-actions button {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.btn-call-s { background: #34c759; color: white; }
+.btn-sms-s { background: #007aff; color: white; }
+
+/* 通话记录 */
+.log-item {
+  background: #131a33;
+  padding: 14px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.log-num { font-size: 16px; }
+.log-time { font-size: 12px; color: #888; }
+.log-del {
+  background: #ff2d55;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/* 短信 */
+.sms-input {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  outline: none;
+  background: #131a33;
+  color: #fff;
+  border-radius: 12px;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+.sms-textarea {
+  width: 100%;
+  height: 120px;
+  padding: 14px;
+  border: none;
+  outline: none;
+  background: #131a33;
+  color: #fff;
+  border-radius: 12px;
+  font-size: 16px;
+  resize: none;
+  margin-bottom: 12px;
+}
+.btn-send {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 14px;
+  background: #007aff;
+  color: white;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+/* 拨号弹窗 */
+.mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+.dial-window {
+  width: 280px;
+  background: #111;
+  border-radius: 28px;
+  padding: 40px 20px;
+  text-align: center;
+}
+.wave {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 20px;
+  position: relative;
+}
+.wave::before, .wave::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  border: 2px solid #34c759;
+  border-radius: 50%;
+  transform: translate(-50%,-50%);
+  animation: wave 2s infinite;
+}
+.wave::after { animation-delay: 0.7s; }
+@keyframes wave {
+  0% { width:0; height:0; opacity:.8; }
+  100% { width:120px; height:120px; opacity:0; }
+}
+.hangup {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #ff2d55;
+  color: white;
+  border: none;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+@media (min-width:768px) {
+  .container {
+    max-width: 600px;
+    border-radius: 20px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.3);
+    margin:20px auto;
+    height: calc(100vh - 40px);
+  }
+  .key { font-size: 24px; width: 75%; } /* 大屏微调 */
+}
+</style>
+</head>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="show('dial')">拨号</button>
+    <button class="tab-btn" onclick="show('contact')">联系人</button>
+    <button class="tab-btn" onclick="show('logs')">通话记录</button>
+    <button class="tab-btn" onclick="show('sms')">短信</button>
+  </div>
+
+  <div class="content">
+    <!-- 拨号 -->
+    <div class="page active" id="dial">
+      <input type="text" class="dial-input" id="dialNum" readonly>
+      <div class="keypad">
+        <button class="key" onclick="p('1')">1</button>
+        <button class="key" onclick="p('2')">2</button>
+        <button class="key" onclick="p('3')">3</button>
+        <button class="key" onclick="p('4')">4</button>
+        <button class="key" onclick="p('5')">5</button>
+        <button class="key" onclick="p('6')">6</button>
+        <button class="key" onclick="p('7')">7</button>
+        <button class="key" onclick="p('8')">8</button>
+        <button class="key" onclick="p('9')">9</button>
+        <button class="key" onclick="p('*')">*</button>
+        <button class="key" onclick="p('0')">0</button>
+        <button class="key" onclick="p('#')">#</button>
+      </div>
+      <div class="dial-actions">
+        <button class="btn-clear" onclick="clr()">清除</button>
+        <button class="btn-call" onclick="startDial()">拨号</button>
+      </div>
+    </div>
+
+    <!-- 联系人 -->
+    <div class="page" id="contact">
+      <div class="add-form">
+        <input type="text" id="cName" placeholder="姓名">
+        <input type="text" id="cNum" placeholder="号码">
+        <button onclick="addContact()">添加联系人</button>
+      </div>
+      <div id="contactList"></div>
+    </div>
+
+    <!-- 通话记录 -->
+    <div class="page" id="logs">
+      <div id="logList"></div>
+    </div>
+
+    <!-- 短信 -->
+    <div class="page" id="sms">
+      <input type="text" class="sms-input" id="smsNum" placeholder="对方号码">
+      <textarea class="sms-textarea" placeholder="短信内容"></textarea>
+      <button class="btn-send" onclick="sendSms()">发送</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="mask">
+  <div class="dial-window">
+    <div class="wave"></div>
+    <div>拨号中…</div>
+    <div id="showNum" style="font-size:28px;margin:10px 0"></div>
+    <button class="hangup" onclick="closeDial()">挂断</button>
+  </div>
+</div>
+
+<script>
+let contacts = [
+  {name:'张三', num:'13800138000'},
+  {name:'李四', num:'13912345678'}
+];
+let logs = [];
+
+// 切换页面
+function show(id) {
+  document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(e=>e.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  if(id==='contact') renderContact();
+  if(id==='logs') renderLog();
+}
+
+// 拨号
+function p(n){document.getElementById('dialNum').value+=n}
+function clr(){document.getElementById('dialNum').value=''}
+
+function startDial(){
+  const num = document.getElementById('dialNum').value;
+  if(!num)return;
+  addLog(num);
+  document.getElementById('showNum').innerText=num;
+  document.getElementById('mask').style.display='flex';
+}
+function closeDial(){
+  document.getElementById('mask').style.display='none';
+}
+
+// 通话记录
+function addLog(num){
+  const now = new Date();
+  const time = now.toLocaleString();
+  logs.unshift({num,time});
+}
+function renderLog(){
+  const dom = document.getElementById('logList');
+  dom.innerHTML = logs.map((item,i)=>`
+    <div class="log-item">
+      <div>
+        <div class="log-num">${item.num}</div>
+        <div class="log-time">${item.time}</div>
+      </div>
+      <button class="log-del" onclick="delLog(${i})">删除</button>
+    </div>
+  `).join('');
+}
+function delLog(i){
+  logs.splice(i,1);
+  renderLog();
+}
+
+// 联系人
+function addContact(){
+  const name = document.getElementById('cName').value.trim();
+  const num = document.getElementById('cNum').value.trim();
+  if(!name||!num)return alert('请填写完整');
+  contacts.unshift({name,num});
+  document.getElementById('cName').value='';
+  document.getElementById('cNum').value='';
+  renderContact();
+}
+function renderContact(){
+  const dom = document.getElementById('contactList');
+  dom.innerHTML = contacts.map(item=>`
+    <div class="contact-item">
+      <div>
+        <div class="contact-name">${item.name}</div>
+        <div class="contact-num">${item.num}</div>
+      </div>
+      <div class="contact-actions">
+        <button class="btn-call-s" onclick="callContact('${item.num}')">拨打</button>
+        <button class="btn-sms-s" onclick="smsContact('${item.num}')">短信</button>
+      </div>
+    </div>
+  `).join('');
+}
+function callContact(num){
+  document.getElementById('dialNum').value=num;
+  show('dial');
+}
+function smsContact(num){
+  document.getElementById('smsNum').value=num;
+  show('sms');
+}
+
+// 短信
+function sendSms(){
+  const num = document.getElementById('smsNum').value;
+  const txt = document.querySelector('.sms-textarea').value;
+  if(!num||!txt)return alert('请填写号码和内容');
+  alert(`发送成功：${num}\n${txt}`);
+  document.querySelector('.sms-textarea').value='';
+}
+
+// 初始渲染
+renderContact();
+</script>
+</html>
