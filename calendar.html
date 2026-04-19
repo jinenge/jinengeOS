@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>手机日历</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
+  body{background:#090919;color:#fff;padding:8px}
+  .box{max-width:400px;margin:0 auto}
+  .calendar{background:#131330;border-radius:16px;padding:12px}
+  .nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .nav button{background:#222244;border:none;color:#fff;padding:6px 10px;border-radius:8px}
+  .ym{font-size:18px;font-weight:bold}
+
+  .week,.day-wrap{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    text-align:center;gap:2px;
+  }
+  .week{font-size:12px;color:#bbb;margin-bottom:4px}
+  .day{
+    aspect-ratio:1/1;
+    background:#1c1c40;
+    border-radius:6px;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    font-size:12px;
+  }
+  .day.other{opacity:.3}
+  .day.today{background:#382870}
+  .lunar{font-size:8px;color:#aaddff;margin-top:1px}
+  .holiday{font-size:7px;color:#ff6699}
+  .jieqi{font-size:7px;color:#22ddaa}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="calendar">
+    <div class="nav">
+      <button id="prev">‹ 上月</button>
+      <div class="ym" id="ym"></div>
+      <button id="next">下月 ›</button>
+    </div>
+    <div class="week">
+      <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+    </div>
+    <div class="day-wrap" id="dayWrap"></div>
+  </div>
+</div>
+
+<script>
+// ==================== 农历正确数据 ====================
+const lunarMonth = ["正月","二月","三月","四月","五月","六月","七月","八月","九月","十月","冬月","腊月"];
+const lunarDay = [
+"初一","初二","初三","初四","初五","初六","初七","初八","初九","初十",
+"十一","十二","十三","十四","十五","十六","十七","十八","十九","二十",
+"廿一","廿二","廿三","廿四","廿五","廿六","廿七","廿八","廿九","三十"
+];
+
+// 2026年农历每月天数
+const lunar2026 = [29,30,29,30,29,30,29,30,29,30,29,30];
+
+// 2026-01-01 对应农历 2025腊月十三
+// 2026-02-17 春节
+
+function getLunarDay(y, m, d){
+  if(y !== 2026) return "—";
+  let date = new Date(y, m, d);
+  let base = new Date(2026,0,1); // 2026-01-01
+  let diff = Math.floor((date - base) / (1000*60*60*24));
+  let dayCount = diff + 13; // 对应腊月十三
+
+  let idx = 11; // 腊月
+  while(idx < lunar2026.length && dayCount > lunar2026[idx]){
+    dayCount -= lunar2026[idx];
+    idx++;
+    if(idx >= 12) idx = 0;
+  }
+  return lunarDay[dayCount - 1] || "初一";
+}
+
+// ======================================================
+
+const now = new Date();
+let y = now.getFullYear();
+let m = now.getMonth();
+
+const holidays = {
+"1-1":"元旦",
+"2-10":"春节","2-11":"春节","2-12":"春节","2-13":"春节","2-14":"春节","2-15":"春节","2-16":"春节","2-17":"春节",
+"4-4":"清明",
+"5-1":"劳动节","5-2":"劳动节","5-3":"劳动节","5-4":"劳动节","5-5":"劳动节",
+"6-10":"端午",
+"9-15":"中秋",
+"10-1":"国庆","10-2":"国庆","10-3":"国庆","10-4":"国庆","10-5":"国庆","10-6":"国庆","10-7":"国庆"
+};
+
+const jieqi = {
+"1-5":"小寒","1-20":"大寒",
+"2-4":"立春","2-19":"雨水",
+"3-5":"惊蛰","3-20":"春分",
+"4-4":"清明","4-20":"谷雨",
+"5-5":"立夏","5-21":"小满",
+"6-6":"芒种","6-21":"夏至",
+"7-7":"小暑","7-23":"大暑",
+"8-7":"立秋","8-23":"处暑",
+"9-7":"白露","9-23":"秋分",
+"10-8":"寒露","10-24":"霜降",
+"11-7":"立冬","11-22":"小雪",
+"12-7":"大雪","12-22":"冬至"
+};
+
+function render(){
+  let wrap = document.getElementById("dayWrap");
+  let ym = document.getElementById("ym");
+  wrap.innerHTML = "";
+
+  let first = new Date(y,m,1).getDay();
+  let last = new Date(y,m+1,0).getDate();
+  ym.textContent = `${y}年${m+1}月`;
+
+  for(let i=0;i<first;i++){
+    let dom = document.createElement("div");
+    dom.className = "day other";
+    wrap.appendChild(dom);
+  }
+
+  for(let d=1;d<=last;d++){
+    let dom = document.createElement("div");
+    dom.className = "day";
+
+    if(y===now.getFullYear() && m===now.getMonth() && d===now.getDate()){
+      dom.classList.add("today");
+    }
+
+    let lunar = getLunarDay(y,m,d);
+    dom.innerHTML = `
+      <div>${d}</div>
+      <div class="lunar">${lunar}</div>
+    `;
+
+    let key = `${m+1}-${d}`;
+    if(holidays[key]){
+      dom.innerHTML += `<div class="holiday">${holidays[key]}</div>`;
+    }
+    if(jieqi[key]){
+      dom.innerHTML += `<div class="jieqi">${jieqi[key]}</div>`;
+    }
+
+    wrap.appendChild(dom);
+  }
+}
+
+document.getElementById("prev").onclick = ()=>{
+  m--; if(m<0){m=11;y--;} render();
+};
+document.getElementById("next").onclick = ()=>{
+  m++; if(m>11){m=0;y++;} render();
+};
+
+render();
+</script>
+</body>
+</html>

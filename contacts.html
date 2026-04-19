@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>通讯录</title>
+<style>
+*{box-sizing:border-box;font-family:'Roboto', system-ui, sans-serif}
+body{margin:0;background:#0f172a;color:#f8fafc}
+.container{max-width:480px;margin:auto}
+
+/* 安卓风格导航栏 */
+.nav{display:flex;gap:2px;padding:12px 8px;background:#1e293b;border-radius:18px;margin:12px}
+.nav button{flex:1;padding:10px;border:none;border-radius:14px;background:transparent;color:#94a3b8}
+.nav button.active{background:#3b82f6;color:white;box-shadow:0 0 12px #3b82f666}
+.nav button:hover{background:#27374d;color:#cbd5e1}
+
+.content{padding:12px}
+
+.form{background:#1e293b;padding:14px;border-radius:16px;margin-bottom:12px}
+.form input{width:100%;padding:12px;margin-bottom:10px;border-radius:12px;border:none;background:#0f172a;color:#f8fafc}
+.form button{width:100%;padding:12px;border:none;border-radius:12px;background:#3b82f6;color:#fff;font-weight:500}
+.form .edit-area{display:none; margin-top:10px;}
+#editBtn{background:#f59e0b;display:none;}
+
+/* 联系人条目 */
+.item{background:#1e293b;padding:16px;border-radius:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;border:1px solid #3b82f622}
+.item:hover{border-color:#3b82f666}
+.name{font-size:16px;font-weight:500}
+.num{font-size:14px;color:#64748b}
+
+.acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.acts button{padding:8px 12px;border:none;border-radius:12px;font-size:12px;font-weight:500}
+.btn-call{background:#10b981;color:#fff}
+.btn-sms{background:#3b82f6;color:#fff}
+.btn-edit{background:#f59e0b;color:#fff}
+.btn-del{background:#ef4444;color:#fff}
+
+/* 🔥 超真实安卓通话界面 */
+.call-screen{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:#000;
+  z-index:9999;
+  display:flex;flex-direction:column;align-items:center;
+  padding:60px 20px 40px;
+  display:none;
+}
+.call-top{margin-bottom:auto}
+.call-avatar{
+  width:140px;height:140px;border-radius:50%;background:#333;
+  display:flex;align-items:center;justify-content:center;font-size:60px;margin-bottom:20px
+}
+.call-info{text-align:center}
+.call-name{font-size:40px;font-weight:300;margin-bottom:8px}
+.call-number{font-size:20px;color:#999;margin-bottom:10px}
+.call-status{font-size:16px;color:#666}
+
+.call-bottom{margin-top:auto;display:flex;gap:25px;}
+.call-btn{
+  width:70px;height:70px;border-radius:50%;border:none;
+  display:flex;align-items:center;justify-content:center;font-size:28px
+}
+.btn-end{background:#ef4444;color:white}
+.btn-other{background:#333;color:white}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <div class="nav">
+    <button onclick="location.href='phone.html'">拨号</button>
+    <button class="active">通讯录</button>
+    <button onclick="location.href='mms.html'">短信</button>
+  </div>
+  <div class="content">
+    <div class="form">
+      <input id="name" placeholder="姓名">
+      <input id="num" placeholder="号码">
+      <button onclick="add()">添加联系人</button>
+      
+      <div class="edit-area" id="editArea">
+        <input id="editName" placeholder="修改后的姓名">
+        <input id="editNum" placeholder="修改后的号码">
+        <button id="editBtn" onclick="saveEdit()">保存修改</button>
+      </div>
+    </div>
+
+    <div id="list"></div>
+  </div>
+</div>
+
+<!-- 安卓仿真通话弹窗 -->
+<div class="call-screen" id="callScreen">
+  <div class="call-top">
+    <div class="call-avatar">👤</div>
+    <div class="call-info">
+      <div class="call-name" id="callName"></div>
+      <div class="call-number" id="callNumber"></div>
+      <div class="call-status">呼叫中…</div>
+    </div>
+  </div>
+  
+  <div class="call-bottom">
+    <button class="call-btn btn-other">🔇</button>
+    <button class="call-btn btn-other">📝</button>
+    <button class="call-btn btn-end" onclick="endCall()">📞</button>
+  </div>
+</div>
+
+<script>
+let list = JSON.parse(localStorage.getItem('contacts')) || [
+  {name:'宝贝',num:'13800130001'},
+  {name:'女友闺蜜',num:'13900130002'},
+  {name:'邻居',num:'13600130003'},
+  {name:'公司前台',num:'02012345678'},
+  {name:'10086 移动客服',num:'10086'},
+  {name:'10010 联通客服',num:'10010'},
+  {name:'10000 电信客服',num:'10000'},
+]
+
+let editIndex = -1
+
+function save() {
+  localStorage.setItem('contacts', JSON.stringify(list))
+}
+
+function render(){
+  document.getElementById('list').innerHTML = list.map((i,k)=>`
+    <div class="item">
+      <div>
+        <div class="name">${i.name}</div>
+        <div class="num">${i.num}</div>
+      </div>
+      <div class="acts">
+        <button class="btn-call" onclick="startCall('${i.name}', '${i.num}')">拨打</button>
+        <button class="btn-sms" onclick="sms('${i.num}')">短信</button>
+        <button class="btn-edit" onclick="startEdit(${k})">编辑</button>
+        <button class="btn-del" onclick="del(${k})">删除</button>
+      </div>
+    </div>
+  `).join('')
+}
+
+// 添加
+function add(){
+  const name=document.getElementById('name').value.trim()
+  const num=document.getElementById('num').value.trim()
+  if(!name||!num)return alert('请填写完整')
+  list.unshift({name,num})
+  save()
+  document.getElementById('name').value=''
+  document.getElementById('num').value=''
+  render()
+}
+
+// 删除
+function del(k){
+  if(!confirm('确定删除该联系人？'))return
+  list.splice(k,1)
+  save()
+  render()
+}
+
+// 编辑
+function startEdit(k){
+  editIndex = k
+  const item = list[k]
+  document.getElementById('editName').value = item.name
+  document.getElementById('editNum').value = item.num
+  document.getElementById('editArea').style.display = 'block'
+  document.getElementById('editBtn').style.display = 'block'
+}
+
+// 保存编辑
+function saveEdit(){
+  const name = document.getElementById('editName').value.trim()
+  const num = document.getElementById('editNum').value.trim()
+  if(!name || !num) return alert('姓名和号码不能为空')
+  list[editIndex] = {name, num}
+  save()
+  alert('修改已保存')
+  
+  document.getElementById('editArea').style.display = 'none'
+  document.getElementById('editBtn').style.display = 'none'
+  document.getElementById('editName').value = ''
+  document.getElementById('editNum').value = ''
+  editIndex = -1
+  render()
+}
+
+// 拨号
+function startCall(name, num){
+  document.getElementById('callName').innerText = name
+  document.getElementById('callNumber').innerText = num
+  document.getElementById('callScreen').style.display = 'flex'
+}
+
+function endCall(){
+  document.getElementById('callScreen').style.display = 'none'
+}
+
+// 短信
+function sms(num){
+  location.href = 'mms.html?to=' + encodeURIComponent(num)
+}
+
+render()
+</script>
+</body>
+</html>

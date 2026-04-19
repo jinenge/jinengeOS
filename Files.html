@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>手机文件管理器</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif}
+:root{--bg:#f8f9fa;--bar:#fff;--card:#fff;--text:#222;--border:#ddd;--theme:#007bff;--hover:#f0f0f0}
+.dark{--bg:#121212;--bar:#1e1e1e;--card:#2b2b2b;--text:#eee;--border:#333;--theme:#40a9ff;--hover:#333}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text)}
+.header{position:fixed;top:0;left:0;right:0;height:56px;background:var(--bar);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:8px;z-index:10}
+.search{flex:1;height:36px;border-radius:18px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;padding:0 12px}
+.search input{width:100%;background:transparent;border:none;outline:none;color:var(--text);font-size:14px}
+.btn{height:36px;padding:0 12px;border-radius:18px;background:var(--card);border:1px solid var(--border);font-size:13px;color:var(--text)}
+.btn:active{opacity:.7}
+.body{position:absolute;top:56px;left:0;right:0;bottom:0;overflow:auto;padding:10px}
+
+.storage-bar{background:var(--card);padding:10px 12px;border-radius:10px;margin-bottom:10px;font-size:13px;border:1px solid var(--border)}
+.storage-info{display:flex;justify-content:space-between;margin-bottom:6px}
+.progress{height:6px;background:#e0e0e0;border-radius:3px;overflow:hidden}
+.progress-used{height:100%;background:var(--theme);width:35%}
+
+.path-bar{background:var(--card);padding:8px 12px;border-radius:10px;margin-bottom:10px;font-size:14px;border:1px solid var(--border)}
+.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.toolbar select{height:32px;padding:0 8px;border-radius:16px;background:var(--card);border:1px solid var(--border);color:var(--text)}
+.toolbar-right{display:flex;align-items:center;gap:8px}
+.view-btn{width:32px;height:32px;border-radius:16px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+.icon-size{display:flex;align-items:center;gap:6px;font-size:12px}
+.icon-size input{width:80px}
+
+/* 图标布局 */
+.files-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--icon-size,88px),1fr));gap:10px}
+.files-grid .item{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;padding:8px 4px;border-radius:12px;background:var(--card)}
+.files-grid .item:active{background:var(--hover)}
+.files-grid .icon{font-size:36px;margin-bottom:6px}
+.files-grid .name{font-size:12px;line-height:1.2;word-break:break-all}
+.files-grid .size{font-size:10px;color:#888;margin-top:4px}
+
+/* 列表布局 */
+.files-list{display:flex;flex-direction:column;gap:6px}
+.files-list .item{position:relative;display:flex;align-items:center;padding:10px 12px;border-radius:10px;background:var(--card)}
+.files-list .item:active{background:var(--hover)}
+.files-list .icon{font-size:20px;margin-right:10px}
+.files-list .info{flex:1}
+.files-list .name{font-size:14px}
+.files-list .size{font-size:12px;color:#888}
+
+/* 菜单固定在文件旁边 */
+.item-menu{position:absolute;left:100%;top:50%;transform:translateY(-50%);margin-left:6px;width:140px;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.1);z-index:9;display:none}
+.item-menu div{padding:8px 10px;font-size:13px}
+.item-menu div:active{background:var(--hover)}
+.item.show-menu .item-menu{display:block}
+
+.setting{position:fixed;right:-260px;top:56px;bottom:0;width:250px;background:var(--bar);border-left:1px solid var(--border);padding:16px;transition:right .3s;z-index:20}
+.setting.show{right:0}
+.setting h3{margin-bottom:12px;font-size:16px}
+.set-item{display:flex;justify-content:space-between;align-items:center;margin:12px 0}
+
+.action-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+
+/* 属性弹窗 */
+.mask{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;display:none;align-items:center;justify-content:center}
+.mask.show{display:flex}
+.dialog{width:85%;max-width:320px;background:var(--card);border-radius:16px;padding:20px}
+.dialog h3{margin-bottom:12px}
+.prop-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.prop-row span:first-child{color:#888}
+.btns{margin-top:16px;display:flex;justify-content:flex-end}
+.dialog input{width:100%;padding:10px;margin-top:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <button class="btn" id="backBtn">⬅ 返回</button>
+  <div class="search"><input id="search" placeholder="搜索文件" type="text"></div>
+  <button class="btn" id="setBtn">⚙️</button>
+</div>
+
+<div class="body">
+  <div class="storage-bar">
+    <div class="storage-info">
+      <span>已用 52.6GB</span>
+      <span>剩余 97.4GB / 总150GB</span>
+    </div>
+    <div class="progress"><div class="progress-used"></div></div>
+  </div>
+
+  <div class="path-bar" id="pathBar">当前路径：/</div>
+
+  <div class="toolbar">
+    <select id="sort">
+      <option value="name">按名称</option>
+      <option value="time">按时间</option>
+      <option value="size">按大小</option>
+    </select>
+    <div class="toolbar-right">
+      <div class="icon-size">
+        <span>大小</span>
+        <input type="range" min="70" max="120" value="88" id="size">
+      </div>
+      <button class="view-btn" id="gridView">📁</button>
+      <button class="view-btn" id="listView">📄</button>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn" id="newFolder">📁新建文件夹</button>
+    <button class="btn" id="newFile">📄新建文件</button>
+    <button class="btn" id="copy">复制</button>
+    <button class="btn" id="cut">剪切</button>
+    <button class="btn" id="paste">粘贴</button>
+  </div>
+
+  <div class="files" id="fileList"></div>
+</div>
+
+<div class="setting" id="setting">
+  <h3>设置</h3>
+  <div class="set-item"><span>深色模式</span><input type="checkbox" id="dark"></div>
+  <div class="set-item"><span>显示后缀名</span><input type="checkbox" checked></div>
+</div>
+
+<!-- 属性弹窗 -->
+<div class="mask" id="propMask">
+  <div class="dialog">
+    <h3>文件属性</h3>
+    <div class="prop-row"><span>名称</span><span id="propName"></span></div>
+    <div class="prop-row"><span>类型</span><span id="propType"></span></div>
+    <div class="prop-row"><span>大小</span><span id="propSize"></span></div>
+    <div class="prop-row"><span>时间</span><span id="propTime"></span></div>
+    <div class="prop-row"><span>路径</span><span id="propPath"></span></div>
+    <div class="btns">
+      <button class="btn" onclick="closeProp()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 重命名/新建弹窗 -->
+<div class="mask" id="dialogMask">
+  <div class="dialog">
+    <h3 id="dialogTitle"></h3>
+    <input id="dialogInput">
+    <div class="btns">
+      <button class="btn" onclick="closeDialog()">取消</button>
+      <button class="btn" style="background:var(--theme);color:#fff" onclick="confirmDialog()">确定</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let path = "/";
+let clipboard = { mode: null, item: null };
+let viewMode = "grid";
+let dialogCallback = null;
+
+let data = {
+  "/": [
+    { name: "文档", type: "folder", time: "2026-04-13", size: "0KB" },
+    { name: "图片", type: "folder", time: "2026-04-13", size: "0KB" },
+    { name: "备忘录.txt", type: "file", time: "2026-04-13", size: "2KB" },
+    { name: "笔记.docx", type: "file", time: "2026-04-13", size: "16KB" },
+    { name: "照片.jpg", type: "file", time: "2026-04-13", size: "3.8MB" }
+  ]
+};
+
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+function updatePath() {
+  $("#pathBar").innerText = "当前路径：" + path;
+}
+
+$("#backBtn").onclick = () => {
+  if (path === "/") return;
+  let arr = path.split("/").filter(i => i);
+  arr.pop();
+  path = arr.length ? "/" + arr.join("/") : "/";
+  render();
+};
+
+function render() {
+  const list = data[path] || [];
+  const root = $("#fileList");
+  root.innerHTML = "";
+  updatePath();
+  root.className = viewMode === "grid" ? "files-grid" : "files-list";
+
+  let keyword = $("#search").value.toLowerCase();
+  let sort = $("#sort").value;
+  let items = list.filter(i => i.name.toLowerCase().includes(keyword));
+
+  items.sort((a, b) => {
+    if (sort === "name") return a.name.localeCompare(b.name);
+    if (sort === "time") return a.time.localeCompare(b.time);
+    return a.size.localeCompare(b.size);
+  });
+
+  items.forEach(i => {
+    let el = document.createElement("div");
+    el.className = "item";
+    el.dataset.name = i.name;
+    el.dataset.type = i.type;
+    el.dataset.size = i.size;
+    el.dataset.time = i.time;
+
+    el.innerHTML = `
+      <div class="icon">${i.type === "folder" ? "📁" : "📄"}</div>
+      <div class="info">
+        <div class="name">${i.name}</div>
+        <div class="size">${i.size}</div>
+      </div>
+      <div class="item-menu">
+        <div data-action="open">打开</div>
+        <div data-action="copy">复制</div>
+        <div data-action="cut">剪切</div>
+        <div data-action="rename">重命名</div>
+        <div data-action="attr">属性</div>
+        <div data-action="del">删除</div>
+      </div>
+    `;
+    root.appendChild(el);
+
+    el.onclick = (e) => {
+      if (e.target.closest(".item-menu")) return;
+      $$(".item").forEach(i => i.classList.remove("show-menu"));
+      el.classList.add("show-menu");
+    };
+
+    el.ondblclick = () => {
+      if (i.type === "folder") {
+        path += path === "/" ? i.name : "/" + i.name;
+        if (!data[path]) data[path] = [];
+        render();
+      }
+    };
+  });
+
+  bindMenu();
+}
+
+function bindMenu() {
+  $$(".item-menu div").forEach(m => {
+    m.onclick = () => {
+      let act = m.dataset.action;
+      let item = m.closest(".item");
+      let name = item.dataset.name;
+      let type = item.dataset.type;
+      let size = item.dataset.size;
+      let time = item.dataset.time;
+
+      if (act === "open") {
+        if (type === "folder") {
+          path += path === "/" ? name : "/" + name;
+          if (!data[path]) data[path] = [];
+          render();
+        }
+      }
+      if (act === "copy") clipboard = { mode: "copy", item: { name, type } };
+      if (act === "cut") clipboard = { mode: "cut", item: { name, type } };
+      if (act === "del") {
+        if (confirm("确定删除？")) {
+          data[path] = data[path].filter(i => i.name !== name);
+          render();
+        }
+      }
+      if (act === "rename") {
+        showDialog("重命名", name, (val) => {
+          let f = data[path].find(i => i.name === name);
+          if (f) f.name = val;
+          render();
+        });
+      }
+      if (act === "attr") {
+        $("#propName").innerText = name;
+        $("#propType").innerText = type === "folder" ? "文件夹" : "文件";
+        $("#propSize").innerText = size;
+        $("#propTime").innerText = time;
+        $("#propPath").innerText = path;
+        $("#propMask").classList.add("show");
+      }
+      item.classList.remove("show-menu");
+    };
+  });
+}
+
+function closeProp() {
+  $("#propMask").classList.remove("show");
+}
+
+function showDialog(title, val, cb) {
+  $("#dialogTitle").innerText = title;
+  $("#dialogInput").value = val;
+  $("#dialogMask").classList.add("show");
+  dialogCallback = cb;
+}
+
+function closeDialog() {
+  $("#dialogMask").classList.remove("show");
+}
+
+function confirmDialog() {
+  let v = $("#dialogInput").value.trim();
+  if (v && dialogCallback) dialogCallback(v);
+  closeDialog();
+  render();
+}
+
+$("#gridView").onclick = () => { viewMode = "grid"; render(); };
+$("#listView").onclick = () => { viewMode = "list"; render(); };
+
+$("#size").oninput = () => {
+  document.documentElement.style.setProperty("--icon-size", $("#size").value + "px");
+};
+
+$("#newFolder").onclick = () => {
+  showDialog("新建文件夹", "", (name) => {
+    data[path].push({ name, type: "folder", time: new Date().toLocaleDateString(), size: "0KB" });
+  });
+};
+
+$("#newFile").onclick = () => {
+  showDialog("新建文件", "", (name) => {
+    data[path].push({ name, type: "file", time: new Date().toLocaleDateString(), size: "1KB" });
+  });
+};
+
+$("#copy").onclick = () => {
+  let i = $(".item.show-menu");
+  if (i) clipboard = { mode: "copy", item: { name: i.dataset.name, type: i.dataset.type } };
+};
+
+$("#cut").onclick = () => {
+  let i = $(".item.show-menu");
+  if (i) clipboard = { mode: "cut", item: { name: i.dataset.name, type: i.dataset.type } };
+};
+
+$("#paste").onclick = () => {
+  if (!clipboard.item) return;
+  let { name, type } = clipboard.item;
+  if (data[path].some(i => i.name === name)) return alert("已存在");
+  data[path].push({
+    name, type,
+    time: new Date().toLocaleDateString(),
+    size: type === "folder" ? "0KB" : "1KB"
+  });
+  if (clipboard.mode === "cut") {
+    for (let p in data) data[p] = data[p].filter(i => i.name !== name);
+  }
+  clipboard = { mode: null, item: null };
+  render();
+};
+
+$("#setBtn").onclick = () => $("#setting").classList.toggle("show");
+$("#dark").onchange = () => document.body.classList.toggle("dark");
+$("#search").oninput = render;
+$("#sort").onchange = render;
+
+render();
+</script>
+</body>
+</html>

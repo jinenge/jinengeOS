@@ -1,0 +1,274 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <link rel="shortcut icon" href="images/AppStore.png" type="image/x-icon">
+    <link rel="stylesheet" href="mdui-v1.0.1/css/mdui.min.css">
+    <script src="mdui-v1.0.1/js/mdui.min.js"></script>
+    <title>应用商店</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            padding-bottom: 20px;
+            /* 霓虹背景底色 */
+            background: #050a1a;
+            color: #fff;
+        }
+
+        /* 霓虹网格布局 */
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            padding: 16px;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        /* 霓虹卡片 */
+        .app-card {
+            background: #111927;
+            border-radius: 20px;
+            padding: 20px 12px;
+            text-align: center;
+            /* 霓虹发光边框 */
+            border: 1px solid #3f51b5;
+            box-shadow: 0 0 10px #3f51b5, inset 0 0 10px #3f51b5;
+            transition: 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        /* 卡片悬浮效果 */
+        .app-card:hover {
+            transform: translateY(-6px);
+            /* 更亮的悬浮发光 */
+            box-shadow: 0 0 25px #7b61ff, 0 10px 20px rgba(123, 97, 255, 0.3);
+            border-color: #7b61ff;
+        }
+        /* 卡片里面的图标 */
+        .app-icon-img {
+            width: 65px;
+            height: 65px;
+            border-radius: 16px;
+            object-fit: cover;
+            margin: 0 auto 10px;
+            display: block;
+            /* 图标也加个辉光 */
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        .app-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            text-shadow: 0 0 5px #7b61ff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 霓虹安装弹窗 */
+        .install-modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 20, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+        .install-card {
+            background: #111927;
+            width: 280px;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid #7b61ff;
+            box-shadow: 0 0 30px rgba(123, 97, 255, 0.5);
+        }
+        .install-title {
+            font-size: 18px;
+            color: #fff;
+            text-shadow: 0 0 8px #7b61ff;
+            margin-bottom: 20px;
+        }
+        /* 霓虹进度条 */
+        .progress-bar {
+            height: 8px;
+            background: #222;
+            border-radius: 99px;
+            overflow: hidden;
+            margin: 16px 0;
+            box-shadow: inset 0 0 5px #000;
+        }
+        .progress {
+            height: 100%;
+            /* 蓝紫渐变霓虹进度 */
+            background: linear-gradient(90deg, #3f51b5, #7b61ff, #ff2d95);
+            width: 0%;
+            transition: width 0.1s;
+            box-shadow: 0 0 10px #7b61ff;
+        }
+        .percent {
+            color: #eee;
+            text-shadow: 0 0 5px #7b61ff;
+            font-size: 14px;
+        }
+
+        /* 顶部标题霓虹效果 */
+        .mdui-toolbar {
+            background: #111927 !important;
+            border-bottom: 1px solid #3f51b5;
+            box-shadow: 0 0 15px rgba(63, 81, 181, 0.5);
+        }
+        .mdui-typo-title {
+            color: #fff !important;
+            text-shadow: 0 0 10px #7b61ff;
+            font-size: 22px;
+        }
+    </style>
+</head>
+
+<body class="mdui-theme-primary-indigo mdui-theme-accent-pink mdui-appbar-with-toolbar">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-shadow-1">
+        <div class="mdui-toolbar mdui-color-theme-50">
+            <a class="mdui-typo-title">应用商店</a>
+        </div>
+    </div>
+
+    <!-- 霓虹安装弹窗 -->
+    <div class="install-modal" id="installModal">
+        <div class="install-card">
+            <div class="install-title" id="installTitle">正在安装...</div>
+            <div class="progress-bar"><div class="progress" id="progress"></div></div>
+            <div class="percent" id="percent">0%</div>
+        </div>
+    </div>
+
+    <!-- 加载动画 -->
+    <div style="position:fixed;left:0;top:0;width:100%;height:100%;z-index:-10;" class="mdui-valign">
+        <div style="width:100%;text-align:center;" id="spinner">
+            <div class="mdui-spinner" style="color: #7b61ff;"></div>
+        </div>
+    </div>
+
+    <!-- 霓虹卡片容器 -->
+    <div class="app-grid" id="appList"></div>
+
+<script>
+var currentApp = null;
+
+// 系统接口
+function postScript(script) {
+    var scriptStr = script.toString();
+    var postData = { "type": "JavaScript", "script": scriptStr };
+    window.parent.postMessage(JSON.stringify(postData), "/");
+}
+
+function addApp(icon, name, url, color1, color2, textColor) {
+    var postData = {
+        "type": "addApp",
+        "icon": icon,
+        "name": name,
+        "url": url,
+        "color1": color1,
+        "color2": color2,
+        "textColor": textColor
+    };
+    window.parent.postMessage(JSON.stringify(postData), "/");
+}
+
+// 深色模式（霓虹主题下保持统一）
+if (localStorage.getItem("darkTheme") == "true") {
+    document.body.classList.add("mdui-theme-layout-dark");
+    postScript(()=>{
+        gebi("statusBar").style.background = "#050a1a";
+        gebi("statusBar").style.color = "#fff";
+    });
+} else {
+    postScript(()=>{
+        gebi("statusBar").style.background = "#050a1a";
+        gebi("statusBar").style.color = "#fff";
+    });
+}
+
+// 加载 apps.json
+window.onload = function() {
+    var getAppData = new XMLHttpRequest();
+    getAppData.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            appData = JSON.parse(this.responseText);
+            freshAppList();
+            document.getElementById("spinner").style.display = "none";
+        }
+    };
+    getAppData.open("GET", "apps.json", true);
+    getAppData.send();
+};
+
+// 渲染霓虹卡片
+function freshAppList() {
+    var html = "";
+    appData.forEach((item, index)=>{
+        html += `
+        <div class="app-card mdui-ripple" onclick="install(${index})">
+            <img src="${item.icon}" class="app-icon-img">
+            <div class="app-name">${item.name}</div>
+        </div>`;
+    });
+    document.getElementById("appList").innerHTML = html;
+}
+
+// 安装逻辑
+function install(index) {
+    currentApp = appData[index];
+    const modal = document.getElementById("installModal");
+    const title = document.getElementById("installTitle");
+    const progress = document.getElementById("progress");
+    const percent = document.getElementById("percent");
+
+    modal.style.display = "flex";
+    title.innerText = "💿 正在安装：" + currentApp.name;
+    progress.style.width = "0%";
+    percent.innerText = "0%";
+
+    let w = 0;
+    let timer = setInterval(()=>{
+        w++;
+        progress.style.width = w+"%";
+        percent.innerText = w+"%";
+        if(w >= 100){
+            clearInterval(timer);
+
+            // 安装到桌面
+            addApp(
+                currentApp.icon,
+                currentApp.name,
+                currentApp.url,
+                currentApp.color1 || "#E8EAF6",
+                currentApp.color2 || "#C5CAE9",
+                currentApp.textColor || "#000"
+            );
+
+            // 自动关闭
+            modal.style.display = "none";
+
+            setTimeout(()=>{
+                try { window.app.close(); }
+                catch(e) {
+                    try { window.parent.postMessage(JSON.stringify({type:"closePage"}),"/"); }
+                    catch(e2){ history.back(); }
+                }
+            },200);
+        }
+    },30);
+}
+</script>
+</body>
+</html>
