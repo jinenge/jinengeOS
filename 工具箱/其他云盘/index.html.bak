@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>其他云盘</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif}
+  body{background:#050510;color:#fff}
+
+  /* 主界面 */
+  .toolbox{
+    width:100%;min-height:100vh;
+    padding:24px;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+    align-content:center;
+  }
+  .app-item{
+    background:#101028;
+    border-radius:24px;
+    padding:40px 16px;
+    display:flex;flex-direction:column;align-items:center;gap:14px;
+    box-shadow:0 0 20px rgba(120,0,255,0.25);
+    transition:.2s;
+  }
+  .app-item:active{transform:scale(.96);box-shadow:0 0 30px rgba(160,0,255,0.5)}
+  .app-icon{
+    font-size:52px;      /* 图标变大 */
+    filter:drop-shadow(0 0 12px currentColor)
+  }
+  .app-name{
+    font-size:18px;font-weight:600;
+    background:linear-gradient(90deg,#0cf,#f0f);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="toolbox">
+  <div class="app-item" onclick="location.href='工具箱/其他云盘'">
+    <img src="图标/123云盘.png" alt="img">
+    <div class="app-name">123云盘</div>
+  </div>
+  <div class="app-item" onclick="location.href='工具箱/计算器'">
+    <div class="app-icon" style="color:#f0f">🧮</div>
+    <div class="app-name">计算器</div>
+  </div>
+  <div class="app-item" onclick="location.href='工具箱/时钟'">
+    <div class="app-icon" style="color:#0fc">🕒</div>
+    <div class="app-name">时钟</div>
+  </div>
+  <div class="app-item" onclick="location.href='apps/LocalNote.html'">
+    <div class="app-icon" style="color:#ff3">📝</div>
+    <div class="app-name">备忘录</div>
+  </div>
+</div>
+
+</body>
+</html>

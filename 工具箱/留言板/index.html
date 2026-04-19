@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>进恩哥系统留言板</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif}
+body{
+    background:#050510;
+    background-image: linear-gradient(135deg,#101028 0%,#050510 100%);
+    color:#e0e0ff;
+    padding:20px
+}
+.container{max-width:700px;margin:0 auto}
+.title{
+    text-align:center;font-size:28px;margin-bottom:20px;
+    color:#0ff;
+    text-shadow:0 0 10px #0ff,0 0 25px #00f;
+}
+.send-box{
+    background:rgba(20,20,50,.7);
+    border:1px solid #0ff8;
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:20px;
+    backdrop-filter:blur(10px)
+}
+.send-box input,.send-box textarea{
+    width:100%;background:#111234;border:1px solid #0ff6;
+    border-radius:10px;padding:12px;color:#fff;margin-bottom:10px;outline:none
+}
+.send-box textarea{height:100px}
+.send-box button{
+    width:100%;padding:14px;border:none;border-radius:12px;
+    background:linear-gradient(90deg,#00f,#0ff);
+    color:#000;font-weight:bold;
+    box-shadow:0 0 15px #0ff8;cursor:pointer
+}
+.msg{
+    background:rgba(20,20,50,.6);
+    border:1px solid #0ff4;
+    border-radius:16px;padding:16px;margin-bottom:12px;
+    backdrop-filter:blur(6px)
+}
+.msg .nick{color:#0ff;font-weight:bold;margin-bottom:6px}
+.msg .text{color:#e0e0ff;margin-bottom:8px;line-height:1.5}
+.msg .info{font-size:12px;color:#88a}
+.msg .reply-btn{
+    margin-top:8px;padding:6px 12px;background:#00ffff22;
+    border:1px solid #0ff;border-radius:8px;color:#0ff;cursor:pointer
+}
+.reply{
+    margin-left:20px;margin-top:10px;padding:10px;
+    background:#111234;border-left:3px solid #0ff;border-radius:8px
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="title">🌃 进恩哥系统留言板</div>
+    <div class="send-box">
+        <input name="nick" id="nick" placeholder="输入昵称">
+        <textarea name="msg" id="msg" placeholder="输入消息…"></textarea>
+        <button onclick="send()">发送消息</button>
+    </div>
+    <div id="list"></div>
+</div>
+
+<script>
+function load(){
+    fetch("list.php").then(r=>r.text()).then(h=>{
+        document.getElementById("list").innerHTML = h
+    })
+}
+
+function send(){
+    let n = document.getElementById("nick").value || "匿名"
+    let t = document.getElementById("msg").value
+    if(!t) return
+    let fd = new FormData()
+    fd.append("nick", n)
+    fd.append("msg", t)
+    fetch("post.php", { method:"POST", body:fd }).then(()=>{
+        document.getElementById("msg").value = ""
+        load()
+    })
+}
+
+function reply(id){
+    let c = prompt("回复内容：")
+    if(!c) return
+    let fd = new FormData()
+    fd.append("mid", id)
+    fd.append("content", c)
+    fetch("reply.php", { method:"POST", body:fd }).then(load)
+}
+
+load()
+setInterval(load, 4000)
+</script>
+</body>
+</html>

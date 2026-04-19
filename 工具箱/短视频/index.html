@@ -1,0 +1,241 @@
+<!-- 获取背景图片 -->
+<body background="https://api.dujin.org/bing/m.php"> 
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta name="force-rendering" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+   <link rel="shortcut icon"type="DSP/x-icon"  href="https://jinenyy.vip/favicon.ico"/>
+    <title>在线看小姐姐</title>
+    <style>
+        #controls {
+            position: absolute; /* 悬浮定位 */
+            bottom: 10%; /* 距离底部10px */
+            left: 50%; /* 居中 */
+            transform: translateX(-50%); /* 水平居中 */
+            opacity: 0; /* 初始透明 */
+            transition: opacity 0.3s; /* 渐变效果 */
+            pointer-events: none; /* 禁用事件 */
+        }
+        
+        #controls.visible {
+            opacity: 1; /* 可见 */
+            pointer-events: auto; /* 启用事件 */
+        }
+
+        /* 按钮样式 */
+        .control-button {
+            background: #6C49B8; /* 按钮背景颜色 */
+            color: #fff; /* 按钮文字颜色 */
+            line-height: 30px; /* 按钮高度 */
+            text-align: center; /* 文本居中 */
+            width: 90px; /* 按钮宽度 */
+            border: none; /* 无边框 */
+            margin: 0 6px; /* 按钮间距 */
+            border-radius: 6px; /* 圆角按钮 */
+            font-weight: bold; /* 加粗文字 */
+            pointer-events: auto; /* 启用事件 */
+        }
+
+        #player-container {
+            position: relative; /* 相对定位，以便控制按钮悬浮 */
+        }
+
+		#center-flex {
+		  display: flex;
+		  justify-content: center;
+		  align-items: center;
+		  padding:5px;
+		}
+				
+    </style>
+</head>
+<div id="player-container">
+    <section id="main">
+        <!-- 视频播放器 -->
+        <video id="player" controls="controls" width="100%" height="95%"></video>
+	 <div id="center-flex">	
+        <select id="videoSelect">
+			<option value="http://api.yujn.cn/api/xjj.php">稳定线路</option>        
+                       <option value="https://www.cunshao.com/666666/api/pc.php">横屏线路</option>
+			<option value="https://www.cunshao.com/666666/api/web.php">竖屏线路</option>  
+                       <option value="http://api.yujn.cn/api/zzxjj.php">极速线路</option>
+			<option value="http://api.yujn.cn/api/wmsc.php">完美身材</option>
+			<option value="http://api.yujn.cn/api/heisis.php">黑丝视频</option>
+			<option value="http://api.yujn.cn/api/baisis.php">白丝视频</option>
+			<option value="https://api.yujn.cn/api/manzhan.php">漫展视频</option>
+			<option value="http://api.yujn.cn/api/hanfu.php">汉服古风</option>
+			<option value="http://api.yujn.cn/api/jpmt.php">极品玉足</option>
+			<option value="http://api.yujn.cn/api/manyao.php">慢摇系列</option>
+			<option value="http://api.yujn.cn/api/diaodai.php">吊带系列</option>
+			<option value="http://api.yujn.cn/api/qingchun.php">清纯系列</option>
+			<option value="http://api.yujn.cn/api/COS.php">COS系列</option>
+			<option value="http://api.yujn.cn/api/diaodai.php">吊带系列</option>
+			<option value="http://api.yujn.cn/api/ksbianzhuang.php">快手变装</option>
+			<option value=" http://api.yujn.cn/api/bianzhuang.php">抖音变装</option>
+			<option value="https://api.yujn.cn/api/nvda.php">女大系列</option>
+			<option value="http://api.yujn.cn/api/nvgao.php">女高系列</option>
+			<option value="http://api.yujn.cn/api/sbkl.php">双倍快乐</option>
+			<option value="http://api.yujn.cn/api/luoli.php">萝莉系列</option>
+			<option value="http://api.yujn.cn/api/tianmei.php">甜妹系列</option>
+			<option value="http://api.yujn.cn/api/jksp.php">JK洛丽塔</option>
+			<option value="http://api.yujn.cn/api/yuzu.php">玉足美腿</option>
+                       <option value=" http://api.yujn.cn/api/chuanda.php">穿搭系列</option>	
+                       <option value="http://api.yujn.cn/api/jjy.php">鞠婧祎系列</option>	
+                       <option value="http://api.yujn.cn/api/shwd.php">丝滑舞蹈</option>	
+	               <option value="http://api.yujn.cn/api/jiepai.php">街拍系列</option>
+                       <option value="http://api.yujn.cn/api/ndym.php">欲梦视频</option>
+                         <option value="http://api.yujn.cn/api/rewu.php">热舞视频</option>
+                        <option value="http://api.yujn.cn/api/manhuay.php">漫画芋视频</option>
+                        <option value="http://api.yujn.cn/api/xiaoxiao.php">抖音潇潇</option>
+			<option value="http://v.nrzj.vip/video.php">随机小姐姐</option>
+                        <option value="http://api.yujn.cn/api/juhexjj.php">各类小姐姐</option>
+			<option value="https://api.qoc.cc/api/xjj">备用线路1</option>
+			<option value="http://www.kuaidoushe.com/video.php">备用线路2</option>
+			<option value="https://xjj.349457.xyz/video.php">备用线路3</option>
+			<option value="http://api.yujn.cn/api/ksxjjsp.php">备用线路4</option>
+                                                           </select>
+    
+        <!-- 控制按钮 -->
+        <button id="switch" class="control-button">连续: 开</button>
+        <button id="next1" class="control-button">换一个</button>
+        <!-- 下载按钮 -->
+ <a id="download" href="http://api.yujn.cn/api/xjj.php" download style="margin-left: 0px;">
+            <button class="control-button">下载视频</button>
+        </a>
+	</div>
+    </div>
+</div>
+<div id="player-container">
+    <section id="main">
+       </section>
+     <script>
+
+
+(function (window, document) {
+    // 防止网页被嵌入
+    if (top != self) {
+        window.top.location.replace(self.location.href);
+    }
+    
+    var get = function (id) {
+        return document.getElementById(id);
+    }
+    
+    var bind = function (element, event, callback) {
+        return element.addEventListener(event, callback);
+    }
+    
+    var auto = true; // 自动播放开关
+    var player = get('player'); // 获取视频播放器
+    var controls = get('controls'); // 获取控制按钮
+    var hideTimeout; // 隐藏超时
+
+    var randomm = function () {
+        player.src = get('videoSelect').value + '?_t=' + Math.random(); // 更新视频源
+        player.play(); // 播放视频
+        // 更新下载链接
+        get('download').href = get('videoSelect').value; // 更新下载按钮链接
+    }
+
+    bind(get('next1'), 'click', randomm);
+    bind(player, 'error', function () {
+        randomm(); // 如果播放出错，换一个视频
+    });
+    
+    bind(get('switch'), 'click', function () {
+        auto = !auto; // 切换自动播放状态
+        this.innerText = '连续: ' + (auto ? '开' : '关'); // 更新按钮文本
+    });
+    
+    bind(player, 'ended', function () {
+        if (auto) randomm(); // 视频结束时自动播放
+    });
+    
+    bind(get('videoSelect'), 'change', function () {
+        player.src = this.value; // 更新视频源
+        player.play(); // 播放新视频
+        // 更新下载链接
+        get('download').href = this.value; // 更新下载按钮链接
+    });
+    
+    window.onload = function() {
+        var lastSource = localStorage.getItem('lastVideoSource');
+        if (lastSource) {
+            get('videoSelect').value = lastSource; // 设置下拉框为上次选择的源
+            player.src = lastSource; // 更新视频播放器源
+        } else {
+            player.src = get('videoSelect').value; // 默认选择第一个视频源
+        }
+        player.play(); // 自动播放
+    };
+
+    bind(get('videoSelect'), 'change', function () {
+        localStorage.setItem('lastVideoSource', this.value); // 保存到 localStorage
+    });
+
+// 下载视频
+downloadBtn.addEventListener('click', function () {
+    const videoUrl = downloadBtn.getAttribute('data-url');
+    if (videoUrl) {
+        const link = document.createElement('a');
+        link.href = videoUrl;
+        link.download = videoUrl.split('/').pop().split('?')[0];
+        link.click();
+    } else {
+        console.error('视频 URL 不存在');
+    }
+});
+
+// 提取视频标题的函数
+function getVideoTitleFromUrl(url) {
+    const regex = /clientCacheKey=([a-zA-Z0-9_-]+)/;
+    const match = url.match(regex);
+    return match ? match[1] : null; // 如果找不到标题，返回 null
+}
+                // 点击收藏项播放视频
+                listItem.addEventListener('click', function () {
+                    const videoUrl = this.getAttribute('data-url'); // 获取视频地址
+                    if (videoUrl) {
+                        player.src({ type: 'video/mp4', src: videoUrl }); // 使用 Video.js 的播放器 API 设置新视频地址
+                        player.play(); // 播放视频
+                        downloadBtn.setAttribute('data-url', videoUrl); // 更新下载按钮的 URL
+                    } else {
+                        alert('无法播放：视频地址无效。');
+                    }
+                });
+
+  // 添加下载按钮
+                const downloadBtn = document.createElement('button');
+                downloadBtn.textContent = '下载';
+                downloadBtn.addEventListener('click', function (event) {
+                    event.stopPropagation(); // 阻止冒泡
+
+                    const videoUrl = favorite.video_url;
+                    if (videoUrl) {
+                        const a = document.createElement('a');
+                        a.href = videoUrl;  // 设置下载链接为视频 URL
+                        a.download = favorite.video_title + '.mp4';  // 设置下载文件名
+                        a.click();  // 自动触发下载
+                    } else {
+                        alert('无法下载：视频地址无效。');
+                    }
+                });
+
+
+
+    // 鼠标移动时显示控制按钮
+    document.addEventListener('mousemove', function() {
+        controls.classList.add('visible'); // 显示控制按钮
+        clearTimeout(hideTimeout); // 清除之前的隐藏超时
+        hideTimeout = setTimeout(function() {
+            controls.classList.remove('visible'); // 隐藏控制按钮
+        }, 2000); // 2秒后隐藏
+    });
+})(window, document);
+</script>
+<!-- API由@656241411整理于2024年10月2日21:54:58 -->
+</body>
+</html>
