@@ -1,13 +1,5 @@
-[{
-        "icon": "images/LocalNote.png",
-        "name": "备忘录",
-        "url": "apps/LocalNote.html",
-        "color1": "#E8EAF6",
-        "color2": "#000",
-        "textColor": "#000",
-        "description": "由 Burger Studio 开发的 LocalNote"
-    },
-    {
+[
+   {
         "icon": "images/LocalPaint.png",
         "name": "画册",
         "url": "apps/LocalPaint.html",
@@ -27,101 +19,56 @@
     },
     {
         "icon": "images/Timetable.png",
-        "name": "课程表",
-        "url": "apps/Timetable.html",
+        "name": "频率发生器",
+        "url": "工具箱/频率发生器",
         "color1": "#E8EAF6",
         "color2": "#000",
         "textColor": "#000",
-        "description": "由 Burger Studio 开发的课程表，需要 Webdroid 1.9.0 及以上版本。"
+        "description": "频率调节专用发生器，可自定义调节频率。"
     },
     {
-        "icon": "images/DaysMatter.png",
-        "name": "倒数日",
-        "url": "apps/DaysMatter.html",
+        "icon": "images/Timetable.png",
+        "name": "FM音乐电台",
+        "url": "工具箱/FM音乐电台",
         "color1": "#E8EAF6",
         "color2": "#000",
         "textColor": "#000",
-        "description": "由 Burger Studio 开发的倒数日，需要 Webdroid 1.10.0 及以上版本。"
+        "description": "收听广播电台"
     },
-    {
-        "icon": "images/Calc.png",
-        "name": "计算器",
-        "url": "apps/Calc.html",
-        "color1": "#fff",
-        "color2": "#000",
-        "textColor": "#000",
-        "description": "由 Burger Studio 开发的计算器，需要 Webdroid 1.11.0 及以上版本。"
-    },
-    {
-        "icon": "images/LatticeScreen.png",
-        "name": "点阵显示器",
-        "url": "apps/LatticeScreen/index.html",
+        {
+        "icon": "图标/短视频.png",
+        "name": "短视频",
+        "url": "工具箱/短视频",
         "color1": "#E8EAF6",
         "color2": "#000",
         "textColor": "#000",
-        "description": "由 Burger Studio 开发的点阵显示器，需要 Webdroid 1.12.0 及以上版本。"
+        "description": "观看妹子短视频"
     },
-    {
-        "icon": "images/WebDev.png",
-        "name": "WebDev",
-        "url": "apps/WebDev/index.html",
-        "color1": "#fff",
+        {
+        "icon": "图标/新年倒计时.png",
+        "name": "新年倒计时",
+        "url": "工具箱/新年倒计时",
+        "color1": "#E8EAF6",
         "color2": "#000",
         "textColor": "#000",
-        "description": "由 Burger Studio 开发的 Web 编辑器，需要 Webdroid 2.1.0 及以上版本。"
+        "description": "查看新年的倒计时"
     },
-    {
-        "icon": "images/NetEaseMusic.png",
-        "name": "网易云音乐",
-        "url": "https://music.163.com/",
-        "color1": "#D43C33",
-        "color2": "#000",
-        "textColor": "#fff",
-        "description": "音乐的力量"
-    },
-    {
-        "icon": "images/bilibili.png",
-        "name": "哔哩哔哩",
-        "url": "https://www.bilibili.com/",
-        "color1": "#FB7299",
-        "color2": "#000",
-        "textColor": "#fff",
-        "description": "弹幕视频网站"
-    },
-    {
-        "icon": "images/Minecraft.png",
-        "name": "Minecraft",
-        "url": "https://goro.top/WebMC/",
-        "color1": "#000",
-        "color2": "#000",
-        "textColor": "#fff",
-        "description": "MC 网页复刻版"
-    },
-    {
-        "icon": "images/Phigros.png",
-        "name": "Phigros",
-        "url": "https://vercel.phicommunity.com.cn/",
-        "color1": "#000",
-        "color2": "#000",
-        "textColor": "#fff",
-        "description": "PhiCommunity"
-    },
-    {
-        "icon": "images/WoodBox.png",
-        "name": "一个木函",
-        "url": "https://ol.woobx.cn/",
-        "color1": "#FAFAFA",
+       {
+        "icon": "图标/MX绘画.png",
+        "name": "MX绘画",
+        "url": "工具箱/MX绘画",
+        "color1": "#E8EAF6",
         "color2": "#000",
         "textColor": "#000",
-        "description": "实用工具集"
+        "description": "AI创作图片，视频专业工具"
     },
-    {
-        "icon": "images/Baidu.png",
-        "name": "百度",
-        "url": "https://www.baidu.com/",
-        "color1": "#fff",
+       {
+        "icon": "图标/苏诺之音.png",
+        "name": "Suno Ai音乐",
+        "url": "工具箱/Suno",
+        "color1": "#E8EAF6",
         "color2": "#000",
         "textColor": "#000",
-        "description": "国内搜索引擎"
+        "description": "AI创作音乐，作词，作曲生成工具"
     }
 ]
