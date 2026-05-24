@@ -9,15 +9,6 @@
         "description": "由 Burger Studio 开发的 LocalPaint"
     },
     {
-        "icon": "图标/logo.png",
-        "name": "进恩哥资源仓库",
-        "url": "https://jinenge.us.kg/jinenge",
-        "color1": "#E8EAF6",
-        "color2": "#000",
-        "textColor": "#000",
-        "description": "进恩哥资源仓库是一个多功能的工具箱以及资源平台。"
-    },
-    {
         "icon": "images/Timetable.png",
         "name": "频率发生器",
         "url": "工具箱/频率发生器",
