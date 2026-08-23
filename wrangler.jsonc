@@ -1,14 +1,6 @@
-{
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "jinengeos",
-  "compatibility_date": "2026-05-07",
-  "observability": {
-    "enabled": true
-  },
-  "assets": {
-    "directory": "."
-  },
-  "compatibility_flags": [
-    "nodejs_compat"
-  ]
-}
+name = "jinengeos"
+compatibility_date = "2026‑08‑23"
+
+# 指向你的网页输出目录，不要写 "./"
+[assets]
+directory = "./_site"
