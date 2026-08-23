@@ -6,7 +6,7 @@
     <link rel="shortcut icon" href="favicon.png" type="image/x-icon">
     <link rel="stylesheet" href="mdui-v1.0.1/css/mdui.min.css">
     <script src="mdui-v1.0.1/js/mdui.min.js"></script>
-    <title>进恩哥系统2.1</title>
+    <title>进恩哥系统2.2</title>
    <style>
 
         body {
@@ -243,17 +243,17 @@
     <div id="dockBar">
         <div class="mdui-container" style="padding-left: 16px;padding-right: 16px;max-width: 640px;">
             <div class="mdui-row-xs-4">
-                <div class="mdui-col icon icon-dock" onclick="javascript:launchApp('images/Phone.png', 'phone.html', '#E8EAF6', '#000', '#000');">
-                    <img src="images/Phone.png">
+                <div class="mdui-col icon icon-dock" onclick="javascript:launchApp('图标/Phone.png', 'phone.html', '#E8EAF6', '#000', '#000');">
+                    <img src="图标/Phone.png">
                 </div>
-                <div class="mdui-col icon icon-dock" onclick="javascript:launchApp('images/MMS.png', 'mms.html', '#E8F5E9', '#000', '#000');">
-                    <img src="images/MMS.png">
+                <div class="mdui-col icon icon-dock" onclick="javascript:launchApp('图标/MMS.png', 'mms.html', '#E8F5E9', '#000', '#000');">
+                    <img src="图标/MMS.png">
                 </div>
-                <div class="mdui-col icon icon-dock" onclick="javascript:launchApp('images/Baidu.png', 'https://baidu.com/', '#000', '#000', '#fff');">
-                    <img src="images/Baidu.png">
+                <div class="mdui-col icon icon-dock" onclick="javascript:launchApp('图标/Baidu.png', 'https://baidu.com/', '#000', '#000', '#fff');">
+                    <img src="图标/Baidu.png">
                 </div>
-                <div class="mdui-col icon icon-dock" onclick="javascript:launchApp('images/AppStore.png', 'AppStore.html', '#E8EAF6', '#000', '#000');">
-                    <img src="images/AppStore.png">
+                <div class="mdui-col icon icon-dock" onclick="javascript:launchApp('图标/AppStore.png', 'AppStore.html', '#E8EAF6', '#000', '#000');">
+                    <img src="图标/AppStore.png">
                 </div>
             </div>
         </div>
@@ -275,32 +275,36 @@
     </div>
     <div class="mdui-container mdui-center" style="padding-top: 28px;padding-left: 16px;padding-right: 16px;max-width: 640px;">
         <div class="mdui-row-xs-4" style="overflow: scroll;" id="appList">
-            <div class="mdui-col icon" onclick="javascript:launchApp('images/Settings.png', 'Settings.html', '#ECEFF1', '#000', '#000');">
-                <img src="images/Settings.png">
+            <div class="mdui-col icon" onclick="javascript:launchApp('图标/Settings.png', 'Settings.html', '#ECEFF1', '#000', '#000');">
+                <img src="图标/Settings.png">
                 <p>设置</p>
             </div>
-            <div class="mdui-col icon" onclick="javascript:launchApp('images/Contacts.png', 'contacts.html', '#E3F2FD', '#000', '#000');">
-                <img src="images/Contacts.png">
+            <div class="mdui-col icon" onclick="javascript:launchApp('图标/Contacts.png', 'contacts.html', '#E3F2FD', '#000', '#000');">
+                <img src="图标/Contacts.png">
                 <p>通讯录</p>
             </div>
-            <div class="mdui-col icon" onclick="javascript:launchApp('images/Files.png', 'Files.html', '#ECEFF1', '#000', '#000');">
-                <img src="images/Files.png">
+            <div class="mdui-col icon" onclick="javascript:launchApp('图标/Files.png', 'Files.html', '#ECEFF1', '#000', '#000');">
+                <img src="图标/Files.png">
                 <p>文件</p>
             </div>
-            <div class="mdui-col icon" onclick="javascript:launchApp('images/AppStore.png', 'AppStore.html', '#E8EAF6', '#000', '#000');">
-                <img src="images/AppStore.png">
+            <div class="mdui-col icon" onclick="javascript:launchApp('图标/AppStore.png', 'AppStore.html', '#E8EAF6', '#000', '#000');">
+                <img src="图标/AppStore.png">
                 <p>应用商店</p>
             </div>
-            <div class="mdui-col icon" onclick="javascript:launchApp('images/openlist.png', 'openlist', '#000', '#000', '#fff');">
-                <img src="images/openlist.png">
+            <div class="mdui-col icon" onclick="javascript:launchApp('图标/openlist.png', 'openlist', '#000', '#000', '#fff');">
+                <img src="图标/openlist.png">
                 <p>Openlist</p>
+            </div>
+            <div class="mdui-col icon" onclick="javascript:launchApp('图标/音乐.png', 'music', '#000', '#000', '#fff');">
+                <img src="图标/音乐.png">
+                <p>音乐搜索器</p>
             </div>
             <div class="mdui-col icon" onclick="javascript:launchApp('图标/游戏.png', '工具箱/游戏', '#000', '#000', '#fff');">
                 <img src="图标/游戏.png">
                 <p>小游戏</p>
             </div>
-            <div class="mdui-col icon" onclick="javascript:launchApp('图标/工具箱大图标.png', 'tool.html', '#000', '#000', '#fff');">
-                <img src="图标/工具箱大图标.png">
+            <div class="mdui-col icon" onclick="javascript:launchApp('图标/工具箱.png', 'tool.html', '#000', '#000', '#fff');">
+                <img src="图标/工具箱.png">
                 <p>工具箱</p>
             </div>
             <div class="mdui-col icon" onclick="javascript:launchApp('图标/其他云盘.png', '工具箱/其他云盘', '#000', '#000', '#fff');">
@@ -454,7 +458,7 @@
             gebi("navBar").style.background = "";
             gebi("statusBar").style.color = "#fff";
             gebi("navBar").style.color = "";
-            document.title = "进恩哥系统2.1";
+            document.title = "进恩哥系统2.2";
             opened = 0;
             recent = [];
             getDevTools();
@@ -616,7 +620,7 @@
             localStorage.setItem("displayBatteryLevel", 1);
         }
         if (!localStorage.getItem("wallpaper")) {
-            localStorage.setItem("wallpaper", "images/default_wallpaper.png");
+            localStorage.setItem("wallpaper", "图标/default_wallpaper.png");
         }
         if (!localStorage.getItem("transparentDockBar")) {
             localStorage.setItem("transparentDockBar", 0);
@@ -781,7 +785,7 @@
                     if (opened == 1) {
                         switchActivity("Update.html", false, true);
                     } else {
-                        launchApp("images/Update.png", "Update.html", "#1976D2", "#000", "#fff", "#fff");
+                        launchApp("图标/Update.png", "Update.html", "#1976D2", "#000", "#fff", "#fff");
                     }
                 });
             }
