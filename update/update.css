@@ -35,7 +35,7 @@
             align-items: center;
             will-change: transform;
             background-color: #ffffff;
-            transition: all 0.3s ease-in-out;
+            transition: all 0.3 ease-in-out;
         }
 
         .item:hover {
@@ -46,7 +46,7 @@
         .item img {
             width: 36px;
             height: 36px;
-            transition: all 0.3s ease-in-out;
+            transition: all 0.3 ease-in-out;
         }
 
         .item:hover img {
@@ -61,7 +61,7 @@
             border-radius: 6px;
             color: #ffffff;
             cursor: pointer;
-            transition: all 0.3s ease-in-out;
+            transition: all 0.3 ease-in-out;
         }
 
         .item button:hover {
