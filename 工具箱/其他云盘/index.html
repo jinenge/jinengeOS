@@ -11,46 +11,42 @@
             box-sizing: border-box;
             font-family: system-ui, -apple-system, sans-serif;
         }
+        /* 统一静态冷深蓝渐变，移除动态刺眼流动光效 */
         body {
-            max-width: 1200px;
+            max-width: 640px;
             margin: 20px auto;
             padding: 0 12px;
             min-height: 100vh;
-            background: linear-gradient(-45deg, #000011, #190038, #002244, #250040);
-            background-size: 400% 400%;
+            background: linear-gradient(140deg, #08081a 0%, #0c0c2c 50%, #060622 100%);
             background-attachment: fixed;
-            animation: flowBg 12s ease infinite;
         }
-        @keyframes flowBg {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        /* 缩小提取码卡片，手机适配 */
+        /* 提取码卡片：低亮度磨砂，弱化蓝光 */
         #switchmore {
-            background: rgba(10, 10, 30, 0.7);
+            background: rgba(30, 30, 60, 0.35);
+            backdrop-filter: blur(12px);
             border-radius: 10px;
             padding: 12px 15px;
             margin-bottom: 18px;
-            border: 1px solid #00ccff;
-            box-shadow: 0 0 12px #00ccff, inset 0 0 8px rgba(0,204,255,0.15);
+            border: 1px solid rgba(0, 153, 204, 0.25);
+            box-shadow: 0 0 8px rgba(0, 153, 204, 0.12);
         }
         .des-title {
             font-size: 15px;
             line-height: 1.6;
-            color: #fff;
+            color: #e8edff;
         }
         #change {
             font-size: 19px;
             font-weight: bold;
             display: block;
             margin-bottom: 4px;
-            color: #00f0ff;
-            text-shadow: 0 0 8px #00f0ff;
+            color: #88ccff;
+            text-shadow: none;
         }
         #change1 {
             font-size: 14px;
             line-height: 1.7;
+            color: #c5d8f5;
         }
         .row {
             display: grid;
@@ -58,34 +54,36 @@
             gap: 1rem;
             margin-bottom: 1.5rem;
         }
+        /* 链接卡片：去掉亮粉刺眼边框，改用冷调 */
         .link-card {
-            background: rgba(15, 10, 35, 0.8);
+            background: rgba(30, 30, 60, 0.35);
+            backdrop-filter: blur(12px);
             border-radius: 10px;
             padding: 14px 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 8px;
-            border: 1px solid #ff2ee6;
-            box-shadow: 0 0 10px #ff2ee6;
+            border: 1px solid rgba(179, 157, 255, 0.22);
+            box-shadow: 0 0 10px rgba(92, 47, 194, 0.12);
             transition: all 0.3s ease;
         }
         .link-card:hover {
             transform: translateY(-6px);
-            border-color: #00e7ff;
-            box-shadow: 0 0 22px #00e7ff, 0 0 35px #00e7ff;
+            border-color: rgba(0, 153, 204, 0.35);
+            box-shadow: 0 0 14px rgba(0, 153, 204, 0.18);
         }
         .link-card img {
             width: 40px;
             height: 40px;
             object-fit: contain;
-            filter: drop-shadow(0 0 6px #ffffff);
+            filter: drop-shadow(0 0 4px rgba(255,255,255,0.4));
         }
         .link-name {
             font-size: 14px;
-            color: #ffffff;
+            color: #e8edff;
             text-align: center;
-            text-shadow: 0 0 4px #fff;
+            text-shadow: none;
         }
         a {
             text-decoration: none;
@@ -93,7 +91,7 @@
     </style>
 </head>
 <body>
-    <!-- 提取码区域（缩小精简版） -->
+    <!-- 提取码区域 -->
     <div class="message cards" id="switchmore">
         <div class="des-title">
             <span id="change">提&nbsp;取&nbsp;码&nbsp;：<br />
@@ -106,8 +104,7 @@
             </span>
         </div>
     </div>
-
-    <!-- 第一组网盘（阿里云盘为你原始链接） -->
+    <!-- 第一组网盘 -->
     <div class="row">
         <div class="col">
             <a href="https://www.123865.com/s/ZNN8Vv-vngc3" target="_self">
@@ -134,7 +131,6 @@
             </a>
         </div>
     </div>
-
     <!-- MIUI系统应用更新 蓝奏云 -->
     <div class="row" style="margin-top: 1.5rem;">
         <div class="col">
@@ -146,7 +142,6 @@
             </a>
         </div>
     </div>
-
     <!-- 好用的软件大全 蓝奏云 -->
     <div class="row" style="margin-top: 1.5rem;">
         <div class="col">

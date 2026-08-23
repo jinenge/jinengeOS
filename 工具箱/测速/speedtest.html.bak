@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>外网测速工具</title>
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Segoe UI",system-ui,sans-serif;
+}
+body{
+    min-height:100vh;
+    background:#080c18;
+    background-image:
+        radial-gradient(circle at 10% 20%, rgba(0,120,255,0.08) 0%, transparent 45%),
+        radial-gradient(circle at 85% 78%, rgba(0,220,255,0.06) 0%, transparent 45%);
+    color:#e8f4ff;
+    padding:20px 16px;
+}
+.container{
+    max-width:680px;
+    margin:0 auto;
+}
+.title{
+    text-align:center;
+    margin-bottom:24px;
+    font-size:28px;
+    background: linear-gradient(90deg,#00ccff,#0077ff);
+    -webkit-background-clip:text;
+    color:transparent;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+}
+.gauge-wrap{
+    position:relative;
+    width:340px;
+    height:190px;
+    margin:0 auto 24px;
+}
+.gauge-svg{
+    width:340px;
+    height:170px;
+    overflow:visible;
+}
+.needle{
+    position:absolute;
+    bottom:0;
+    left:50%;
+    width:4px;
+    height:140px;
+    background:linear-gradient(180deg,#00ccff,#0066ff);
+    transform-origin:left bottom;
+    transform:rotate(-90deg);
+    border-radius:2px;
+    transition:transform 0.25s ease-out;
+    box-shadow:0 0 12px #00b8ff;
+    z-index:2;
+}
+.gauge-num{
+    position:absolute;
+    bottom:14px;
+    left:50%;
+    transform:translateX(-50%);
+    text-align:center;
+    z-index:3;
+}
+.speed-val{
+    font-size:64px;
+    font-weight:bold;
+    color:#00ddff;
+    line-height:1;
+}
+.speed-unit{
+    font-size:16px;
+    color:#7294bb;
+    margin-top:4px;
+}
+.data-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-bottom:18px;
+}
+.data-card{
+    background:rgba(16,24,42,0.75);
+    border:1px solid rgba(0,160,255,0.22);
+    padding:20px;
+    border-radius:14px;
+}
+.data-label{
+    font-size:15px;
+    color:#83a6d8;
+    margin-bottom:6px;
+}
+.data-text{
+    font-size:22px;
+    font-weight:500;
+    color:#d0e8ff;
+    font-family:monospace;
+}
+.level-card{
+    text-align:center;
+    padding:16px;
+    border-radius:12px;
+    margin-bottom:20px;
+    background:rgba(14,26,48,0.7);
+    border:1px solid rgba(0,170,255,0.25);
+    font-size:18px;
+    color:#54ccff;
+}
+#startBtn{
+    width:100%;
+    padding:18px;
+    border:none;
+    border-radius:16px;
+    background:linear-gradient(90deg,#007bff,#00b8ff);
+    color:#fff;
+    font-size:20px;
+    font-weight:500;
+    cursor:pointer;
+    box-shadow:0 0 22px rgba(0,150,255,0.35);
+}
+#startBtn:disabled{
+    background:#19335c;
+    box-shadow:none;
+    cursor:not-allowed;
+}
+.status-tip{
+    text-align:center;
+    margin-top:14px;
+    color:#74a2d6;
+    height:26px;
+    font-size:16px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1 class="title">
+        <span>⚡</span>外网网速测速工具
+    </h1>
+
+    <div class="gauge-wrap">
+        <svg class="gauge-svg" viewBox="0 0 340 170">
+            <path d="M 20 170 A 150 150 0 0 1 320 170" fill="none" stroke="#141b2b" stroke-width="16"/>
+            <text x="22" y="162" fill="#7294bb" font-size="12" text-anchor="middle">0</text>
+            <text x="60" y="122" fill="#7294bb" font-size="12" text-anchor="middle">50M</text>
+            <text x="110" y="88" fill="#7294bb" font-size="12" text-anchor="middle">100M</text>
+            <text x="170" y="72" fill="#7294bb" font-size="12" text-anchor="middle">200M</text>
+            <text x="230" y="88" fill="#7294bb" font-size="12" text-anchor="middle">500M</text>
+            <text x="280" y="122" fill="#7294bb" font-size="12" text-anchor="middle">1200M</text>
+        </svg>
+        <div class="needle" id="needle"></div>
+        <div class="gauge-num">
+            <div class="speed-val" id="speedValue">--</div>
+            <div class="speed-unit">Mbps</div>
+        </div>
+    </div>
+
+    <div class="data-grid">
+        <div class="data-card">
+            <div class="data-label">延迟 Ping</div>
+            <div class="data-text" id="pingVal">-- ms</div>
+        </div>
+        <div class="data-card">
+            <div class="data-label">抖动 Jitter</div>
+            <div class="data-text" id="jitterVal">-- ms</div>
+        </div>
+        <div class="data-card">
+            <div class="data-label">下载速度</div>
+            <div class="data-text" id="downVal">-- MB/s<br>-- Mbps</div>
+        </div>
+        <div class="data-card">
+            <div class="data-label">上传速度</div>
+            <div class="data-text" id="upVal">-- MB/s<br>-- Mbps</div>
+        </div>
+    </div>
+
+    <div class="level-card" id="levelText">宽带等级：--</div>
+
+    <button id="startBtn">开始测速</button>
+    <div class="status-tip" id="statusTip">准备就绪</div>
+</div>
+
+<script>
+const btn = document.getElementById('startBtn');
+const statusEl = document.getElementById('statusTip');
+const needle = document.getElementById('needle');
+const speedValue = document.getElementById('speedValue');
+const pingVal = document.getElementById('pingVal');
+const jitterVal = document.getElementById('jitterVal');
+const downVal = document.getElementById('downVal');
+const upVal = document.getElementById('upVal');
+const levelText = document.getElementById('levelText');
+
+const MAX_GAUGE_MBPS = 1200;
+
+function resetUi(){
+    setGauge(0);
+    speedValue.textContent = '--';
+    pingVal.textContent = '-- ms';
+    jitterVal.textContent = '-- ms';
+    // 修复：使用innerHTML解析换行标签
+    downVal.innerHTML = '-- MB/s<br>-- Mbps';
+    upVal.innerHTML = '-- MB/s<br>-- Mbps';
+    levelText.textContent = '宽带等级：--';
+    statusEl.textContent = '准备就绪';
+}
+
+// 对数非线性映射，拉伸低带宽区间，匹配截图表盘视觉
+function setGauge(mbps){
+    speedValue.textContent = mbps.toFixed(1);
+    const maxVal = MAX_GAUGE_MBPS;
+    const logMin = Math.log10(1);
+    const logMax = Math.log10(maxVal);
+    let v = Math.max(mbps,1);
+    let ratio = (Math.log10(v) - logMin) / (logMax - logMin);
+    ratio = Math.min(ratio,1);
+    const deg = -90 + ratio * 180;
+    needle.style.transform = `rotate(${deg}deg)`;
+}
+
+function getLevel(downMbps){
+    if(downMbps <= 12) return '十兆宽带(10M)';
+    else if(downMbps <= 22) return '二十兆宽带(20M)';
+    else if(downMbps <= 32) return '三十兆宽带(30M)';
+    else if(downMbps <= 42) return '四十兆宽带(40M)';
+    else if(downMbps <= 55) return '五十兆宽带(50M)';
+    else if(downMbps <= 95) return '百兆宽带(100M)';
+    else if(downMbps <= 180) return '二百兆宽带(200M)';
+    else if(downMbps <= 450) return '五百兆宽带(500M)';
+    else return '千兆及以上宽带(1000M+)';
+}
+
+async function testPing(testTimes=8){
+    const rttList = [];
+    for(let i=0;i<testTimes;i++){
+        const start = performance.now();
+        try{
+            await fetch(`https://speed.cloudflare.com/__down?bytes=100&t=${Date.now()}`,{cache:'no-store'});
+            const cost = performance.now() - start;
+            rttList.push(cost);
+        }catch(e){}
+    }
+    if(rttList.length === 0) return {avgPing:0,jitter:0};
+    const avgPing = rttList.reduce((sum,v)=>sum+v,0)/rttList.length;
+    let jitter = 0;
+    for(let i=1;i<rttList.length;i++){
+        jitter += Math.abs(rttList[i]-rttList[i-1]);
+    }
+    jitter = rttList.length>1 ? jitter/(rttList.length-1) : 0;
+    return {avgPing:avgPing.toFixed(1),jitter:jitter.toFixed(1)};
+}
+
+async function testDownload(){
+    const testBytes = 25 * 1024 * 1024;
+    const url = `https://speed.cloudflare.com/__down?bytes=${testBytes}&t=${Date.now()}`;
+    const start = performance.now();
+    const res = await fetch(url,{cache:'no-store'});
+    const blob = await res.blob();
+    const costSec = (performance.now() - start)/1000;
+    const mbps = (blob.size * 8 / 1024 / 1024) / costSec;
+    const mbPerSec = mbps / 8;
+    return {mbps:mbps.toFixed(1),mbPerSec:mbPerSec.toFixed(2)};
+}
+
+async function testUpload(){
+    const payload = new Blob([new Uint8Array(12*1024*1024)]);
+    const start = performance.now();
+    await fetch('https://speed.cloudflare.com/__up',{
+        method:'POST',
+        body:payload,
+        keepalive:false
+    });
+    const costSec = (performance.now() - start)/1000;
+    const mbps = (payload.size * 8 / 1024 / 1024) / costSec;
+    const mbPerSec = mbps / 8;
+    return {mbps:mbps.toFixed(1),mbPerSec:mbPerSec.toFixed(2)};
+}
+
+async function runTest(){
+    btn.disabled = true;
+    resetUi();
+    try{
+        statusEl.textContent = '正在测试延迟 Ping...';
+        const pingRes = await testPing();
+        pingVal.textContent = `${pingRes.avgPing} ms`;
+        jitterVal.textContent = `${pingRes.jitter} ms`;
+
+        statusEl.textContent = '正在测试下载速度...';
+        const downRes = await testDownload();
+        // 修复：innerHTML渲染换行
+        downVal.innerHTML = `${downRes.mbPerSec} MB/s |<br>${downRes.mbps} Mbps`;
+        setGauge(parseFloat(downRes.mbps));
+
+        statusEl.textContent = '正在测试上传速度...';
+        const upRes = await testUpload();
+        // 修复：innerHTML渲染换行
+        upVal.innerHTML = `${upRes.mbPerSec} MB/s |<br>${upRes.mbps} Mbps`;
+
+        const level = getLevel(parseFloat(downRes.mbps));
+        levelText.textContent = `宽带等级：${level}`;
+        statusEl.textContent = '✅外网测速完成';
+    }catch(err){
+        statusEl.textContent = `测速异常：${err.message}`;
+    }finally{
+        btn.disabled = false;
+    }
+}
+
+btn.addEventListener('click',runTest);
+resetUi();
+</script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>在线 ADB 调试</title>
+    <style>
+        .result { background: #f5f5f5; padding: 12px; margin-top: 10px; min-height: 200px; white-space: pre-wrap; }
+        .row { margin: 10px 0; }
+        input { padding: 6px; width: 320px; }
+        button { padding: 6px 12px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h3>在线 ADB 调试面板</h3>
+
+    <div class="row">
+        <button onclick="getDevices()">刷新设备列表</button>
+    </div>
+
+    <div class="row">
+        <input type="text" id="shellInput" placeholder="输入Shell命令，例如 ls /sdcard">
+        <button onclick="execShell()">执行命令</button>
+    </div>
+
+    <div class="row">
+        <button onclick="getScreenshot()">获取屏幕截图</button>
+        <div id="screenBox" style="margin-top: 8px;"></div>
+    </div>
+
+    <div class="result" id="resultBox">等待操作...</div>
+
+    <script>
+        const API_URL = 'adb_api.php';
+
+        // 获取设备列表
+        function getDevices() {
+            postData({ action: 'devices' })
+                .then(res => res.text())
+                .then(data => document.getElementById('resultBox').innerHTML = data);
+        }
+
+        // 执行Shell命令
+        function execShell() {
+            const cmd = document.getElementById('shellInput').value;
+            postData({ action: 'shell', cmd: cmd })
+                .then(res => res.text())
+                .then(data => document.getElementById('resultBox').innerHTML = data);
+        }
+
+        // 获取截图
+        async function getScreenshot() {
+            const res = await postData({ action: 'screencap' });
+            const blob = await res.blob();
+            const imgUrl = URL.createObjectURL(blob);
+            document.getElementById('screenBox').innerHTML = 
+                `<img src="${imgUrl}" style="max-width: 300px; border: 1px solid #ccc;">`;
+        }
+
+        // 通用POST请求
+        function postData(data) {
+            return fetch(API_URL, {
+                method: 'POST',
+                body: new URLSearchParams(data)
+            });
+        }
+    </script>
+</body>
+</html>
