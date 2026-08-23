@@ -1,5 +1,0 @@
-name = "jinengeos"
-compatibility_date = "2026-08-23"
-
-[assets]
-directory = "./_site"
