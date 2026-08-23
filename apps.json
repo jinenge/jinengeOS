@@ -1,26 +1,44 @@
 [
    {
-        "icon": "images/LocalPaint.png",
+        "icon": "图标/LocalPaint.png",
         "name": "画册",
-        "url": "apps/LocalPaint.html",
+        "url": "LocalPaint.html",
         "color1": "#E8EAF6",
         "color2": "#000",
         "textColor": "#000",
         "description": "由 Burger Studio 开发的 LocalPaint"
     },
     {
-        "icon": "images/Timetable.png",
+        "icon": "图标/Timetable.png",
         "name": "频率发生器",
-        "url": "工具箱/频率发生器",
+        "url": "https://jinenge.us.kg/工具箱/频率发生器",
         "color1": "#E8EAF6",
         "color2": "#000",
         "textColor": "#000",
         "description": "频率调节专用发生器，可自定义调节频率。"
     },
     {
-        "icon": "images/Timetable.png",
+        "icon": "图标/win12.png",
+        "name": "Win12系统",
+        "url": "https://jinenge.us.kg/工具箱/win12",
+        "color1": "#E8EAF6",
+        "color2": "#000",
+        "textColor": "#000",
+        "description": "win12网页系统。"
+    },
+    {
+        "icon": "https://img0.baidu.com/it/u=1236364738,2895623972&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500",
+        "name": "网速测速工具",
+        "url": "https://jinenge.us.kg/工具箱/测速/speedtest.html",
+        "color1": "#E8EAF6",
+        "color2": "#000",
+        "textColor": "#000",
+        "description": "测速您的网速。"
+    },
+    {
+        "icon": "图标/Timetable.png",
         "name": "FM音乐电台",
-        "url": "工具箱/FM音乐电台",
+        "url": "https://jinenge.us.kg/工具箱/FM音乐电台",
         "color1": "#E8EAF6",
         "color2": "#000",
         "textColor": "#000",
@@ -29,7 +47,7 @@
         {
         "icon": "图标/短视频.png",
         "name": "短视频",
-        "url": "工具箱/短视频",
+        "url": "https://jinenge.us.kg/工具箱/短视频",
         "color1": "#E8EAF6",
         "color2": "#000",
         "textColor": "#000",
@@ -38,7 +56,7 @@
         {
         "icon": "图标/新年倒计时.png",
         "name": "新年倒计时",
-        "url": "工具箱/新年倒计时",
+        "url": "https://jinenge.us.kg/工具箱/新年倒计时",
         "color1": "#E8EAF6",
         "color2": "#000",
         "textColor": "#000",
@@ -47,7 +65,7 @@
        {
         "icon": "图标/MX绘画.png",
         "name": "MX绘画",
-        "url": "工具箱/MX绘画",
+        "url": "https://jinenge.us.kg/工具箱/MX绘画",
         "color1": "#E8EAF6",
         "color2": "#000",
         "textColor": "#000",
@@ -56,10 +74,37 @@
        {
         "icon": "图标/苏诺之音.png",
         "name": "Suno Ai音乐",
-        "url": "工具箱/Suno",
+        "url": "https://jinenge.us.kg/工具箱/Suno",
         "color1": "#E8EAF6",
         "color2": "#000",
         "textColor": "#000",
         "description": "AI创作音乐，作词，作曲生成工具"
+    },
+       {
+        "icon": "https://jinenge.github.io/improv-os/docs/screenshots/logo.png",
+        "name": "现编OS系统",
+        "url": "https://jinenge.us.kg/工具箱/现编OS",
+        "color1": "#E8EAF6",
+        "color2": "#000",
+        "textColor": "#000",
+        "description": "现编os"
+    },
+       {
+        "icon": "https://jinenge.us.kg/rom/root/favicon.ico",
+        "name": "root获取",
+        "url": "https://jinenge.us.kg/rom/root/index.html",
+        "color1": "#E8EAF6",
+        "color2": "#000",
+        "textColor": "#000",
+        "description": "在线漏洞root权限"
+    },
+           {
+        "icon": "https://jinenge.us.kg/图标/taifeng.png",
+        "name": "台风查询",
+        "url": "https://jinenge.us.kg/工具箱/台风",
+        "color1": "#E8EAF6",
+        "color2": "#000",
+        "textColor": "#000",
+        "description": "查看最新的台风信息"
     }
 ]
