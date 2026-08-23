@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>进恩哥系统安全验证</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+    font-family:system-ui;
+    overflow:hidden;
+    background: linear-gradient(135deg, #050a1a 0%, #10203e 50%, #0a152b 100%);
+}
+
+#game{
+    width:100vw;
+    height:100vh;
+    background: radial-gradient(circle at 50% 50%, #0d1c3a 0%, #020818 80%);
+    position:fixed;
+    top:0;
+    left:0;
+}
+
+#player{
+    width:28px;
+    height:28px;
+    background:#00e0ff;
+    border-radius:50%;
+    position:absolute;
+    box-shadow:0 0 25px #00e0ff, 0 0 45px #00e0ff;
+    z-index:10;
+}
+
+/* 超宽音符 */
+.note {
+  position: absolute;
+  width: 50px;
+  height: 45px;
+  border-radius: 6px;
+}
+.note::after {
+  content: "";
+  position: absolute;
+  width: 40px;
+  height: 35px;
+  border-radius: 50%;
+  top: -8px;
+  right: -25px;
+}
+
+#ui{
+    position:fixed;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+    text-align:center;
+    z-index:100;
+}
+
+#time{
+    font-size:24px;
+    color:#fff;
+    margin-bottom:10px;
+    font-weight:bold;
+    text-shadow:0 0 10px #00e0ff;
+}
+
+#btn{
+    padding:14px 32px;
+    background:#00e0ff;
+    color:#000;
+    border:none;
+    border-radius:12px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    box-shadow:0 0 15px #00e0ff;
+}
+
+#btn:disabled{
+    background:#152038;
+    color:#5a6a85;
+    box-shadow:none;
+}
+</style>
+</head>
+<body>
+
+<div id="game">
+  <div id="player"></div>
+</div>
+
+<div id="ui">
+  <div id="time">验证您是不是机器人🤖</div>
+  <button id="btn">开始挑战</button>
+</div>
+
+<script>
+const jumpUrl = "home.html";
+const game = document.getElementById("game");
+const player = document.getElementById("player");
+const timeText = document.getElementById("time");
+const btn = document.getElementById("btn");
+
+let playing = false;
+let win = false;
+let time = 0;
+let gameTimer;
+let spawnTimer;
+
+const colors = [
+  "#ff3d71", "#ff5e57", "#ffc107", "#4cd964", "#00e0ff", "#5856d6", "#af52de"
+];
+
+game.addEventListener("mousemove", function(e){
+  if (!playing) return;
+  let x = e.clientX - 14;
+  if (x < 0) x = 0;
+  if (x > innerWidth - 28) x = innerWidth - 28;
+  player.style.left = x + "px";
+});
+
+function start(){
+  playing = true;
+  btn.disabled = true;
+  btn.textContent = "验证中...";
+  timeText.textContent = "时间：0 秒";
+  time = 0;
+  
+  player.style.left = (innerWidth/2 - 14) + "px";
+  player.style.bottom = "40px";
+
+  gameTimer = setInterval(function(){
+    time++;
+    timeText.textContent = "时间："+time+" 秒";
+    if(time >= 7) success();
+  },1000);
+
+  // 数量变更多
+  spawnTimer = setInterval(spawnBlock, 70);
+}
+
+function spawnBlock(){
+  const block = document.createElement("div");
+  block.className = "note";
+  
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  block.style.background = color;
+  block.style.boxShadow = "0 0 16px " + color;
+  
+  block.style.left = Math.random()*(innerWidth - 60) + "px";
+  game.appendChild(block);
+
+  const fall = setInterval(function(){
+    let top = parseInt(block.style.top || 0);
+    top += 22;
+    block.style.top = top + "px";
+
+    const pr = player.getBoundingClientRect();
+    const br = block.getBoundingClientRect();
+    if(
+      pr.left < br.right &&
+      pr.right > br.left &&
+      pr.top < br.bottom &&
+      pr.bottom > br.top
+    ){
+      clearInterval(fall);
+      alert("验证失败！");
+      location.reload();
+    }
+
+    if(top > innerHeight){
+      clearInterval(fall);
+      block.remove();
+    }
+  },12);
+}
+
+function success(){
+  clearInterval(gameTimer);
+  clearInterval(spawnTimer);
+  win = true;
+  timeText.textContent = "✅ 验证成功！";
+  btn.disabled = false;
+  btn.textContent = "进入系统";
+}
+
+btn.onclick = function(){
+  if(!playing){
+    start();
+  }else if(win){
+    location.href = jumpUrl;
+  }
+};
+</script>
+</body>
+</html>

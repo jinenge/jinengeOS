@@ -1,54 +1,172 @@
 <!doctype html>
 <html>
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
     <link rel="shortcut icon" href="images/Settings.png" type="image/x-icon">
     <link rel="stylesheet" href="mdui-v1.0.1/css/mdui.min.css">
     <script src="mdui-v1.0.1/js/mdui.min.js"></script>
-    <title>电池</title>
+    <title>电池详情</title>
+    <style>
+        * {
+            scrollbar-width: thin;
+        }
+        body {
+            background: linear-gradient(135deg, #050020 0%, #100035 50%, #001030 100%);
+            min-height: 100vh;
+        }
+        /* 顶部导航渐变霓虹 */
+        .mdui-appbar-fixed .mdui-toolbar {
+            background: linear-gradient(90deg, #7928ca, #ff0080, #00c6ff) !important;
+            box-shadow: 0 0 18px #ff008077, 0 0 35px #00c6ff55 !important;
+        }
+        .mdui-typo-title {
+            color: #fff;
+            text-shadow: 0 0 10px #ffffff99;
+            font-weight: 600;
+        }
+        .mdui-btn-icon i {
+            color: #fff;
+            text-shadow: 0 0 6px #fff;
+        }
+        /* 列表磨砂容器 */
+        .mdui-list {
+            background: rgba(255,255,255,0.04);
+            border-radius: 16px;
+            padding: 8px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,0.1);
+            box-shadow: 0 0 24px #7928ca33;
+            margin-top: 64px;
+        }
+        /* 分割线适配深色 */
+        .mdui-divider {
+            background: rgba(255,255,255,0.12) !important;
+        }
+        /* 列表项样式 */
+        .mdui-list-item {
+            color: #f0f0f0 !important;
+            border-radius: 12px;
+            margin: 4px 10px;
+            transition: all 0.3s ease;
+        }
+        .mdui-list-item:hover {
+            background: rgba(255,255,255,0.08) !important;
+            box-shadow: 0 0 14px #ff008066, 0 0 28px #00c6ff44;
+            transform: scale(1.01);
+        }
+        .mdui-list-item-title {
+            color: #ffffff !important;
+            font-size: 15px;
+        }
+        .mdui-list-item-text {
+            color: #00e5ff !important;
+            text-shadow: 0 0 6px #00e5ff66;
+        }
+        .tip-text {
+            color: #ffcc66 !important;
+            font-size: 12px;
+            margin-top: 4px;
+            text-shadow: 0 0 4px #ffcc6644;
+        }
+    </style>
 </head>
-
-<body class="mdui-theme-primary-blue-grey mdui-theme-accent-blue mdui-appbar-with-toolbar">
+<body class="mdui-theme-layout-dark">
     <div class="mdui-appbar mdui-appbar-fixed mdui-shadow-1">
-        <div class="mdui-toolbar mdui-color-theme-50">
+        <div class="mdui-toolbar">
             <a class="mdui-btn mdui-btn-icon mdui-ripple" onclick="javascript:postScript(function (){ gebi('navBack').click(); });">
                 <i class="mdui-icon material-icons">arrow_back</i>
             </a>
-            <a class="mdui-typo-title">电池</a>
+            <a class="mdui-typo-title">电池详情</a>
         </div>
     </div>
     <ul class="mdui-list mdui-center" style="max-width: 640px;">
+        <!-- 基础充电状态 -->
         <li class="mdui-list-item mdui-ripple">
             <div class="mdui-list-item-content">
                 <div class="mdui-list-item-title">电池充电状态</div>
-                <div class="mdui-list-item-text" id="1" onclick="javascript:copyHandle(this.innerText);"></div>
-            </div>
-        </li>
-        <li class="mdui-divider mdui-m-y-0" id="divider1"></li>
-        <li class="mdui-list-item mdui-ripple" id="chargingTime">
-            <div class="mdui-list-item-content">
-                <div class="mdui-list-item-title">电池剩余充电时间</div>
-                <div class="mdui-list-item-text" id="2" onclick="javascript:copyHandle(this.innerText);"></div>
-            </div>
-        </li>
-        <li class="mdui-divider mdui-m-y-0" id="divider2"></li>
-        <li class="mdui-list-item mdui-ripple" id="dischargingTime">
-            <div class="mdui-list-item-content">
-                <div class="mdui-list-item-title">电池剩余续航时间</div>
-                <div class="mdui-list-item-text" id="3" onclick="javascript:copyHandle(this.innerText);"></div>
+                <div class="mdui-list-item-text" id="chargeStatus" onclick="javascript:copyHandle(this.innerText);"></div>
             </div>
         </li>
         <li class="mdui-divider mdui-m-y-0"></li>
+
+        <!-- 当前电量 -->
         <li class="mdui-list-item mdui-ripple">
             <div class="mdui-list-item-content">
-                <div class="mdui-list-item-title">电池电量</div>
-                <div class="mdui-list-item-text" id="4" onclick="javascript:copyHandle(this.innerText);"></div>
+                <div class="mdui-list-item-title">当前电量</div>
+                <div class="mdui-list-item-text" id="batteryLevel" onclick="javascript:copyHandle(this.innerText);"></div>
+            </div>
+        </li>
+        <li class="mdui-divider mdui-m-y-0" id="divider1"></li>
+
+        <!-- 剩余充电时间 -->
+        <li class="mdui-list-item mdui-ripple" id="chargingTimeWrap">
+            <div class="mdui-list-item-content">
+                <div class="mdui-list-item-title">剩余充满时间</div>
+                <div class="mdui-list-item-text" id="chargeTime" onclick="javascript:copyHandle(this.innerText);"></div>
+            </div>
+        </li>
+        <li class="mdui-divider mdui-m-y-0" id="divider2"></li>
+
+        <!-- 剩余续航时间 -->
+        <li class="mdui-list-item mdui-ripple" id="dischargingTimeWrap">
+            <div class="mdui-list-item-content">
+                <div class="mdui-list-item-title">剩余续航时间</div>
+                <div class="mdui-list-item-text" id="dischargeTime" onclick="javascript:copyHandle(this.innerText);"></div>
+            </div>
+        </li>
+        <li class="mdui-divider mdui-m-y-0"></li>
+
+        <!-- 新增硬件电池信息区域 -->
+        <li class="mdui-list-item mdui-ripple">
+            <div class="mdui-list-item-content">
+                <div class="mdui-list-item-title">电池额定容量</div>
+                <div class="mdui-list-item-text" id="batteryCapacity" onclick="javascript:copyHandle(this.innerText);"></div>
+                <div class="tip-text">需APP原生接口读取硬件数据</div>
+            </div>
+        </li>
+        <li class="mdui-divider mdui-m-y-0"></li>
+
+        <li class="mdui-list-item mdui-ripple">
+            <div class="mdui-list-item-content">
+                <div class="mdui-list-item-title">实时充电功率</div>
+                <div class="mdui-list-item-text" id="chargePower" onclick="javascript:copyHandle(this.innerText);"></div>
+                <div class="tip-text">快充/普通充电实时功率</div>
+            </div>
+        </li>
+        <li class="mdui-divider mdui-m-y-0"></li>
+
+        <li class="mdui-list-item mdui-ripple">
+            <div class="mdui-list-item-content">
+                <div class="mdui-list-item-title">电池健康寿命</div>
+                <div class="mdui-list-item-text" id="batteryHealth" onclick="javascript:copyHandle(this.innerText);"></div>
+                <div class="tip-text">100%全新，低于80%损耗严重</div>
+            </div>
+        </li>
+        <li class="mdui-divider mdui-m-y-0"></li>
+
+        <li class="mdui-list-item mdui-ripple">
+            <div class="mdui-list-item-content">
+                <div class="mdui-list-item-title">电池循环次数</div>
+                <div class="mdui-list-item-text" id="cycleCount" onclick="javascript:copyHandle(this.innerText);"></div>
+                <div class="tip-text">完整充放电循环次数</div>
+            </div>
+        </li>
+        <li class="mdui-divider mdui-m-y-0"></li>
+
+        <li class="mdui-list-item mdui-ripple">
+            <div class="mdui-list-item-content">
+                <div class="mdui-list-item-title">实时电压 / 电流</div>
+                <div class="mdui-list-item-text" id="voltAmp" onclick="javascript:copyHandle(this.innerText);"></div>
             </div>
         </li>
     </ul>
+
     <script>
+        // 工具函数
+        function gebi(id) {
+            return document.getElementById(id);
+        }
         //接入 API：切换活动
         function switchActivity(url, back = false) {
             var postData = {
@@ -62,7 +180,7 @@
         if (localStorage.getItem("darkTheme") == "true") {
             document.body.classList.add("mdui-theme-layout-dark");
             postScript(function() {
-                gebi("statusBar").style.background = "#212121";
+                gebi("statusBar").style.background = "#050020";
                 gebi("statusBar").style.color = "#fff";
             });
         } else {
@@ -71,56 +189,101 @@
                 gebi("statusBar").style.color = "#000";
             });
         }
-        //函数：时间转换
+        //函数：时间转换 秒转 HH:mm:ss
         function timeConvert(original) {
+            if(typeof original !== 'number' || isNaN(original)) return "无数据";
             var hDifference = parseInt(original / (60 * 60)).toString().padStart(2, "0");
             var mDifference = parseInt(original / 60 % 60).toString().padStart(2, "0");
             var sDifference = parseInt(original % 60).toString().padStart(2, "0");
             return hDifference + ":" + mDifference + ":" + sDifference;
         }
-        //函数：获取电池信息
+
+        // 全局存储硬件电池数据（父容器APP通过postMessage赋值）
+        let hardwareBatteryData = {
+            capacity: "待设备原生接口提供",
+            power: "待设备原生接口提供",
+            health: "待设备原生接口提供",
+            cycle: "待设备原生接口提供",
+            voltAmp: "待设备原生接口提供"
+        };
+
+        // 监听父页面发送的硬件电池数据（WebView APP通信）
+        window.addEventListener('message', function(e) {
+            try {
+                const msg = JSON.parse(e.data);
+                if(msg.type === "hardwareBattery") {
+                    hardwareBatteryData = {
+                        capacity: msg.capacity || "待设备原生接口提供",
+                        power: msg.power || "待设备原生接口提供",
+                        health: msg.health || "待设备原生接口提供",
+                        cycle: msg.cycle || "待设备原生接口提供",
+                        voltAmp: msg.voltAmp || "待设备原生接口提供"
+                    };
+                    renderHardwareBattery();
+                }
+            }catch(err){}
+        })
+
+        // 渲染硬件电池信息
+        function renderHardwareBattery() {
+            gebi("batteryCapacity").innerText = hardwareBatteryData.capacity;
+            gebi("chargePower").innerText = hardwareBatteryData.power;
+            gebi("batteryHealth").innerText = hardwareBatteryData.health;
+            gebi("cycleCount").innerText = hardwareBatteryData.cycle;
+            gebi("voltAmp").innerText = hardwareBatteryData.voltAmp;
+        }
+
+        //函数：获取浏览器标准电池信息
         function getBatteryInfo() {
+            if(!navigator.getBattery) {
+                postToast("当前浏览器不支持电池API");
+                return;
+            }
             navigator.getBattery().then(function(battery) {
-                document.getElementById("1").innerText = (battery.charging ? "正在充电" : "未在充电");
-                //自动隐藏相应的列表项
+                // 充电状态
+                gebi("chargeStatus").innerText = (battery.charging ? "正在充电" : "未在充电");
+                // 当前电量
+                gebi("batteryLevel").innerText = (battery.level * 100).toFixed(0) + "%";
+
+                // 剩余充满时间控制显示
                 if (battery.chargingTime == Infinity) {
-                    document.getElementById("chargingTime").style.display = "none";
-                    document.getElementById("divider1").style.display = "none";
+                    gebi("chargingTimeWrap").style.display = "none";
+                    gebi("divider1").style.display = "none";
                 } else {
-                    document.getElementById("chargingTime").style.display = "block";
-                    document.getElementById("divider1").style.display = "block";
-                    document.getElementById("2").innerText = timeConvert(battery.chargingTime);
+                    gebi("chargingTimeWrap").style.display = "block";
+                    gebi("divider1").style.display = "block";
+                    gebi("chargeTime").innerText = timeConvert(battery.chargingTime);
                 }
+                // 剩余续航时间控制显示
                 if (battery.dischargingTime == Infinity) {
-                    document.getElementById("dischargingTime").style.display = "none";
-                    document.getElementById("divider2").style.display = "none";
+                    gebi("dischargingTimeWrap").style.display = "none";
+                    gebi("divider2").style.display = "none";
                 } else {
-                    document.getElementById("dischargingTime").style.display = "block";
-                    document.getElementById("divider2").style.display = "block";
-                    document.getElementById("3").innerText = timeConvert(battery.dischargingTime);
+                    gebi("dischargingTimeWrap").style.display = "block";
+                    gebi("divider2").style.display = "block";
+                    gebi("dischargeTime").innerText = timeConvert(battery.dischargingTime);
                 }
-                document.getElementById("4").innerText = (battery.level * 100).toFixed(0) + "%";
+                // 刷新硬件信息
+                renderHardwareBattery();
             });
         }
-        //事件：页面加载完成
+
+        //页面加载初始化
         window.onload = function() {
             getBatteryInfo();
+            renderHardwareBattery();
         };
-        //事件：电池信息改变
-        navigator.getBattery().then(function(battery) {
-            battery.onchargingchange = function() {
-                getBatteryInfo();
-            };
-            battery.onchargingtimechange = function() {
-                getBatteryInfo();
-            };
-            battery.ondischargingtimechange = function() {
-                getBatteryInfo();
-            };
-            battery.onlevelchange = function() {
-                getBatteryInfo();
-            };
-        });
+
+        //监听电池状态实时变化
+        if(navigator.getBattery) {
+            navigator.getBattery().then(function(battery) {
+                battery.onchargingchange = getBatteryInfo;
+                battery.onchargingtimechange = getBatteryInfo;
+                battery.ondischargingtimechange = getBatteryInfo;
+                battery.onlevelchange = getBatteryInfo;
+            });
+        }
+
         //接入 API：发送 Toast
         function postToast(message) {
             var postData = {
@@ -138,7 +301,7 @@
             };
             window.parent.postMessage(JSON.stringify(postData), "/");
         }
-        //函数：复制文本
+        //复制文本功能
         function copyHandle(content) {
             let copy = (e) => {
                 e.preventDefault()
@@ -151,5 +314,4 @@
         }
     </script>
 </body>
-
 </html>

@@ -1,6 +1,5 @@
 <!doctype html>
 <html>
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
@@ -15,25 +14,80 @@
         html {
             scroll-behavior: smooth;
         }
-
+        /* 全局赛博霓虹背景 */
+        * {
+            scrollbar-width: thin;
+        }
+        body {
+            background: linear-gradient(135deg, #050020 0%, #100035 50%, #001030 100%);
+            min-height: 100vh;
+        }
+        /* 顶部渐变霓虹导航栏 */
+        .mdui-appbar-fixed .mdui-toolbar {
+            background: linear-gradient(90deg, #7928ca, #ff0080, #00c6ff) !important;
+            box-shadow: 0 0 18px #ff008077, 0 0 35px #00c6ff55 !important;
+        }
+        .mdui-typo-title {
+            color: #fff;
+            text-shadow: 0 0 10px #ffffff99;
+            font-weight: 600;
+        }
+        .mdui-btn-icon i {
+            color: #fff;
+            text-shadow: 0 0 6px #fff;
+        }
+        /* 文字配色 */
+        .mdui-typo h3, .mdui-typo h5 {
+            color: #ffffff;
+            text-shadow: 0 0 6px #7928ca66;
+        }
+        .mdui-typo p, .mdui-typo blockquote {
+            color: #e2e8f0;
+        }
+        .mdui-typo blockquote a {
+            color: #00e5ff;
+            text-shadow: 0 0 4px #00e5ff77;
+        }
+        /* 表格美化 */
+        .mdui-table {
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .mdui-table th {
+            color: #00e5ff;
+            border-color: rgba(255,255,255,0.12);
+        }
+        .mdui-table td {
+            color: #f0f0f0;
+            border-color: rgba(255,255,255,0.12);
+        }
+        .mdui-table code {
+            color: #ff88cc;
+        }
+        /* CodeMirror编辑器深色适配强化 */
         .mdui-theme-layout-dark .CodeMirror {
-            background: #303030;
+            background: #121228 !important;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+        }
+        .CodeMirror-line {
+            color: #e0e0ff;
         }
     </style>
 </head>
-
-<body class="mdui-theme-primary-blue-grey mdui-theme-accent-blue mdui-appbar-with-toolbar">
+<body class="mdui-theme-layout-dark">
     <div class="mdui-appbar mdui-appbar-fixed mdui-shadow-1">
-        <div class="mdui-toolbar mdui-color-theme-50">
+        <div class="mdui-toolbar">
             <a class="mdui-btn mdui-btn-icon mdui-ripple" onclick="javascript:postScript(function (){ gebi('navBack').click(); });">
                 <i class="mdui-icon material-icons">arrow_back</i>
             </a>
             <a class="mdui-typo-title">API 说明</a>
         </div>
     </div>
-    <div class="mdui-typo mdui-center" style="padding: 16px;max-width: 640px;">
+    <div class="mdui-typo mdui-center" style="padding: 32px;max-width: 640px;">
         <h3>API 说明</h3>
-        <p>嵌入在 Webdroid 内的网页可调用以下 API。</p>
+        <p>嵌入在进恩哥系统内的网页可调用以下 API。</p>
         <blockquote>
             Contents<br>
             <a href="#postToast">发送 Toast</a><br>
@@ -271,6 +325,10 @@
         </div>
     </div>
     <script>
+        //工具函数
+        function gebi(id) {
+            return document.getElementById(id);
+        }
         //接入 API：切换活动
         function switchActivity(url, back = false) {
             var postData = {
@@ -284,7 +342,7 @@
         if (localStorage.getItem("darkTheme") == "true") {
             document.body.classList.add("mdui-theme-layout-dark");
             postScript(function() {
-                gebi("statusBar").style.background = "#212121";
+                gebi("statusBar").style.background = "#050020";
                 gebi("statusBar").style.color = "#fff";
             });
         } else {
@@ -414,5 +472,4 @@ function removeApp(index) {
         };
     </script>
 </body>
-
 </html>

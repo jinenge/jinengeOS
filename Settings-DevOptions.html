@@ -1,39 +1,99 @@
 <!doctype html>
 <html>
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
     <link rel="shortcut icon" href="images/Settings.png" type="image/x-icon">
     <link rel="stylesheet" href="mdui-v1.0.1/css/mdui.min.css">
     <script src="mdui-v1.0.1/js/mdui.min.js"></script>
     <title>开发者选项</title>
     <style>
+        * {
+            scrollbar-width: thin;
+        }
+        body {
+            background: linear-gradient(135deg, #050020 0%, #100035 50%, #001030 100%);
+            min-height: 100vh;
+        }
+        /* 顶部渐变霓虹导航 */
+        .mdui-appbar-fixed .mdui-toolbar {
+            background: linear-gradient(90deg, #7928ca, #ff0080, #00c6ff) !important;
+            box-shadow: 0 0 18px #ff008077, 0 0 35px #00c6ff55 !important;
+        }
+        .mdui-typo-title {
+            color: #fff;
+            text-shadow: 0 0 10px #ffffff99;
+            font-weight: 600;
+        }
+        .mdui-btn-icon i {
+            color: #fff;
+            text-shadow: 0 0 6px #fff;
+        }
+        /* 列表磨砂容器 */
+        .mdui-list {
+            background: rgba(255,255,255,0.04);
+            border-radius: 16px;
+            padding: 8px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,0.1);
+            box-shadow: 0 0 24px #7928ca33;
+            margin-top: 16px;
+        }
+        /* 分割线深色适配 */
+        .mdui-divider {
+            background: rgba(255,255,255,0.12) !important;
+        }
+        /* 列表项通用样式 */
+        .mdui-list-item {
+            color: #f0f0f0 !important;
+            border-radius: 12px;
+            margin: 4px 10px;
+            transition: all 0.3s ease;
+        }
+        .mdui-list-item:hover {
+            background: rgba(255,255,255,0.08) !important;
+            box-shadow: 0 0 14px #ff008066, 0 0 28px #00c6ff44;
+            transform: scale(1.01);
+        }
+        .mdui-list-item-title {
+            color: #ffffff !important;
+            font-size: 15px;
+        }
+        /* 弹窗深色磨砂改造 */
         .mdui-dialog {
             border-radius: 24px;
-            -webkit-box-shadow: 0 3px 3px -2px rgba(0, 0, 0, 0.2), 0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 1px 8px 0 rgba(0, 0, 0, 0.12) !important;
-            box-shadow: 0 3px 3px -2px rgba(0, 0, 0, 0.2), 0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 1px 8px 0 rgba(0, 0, 0, 0.12) !important;
-            -webkit-transition-duration: 0.3s;
+            box-shadow: 0 0 24px #7928ca44 !important;
             transition-duration: 0.3s;
             transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
-            background: #ECEFF1;
+            background: #0f0a28;
+            border: 1px solid rgba(255,255,255,0.12);
         }
-
+        .mdui-dialog-title {
+            color: #fff;
+        }
+        .mdui-dialog p {
+            color: #e2e8f0;
+        }
         .mdui-overlay {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.6);
             transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
         }
-
         .mdui-dialog .mdui-btn {
             border-radius: 16px;
         }
-
+        .mdui-dialog .mdui-btn:not(.mdui-btn-raised) {
+            color: #00e5ff;
+        }
+        .mdui-dialog .mdui-btn-raised {
+            background: linear-gradient(90deg, #7928ca, #ff0080);
+            color: #fff;
+        }
+        /* 开关样式保留原有缩放，适配深色 */
         .mdui-switch-icon {
             transform: scale(2) translateX(-4px);
             width: 28px;
             transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
         }
-
         .mdui-switch-icon::before {
             width: 10px;
             height: 10px;
@@ -43,30 +103,37 @@
             transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
             background-color: #fff !important;
         }
-
         .mdui-switch input[type="checkbox"]:checked+.mdui-switch-icon {
-            background-color: #448AFF !important;
+            background: linear-gradient(90deg, #7928ca, #00c6ff) !important;
         }
-
         .mdui-switch input[type="checkbox"]:checked+.mdui-switch-icon::before {
             left: 12px;
         }
-
+        /* 输入框深色适配 */
         .mdui-textfield-input {
-            background-color: rgba(0, 0, 0, .1);
+            background-color: rgba(255, 255, 255, .08);
             border-radius: 4px 4px 0 0;
             padding: 8px;
+            color: #fff;
         }
-
-        .mdui-theme-layout-dark .mdui-textfield-input {
-            background-color: rgba(255, 255, 255, .1);
+        .mdui-textfield-label {
+            color: #b8c2e0;
+        }
+        .mdui-textfield-helper {
+            color: #94a3b8;
+        }
+        /* 复选框文字 */
+        .mdui-list-item-content {
+            color: #e2e8f0;
+        }
+        .mdui-checkbox-icon {
+            color: #00e5ff;
         }
     </style>
 </head>
-
-<body class="mdui-theme-primary-blue-grey mdui-theme-accent-blue mdui-appbar-with-toolbar">
+<body class="mdui-theme-layout-dark mdui-theme-primary-blue-grey mdui-theme-accent-blue mdui-appbar-with-toolbar">
     <div class="mdui-appbar mdui-appbar-fixed mdui-shadow-1">
-        <div class="mdui-toolbar mdui-color-theme-50">
+        <div class="mdui-toolbar">
             <a class="mdui-btn mdui-btn-icon mdui-ripple" onclick="javascript:postScript(function (){ gebi('navBack').click(); });">
                 <i class="mdui-icon material-icons">arrow_back</i>
             </a>
@@ -207,6 +274,10 @@
         </div>
     </div>
     <script>
+        // 工具函数
+        function gebi(id) {
+            return document.getElementById(id);
+        }
         //接入 API：切换活动
         function switchActivity(url, back = false) {
             var postData = {
@@ -220,7 +291,7 @@
         if (localStorage.getItem("darkTheme") == "true") {
             document.body.classList.add("mdui-theme-layout-dark");
             postScript(function() {
-                gebi("statusBar").style.background = "#212121";
+                gebi("statusBar").style.background = "#050020";
                 gebi("statusBar").style.color = "#fff";
             });
         } else {
@@ -348,5 +419,4 @@
         });
     </script>
 </body>
-
 </html>

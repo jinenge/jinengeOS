@@ -6,66 +6,83 @@
 <title>工具箱</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif}
-  body{background:#050510;color:#fff}
-
-  /* 主界面 */
+  /* 统一整套冷深蓝渐变背景，无发黄刺眼光效 */
+  body{
+    background: linear-gradient(140deg, #08081a 0%, #0c0c2c 50%, #060622 100%);
+    color:#e8edff;
+    min-height:100vh;
+  }
   .toolbox{
-    width:100%;min-height:100vh;
+    width:100%;
+    min-height:100vh;
     padding:24px;
     display:grid;
     grid-template-columns:repeat(2,1fr);
     gap:20px;
     align-content:center;
+    max-width:640px;
+    margin:0 auto;
   }
+  /* 工具卡片 低发光磨砂样式 */
   .app-item{
-    background:#101028;
+    background:rgba(30, 30, 60, 0.35);
+    backdrop-filter: blur(12px);
+    border:1px solid rgba(255,255,255,0.08);
     border-radius:24px;
     padding:40px 16px;
-    display:flex;flex-direction:column;align-items:center;gap:14px;
-    box-shadow:0 0 20px rgba(120,0,255,0.25);
-    transition:.2s;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+    box-shadow:0 0 14px rgba(92, 47, 194, 0.12);
+    transition:.2s ease;
   }
-  .app-item:active{transform:scale(.96);box-shadow:0 0 30px rgba(160,0,255,0.5)}
+  .app-item:active{
+    transform:scale(.96);
+    box-shadow:0 0 20px rgba(92, 47, 194, 0.22);
+  }
+  /* 图标降低发光强度，不刺眼 */
   .app-icon{
-    font-size:52px;      /* 图标变大 */
-    filter:drop-shadow(0 0 12px currentColor)
+    font-size:52px;
+    filter:drop-shadow(0 0 6px currentColor)
   }
+  /* 文字改为柔和低饱和蓝紫渐变，去除亮粉刺眼色 */
   .app-name{
-    font-size:18px;font-weight:600;
-    background:linear-gradient(90deg,#0cf,#f0f);
-    -webkit-background-clip:text;background-clip:text;color:transparent;
+    font-size:18px;
+    font-weight:600;
+    background:linear-gradient(90deg,#88ccff,#b39dff);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
   }
 </style>
 </head>
-
 <body>
-
 <div class="toolbox">
   <div class="app-item" onclick="location.href='calendar.html'">
-    <div class="app-icon" style="color:#0cf">📅</div>
+    <div class="app-icon" style="color:#60bfff">📅</div>
     <div class="app-name">日历</div>
   </div>
   <div class="app-item" onclick="location.href='工具箱/计算器'">
-    <div class="app-icon" style="color:#f0f">🧮</div>
+    <div class="app-icon" style="color:#b39dff">🧮</div>
     <div class="app-name">计算器</div>
   </div>
   <div class="app-item" onclick="location.href='工具箱/时钟'">
-    <div class="app-icon" style="color:#0fc">🕒</div>
+    <div class="app-icon" style="color:#66e0c0">🕒</div>
     <div class="app-name">时钟</div>
   </div>
-  <div class="app-item" onclick="location.href='apps/LocalNote.html'">
-    <div class="app-icon" style="color:#ff3">📝</div>
+  <div class="app-item" onclick="location.href='LocalNote.html'">
+    <div class="app-icon" style="color:#ffd060">📝</div>
     <div class="app-name">备忘录</div>
   </div>
-    <div class="app-item" onclick="location.href='工具箱/手电筒'">
-    <div class="app-icon" style="color:#ff3">🔦</div>
+  <div class="app-item" onclick="location.href='工具箱/手电筒'">
+    <div class="app-icon" style="color:#ffd060">🔦</div>
     <div class="app-name">手电筒</div>
   </div>
-      <div class="app-item" onclick="location.href='工具箱/指南针'">
-    <div class="app-icon" style="color:#ff3">🌍</div>
+  <div class="app-item" onclick="location.href='工具箱/指南针'">
+    <div class="app-icon" style="color:#ffd060">🌍</div>
     <div class="app-name">指南针</div>
   </div>
 </div>
-
 </body>
 </html>

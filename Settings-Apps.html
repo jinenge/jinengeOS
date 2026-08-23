@@ -1,6 +1,5 @@
 <!doctype html>
 <html>
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
@@ -9,63 +8,139 @@
     <script src="mdui-v1.0.1/js/mdui.min.js"></script>
     <title>应用</title>
     <style>
-        .mdui-theme-layout-dark .mdui-list-item-avatar {
-            background: #303030 !important;
+        html {
+            scroll-behavior: smooth;
         }
-
+        * {
+            scrollbar-width: thin;
+        }
+        /* 全局赛博渐变背景 */
+        body {
+            background: linear-gradient(135deg, #050020 0%, #100035 50%, #001030 100%);
+            min-height: 100vh;
+        }
+        /* 顶部导航渐变霓虹 */
+        .mdui-appbar-fixed .mdui-toolbar {
+            background: linear-gradient(90deg, #7928ca, #ff0080, #00c6ff) !important;
+            box-shadow: 0 0 18px #ff008077, 0 0 35px #00c6ff55 !important;
+        }
+        .mdui-typo-title {
+            color: #fff;
+            text-shadow: 0 0 10px #ffffff99;
+            font-weight: 600;
+        }
+        .mdui-btn-icon i {
+            color: #fff;
+            text-shadow: 0 0 6px #fff;
+        }
+        /* 应用列表容器磨砂玻璃 */
+        #appList {
+            background: rgba(255,255,255,0.04);
+            border-radius: 16px;
+            padding: 8px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 0 24px #7928ca33;
+            margin-top: 64px;
+        }
+        /* 列表项通用 */
+        .mdui-list-item {
+            color: #f0f0f0 !important;
+            border-radius: 12px;
+            margin: 4px 10px;
+            transition: all 0.3s ease;
+        }
+        /* 悬浮霓虹发光动效 */
+        .mdui-list-item:hover {
+            background: rgba(255,255,255,0.08) !important;
+            box-shadow: 0 0 14px #ff008066, 0 0 28px #00c6ff44;
+            transform: scale(1.01);
+        }
+        .mdui-list-item-title {
+            color: #ffffff !important;
+            font-size: 15px;
+        }
+        .mdui-list-item-content {
+            color: #00e5ff !important;
+            text-shadow: 0 0 6px #00e5ff66;
+        }
+        .mdui-list-item-icon {
+            color: #ff88cc;
+            text-shadow: 0 0 8px #ff88cc77;
+        }
+        /* 空白提示文字 */
+        #noApp div {
+            color: #e2e8f0;
+            font-size: 16px;
+        }
+        /* 头像原有过渡保留，适配深色 */
+        .mdui-theme-layout-dark .mdui-list-item-avatar {
+            background: #1a1a38 !important;
+        }
         .mdui-list-item:hover .mdui-list-item-avatar {
             background: #EBEBEB !important;
         }
-
         .mdui-theme-layout-dark .mdui-list-item:hover .mdui-list-item-avatar {
-            background: #404040 !important;
+            background: #2b2b52 !important;
         }
-
         .mdui-list-item-avatar {
             transition: .3s cubic-bezier(.4, 0, .2, 1);
         }
-
-        .mdui-tooltip {
-            border-radius: 8px;
-            -webkit-transform: scale(1);
-            transform: scale(1);
-            transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
-        }
-
+        /* 弹窗深色磨砂改造 */
         .mdui-dialog {
             border-radius: 24px;
-            -webkit-box-shadow: 0 3px 3px -2px rgba(0, 0, 0, 0.2), 0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 1px 8px 0 rgba(0, 0, 0, 0.12) !important;
-            box-shadow: 0 3px 3px -2px rgba(0, 0, 0, 0.2), 0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 1px 8px 0 rgba(0, 0, 0, 0.12) !important;
-            -webkit-transition-duration: 0.3s;
+            box-shadow: 0 0 24px #7928ca44 !important;
             transition-duration: 0.3s;
             transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
-            background: #ECEFF1;
+            background: #0f0a28;
+            border: 1px solid rgba(255,255,255,0.12);
         }
-
+        .mdui-dialog-title {
+            color: #fff;
+        }
         .mdui-overlay {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.6);
             transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
         }
-
         .mdui-dialog .mdui-btn {
             border-radius: 16px;
         }
-
+        .mdui-dialog .mdui-btn:not(.mdui-btn-raised) {
+            color: #00e5ff;
+        }
+        .mdui-dialog .mdui-btn-raised {
+            background: linear-gradient(90deg, #7928ca, #ff0080);
+            color: #fff;
+        }
+        /* 输入框深色适配 */
         .mdui-textfield-input {
             background-color: rgba(0, 0, 0, .1);
             border-radius: 4px 4px 0 0;
             padding: 8px;
+            color: #fff;
         }
-
         .mdui-theme-layout-dark .mdui-textfield-input {
-            background-color: rgba(255, 255, 255, .1);
+            background-color: rgba(255, 255, 255, .08);
+        }
+        .mdui-textfield-label {
+            color: #b8c2e0;
+        }
+        .mdui-textfield-error {
+            color: #ff6b81;
+        }
+        /* Tooltip */
+        .mdui-tooltip {
+            border-radius: 8px;
+            transform: scale(1);
+            transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
+            background: #1a1a38;
+            color: #fff;
         }
     </style>
 </head>
-
-<body class="mdui-theme-primary-blue-grey mdui-theme-accent-blue mdui-appbar-with-toolbar">
+<body class="mdui-theme-layout-dark mdui-theme-primary-blue-grey mdui-theme-accent-blue mdui-appbar-with-toolbar">
     <div class="mdui-appbar mdui-appbar-fixed mdui-shadow-1">
-        <div class="mdui-toolbar mdui-color-theme-50">
+        <div class="mdui-toolbar">
             <a class="mdui-btn mdui-btn-icon mdui-ripple" onclick="javascript:postScript(function (){ gebi('navBack').click(); });">
                 <i class="mdui-icon material-icons">arrow_back</i>
             </a>
@@ -116,10 +191,14 @@
         </div>
         <div class="mdui-dialog-actions">
             <button class="mdui-btn mdui-ripple" mdui-dialog-close>取消</button>
-            <button class="mdui-btn mdui-ripple" onclick="javascript:addTheApp();" id="addTheApp">确认</button>
+            <button class="mdui-btn mdui-btn-raised mdui-ripple" onclick="javascript:addTheApp();" id="addTheApp">确认</button>
         </div>
     </div>
     <script>
+        //工具函数
+        function gebi(id) {
+            return document.getElementById(id);
+        }
         //接入 API：切换活动
         function switchActivity(url, back = false) {
             var postData = {
@@ -133,7 +212,7 @@
         if (localStorage.getItem("darkTheme") == "true") {
             document.body.classList.add("mdui-theme-layout-dark");
             postScript(function() {
-                gebi("statusBar").style.background = "#212121";
+                gebi("statusBar").style.background = "#050020";
                 gebi("statusBar").style.color = "#fff";
             });
         } else {
@@ -189,18 +268,20 @@
         };
         //函数：刷新应用列表
         function freshApps() {
-            if (JSON.parse(localStorage.getItem("apps")).length == 0) {
+            let appData = localStorage.getItem("apps");
+            if (!appData) appData = "[]";
+            if (JSON.parse(appData).length == 0) {
                 document.getElementById("noApp").style.opacity = 1;
                 apps = [];
             } else {
-                apps = JSON.parse(localStorage.getItem("apps"));
+                apps = JSON.parse(appData);
                 document.getElementById("noApp").style.opacity = 0;
             }
             document.getElementById("appList").innerHTML = "";
             apps.forEach(function(item, index) {
                 document.getElementById("appList").innerHTML += `<li class="mdui-list-item mdui-ripple">
                     <div class="mdui-list-item-avatar" style="border-radius: 8px;background: #fff;">
-                        <img src="` + item[0] + `" style="border-radius: 8px;"/>
+                        <img src="` + item[0] + `" style="border-radius: 8px;width:100%;height:100%;object-fit:cover;"/>
                     </div>
                     <div class="mdui-list-item-content">` + item[1] + `</div>
                     <i class="mdui-list-item-icon mdui-icon material-icons" onclick="javascript:switchApp('` + item[2] + `', '` + item[3] + `', '` + item[4] + `', '` + item[5] + `');">launch</i>
@@ -217,10 +298,6 @@
             document.getElementById("color2").value = "#000000";
             document.getElementById("textColor").value = "#ffffff";
             document.getElementById("url").focus();
-            document.getElementById("color1").focus();
-            document.getElementById("color2").focus();
-            document.getElementById("textColor").focus();
-            document.getElementById("icon").focus();
         });
         //函数：添加应用
         function addTheApp() {
@@ -231,7 +308,7 @@
                 new mdui.Dialog("#addApp").close();
             }
         }
-        //事件：在最后一个文本框按下回车键
+        //回车键提交
         document.getElementById("textColor").addEventListener("keyup", function(event) {
             event.preventDefault();
             if (event.keyCode === 13) {
@@ -250,7 +327,7 @@
             };
             window.parent.postMessage(JSON.stringify(postData), "/");
         }
-        //函数：复制文本
+        //复制文本
         function copyHandle(content) {
             let copy = (e) => {
                 e.preventDefault()
@@ -260,17 +337,15 @@
             document.addEventListener('copy', copy)
             document.execCommand("Copy");
         }
-        //以下为实验性功能
+        //实验功能
         function test() {
             return "实验性功能：\n1. 导出全部应用：exportApps()\n2. 导入应用（覆盖现有）：importApps(数据内容)\n3. 清除全部应用：clearApps()";
         }
-
         function exportApps() {
             copyHandle(JSON.stringify(apps));
             console.log(JSON.stringify(apps));
             return "已复制到剪贴板";
         }
-
         function importApps(data) {
             if (data == undefined) {
                 return "缺失数据内容";
@@ -284,7 +359,6 @@
                 return "已导入应用";
             }
         }
-
         function clearApps() {
             apps = [];
             localStorage.setItem("apps", JSON.stringify(apps));
@@ -296,5 +370,4 @@
         }
     </script>
 </body>
-
 </html>

@@ -1,72 +1,126 @@
 <!doctype html>
 <html>
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
     <link rel="shortcut icon" href="images/Settings.png" type="image/x-icon">
     <link rel="stylesheet" href="mdui-v1.0.1/css/mdui.min.css">
     <script src="mdui-v1.0.1/js/mdui.min.js"></script>
     <title>显示</title>
     <style>
+        * {
+            scrollbar-width: thin;
+        }
+        /* 更换冷调无发黄渐变，纯深蓝暗紫，去掉暖黄色调 */
+        body {
+            background: linear-gradient(140deg, #08081a 0%, #0c0c2c 50%, #060622 100%);
+            min-height: 100vh;
+        }
+        /* 导航渐变降低饱和度，柔和不刺眼 */
+        .mdui-appbar-fixed .mdui-toolbar {
+            background: linear-gradient(90deg, #5c2fc2, #c82f80, #0099cc) !important;
+            box-shadow: 0 0 12 rgba(0,180,255,0.25) !important;
+        }
+        .mdui-typo-title {
+            color: #ffffff;
+            text-shadow: 0 0 4px rgba(255,255,255,0.6);
+            font-weight: 600;
+        }
+        .mdui-btn-icon i {
+            color: #fff;
+            text-shadow: 0 0 4px rgba(255,255,255,0.5);
+        }
+        /* 列表磨砂面板，提高文字对比度 */
+        .mdui-list {
+            background: rgba(30, 30, 60, 0.35);
+            border-radius: 16px;
+            padding: 8px 0;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 0 16px rgba(92, 47, 194, 0.15);
+            margin-top: 64px;
+        }
+        .mdui-divider {
+            background: rgba(255,255,255,0.08) !important;
+        }
+        .mdui-list-item {
+            color: #e8edff !important;
+            border-radius: 12px;
+            margin: 4px 10px;
+            transition: all 0.3s ease;
+        }
+        .mdui-list-item:hover {
+            background: rgba(60, 60, 100, 0.45) !important;
+            box-shadow: 0 0 10px rgba(0,170,230,0.2);
+            transform: scale(1.005);
+        }
+        .mdui-list-item-title {
+            color: #ffffff !important;
+            font-size: 15px;
+        }
+        /* 弱化荧光，改为浅蓝，不刺眼 */
+        .mdui-list-item-text {
+            color: #99ddff !important;
+            text-shadow: none;
+        }
+        /* 弹窗深色冷调，无发黄 */
         .mdui-dialog {
             border-radius: 24px;
-            -webkit-box-shadow: 0 3px 3px -2px rgba(0, 0, 0, 0.2), 0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 1px 8px 0 rgba(0, 0, 0, 0.12) !important;
-            box-shadow: 0 3px 3px -2px rgba(0, 0, 0, 0.2), 0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 1px 8px 0 rgba(0, 0, 0, 0.12) !important;
-            -webkit-transition-duration: 0.3s;
+            box-shadow: 0 0 16px rgba(92, 47, 194, 0.18) !important;
             transition-duration: 0.3s;
-            transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
-            background: #ECEFF1;
+            background: #101030;
+            border: 1px solid rgba(255,255,255,0.09);
         }
-
+        .mdui-dialog-title {
+            color: #fff;
+        }
         .mdui-overlay {
-            background: rgba(0, 0, 0, 0.3);
-            transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
+            background: rgba(0, 0, 0, 0.7);
         }
-
-        .mdui-dialog .mdui-btn {
-            border-radius: 16px;
+        .mdui-dialog .mdui-btn:not(.mdui-btn-raised) {
+            color: #88ccff;
         }
-
+        /* 滑块 */
+        .mdui-slider input[type="range"]::-webkit-slider-thumb {
+            background: linear-gradient(90deg, #5c2fc2, #0099cc);
+        }
+        /* 开关样式保留，渐变冷色 */
         .mdui-switch-icon {
             transform: scale(2) translateX(-4px);
             width: 28px;
             transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
         }
-
         .mdui-switch-icon::before {
             width: 10px;
             height: 10px;
             transform: translate(4.5px, 5px);
             box-shadow: 0 0 !important;
-            -webkit-box-shadow: 0 0 !important;
-            transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
             background-color: #fff !important;
         }
-
         .mdui-switch input[type="checkbox"]:checked+.mdui-switch-icon {
-            background-color: #448AFF !important;
+            background: linear-gradient(90deg, #5c2fc2, #0099cc) !important;
         }
-
         .mdui-switch input[type="checkbox"]:checked+.mdui-switch-icon::before {
             left: 12px;
         }
-
+        /* 输入框冷深色，文字纯白清晰 */
         .mdui-textfield-input {
-            background-color: rgba(0, 0, 0, .1);
+            background-color: rgba(40, 40, 80, 0.4);
             border-radius: 4px 4px 0 0;
             padding: 8px;
+            color: #ffffff;
         }
-
-        .mdui-theme-layout-dark .mdui-textfield-input {
-            background-color: rgba(255, 255, 255, .1);
+        .mdui-textfield-label {
+            color: #b0c8f0;
+        }
+        .mdui-textfield-error {
+            color: #ff7a8c;
         }
     </style>
 </head>
-
-<body class="mdui-theme-primary-blue-grey mdui-theme-accent-blue mdui-appbar-with-toolbar">
+<body class="mdui-theme-layout-dark">
     <div class="mdui-appbar mdui-appbar-fixed mdui-shadow-1">
-        <div class="mdui-toolbar mdui-color-theme-50">
+        <div class="mdui-toolbar">
             <a class="mdui-btn mdui-btn-icon mdui-ripple" onclick="javascript:postScript(function (){ gebi('navBack').click(); });">
                 <i class="mdui-icon material-icons">arrow_back</i>
             </a>
@@ -172,16 +226,19 @@
                         <div class="mdui-list-item-title" mdui-dialog-close>默认</div>
                     </div>
                 </li>
+                <li class="mdui-divider mdui-m-y-0"></li>
                 <li class="mdui-list-item mdui-ripple" onclick="javascript:setWallpaper('https://api.dujin.org/bing/m.php');">
                     <div class="mdui-list-item-content">
                         <div class="mdui-list-item-title" mdui-dialog-close>必应壁纸</div>
                     </div>
                 </li>
+                <li class="mdui-divider mdui-m-y-0"></li>
                 <li class="mdui-list-item mdui-ripple" onclick="javascript:setWallpaper('https://t.mwm.moe/pc/');">
                     <div class="mdui-list-item-content">
                         <div class="mdui-list-item-title" mdui-dialog-close>二次元</div>
                     </div>
                 </li>
+                <li class="mdui-divider mdui-m-y-0"></li>
                 <li class="mdui-list-item mdui-ripple" mdui-dialog="{target: '#customWallpaper'}">
                     <div class="mdui-list-item-content">
                         <div class="mdui-list-item-title" mdui-dialog-close>自定义</div>
@@ -207,6 +264,10 @@
         </div>
     </div>
     <script>
+        // 全局工具函数
+        function gebi(id) {
+            return document.getElementById(id);
+        }
         //接入 API：切换活动
         function switchActivity(url, back = false) {
             var postData = {
@@ -221,7 +282,7 @@
             document.body.classList.add("mdui-theme-layout-dark");
             document.getElementById("darkTheme").checked = true;
             postScript(function() {
-                gebi("statusBar").style.background = "#212121";
+                gebi("statusBar").style.background = "#08081a";
                 gebi("statusBar").style.color = "#fff";
             });
         } else {
@@ -243,7 +304,7 @@
                 localStorage.setItem("darkTheme", "true");
                 document.body.classList.add("mdui-theme-layout-dark");
                 postScript(function() {
-                    gebi("statusBar").style.background = "#212121";
+                    gebi("statusBar").style.background = "#08081a";
                     gebi("statusBar").style.color = "#fff";
                 });
             }
@@ -389,7 +450,6 @@
                 requestFullScreen(document.documentElement);
             })
         }
-
         function ef() {
             postScript(function() {
                 exitFull();
@@ -404,5 +464,4 @@
         });
     </script>
 </body>
-
 </html>

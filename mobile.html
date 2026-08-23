@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>进恩哥系统安全验证</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        .verification-box {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        /* 目标值显示 */
+        .target-display {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            color: white;
+        }
+
+        .target-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .target-value {
+            font-size: 48px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .target-hint {
+            font-size: 12px;
+            opacity: 0.85;
+            margin-top: 8px;
+        }
+
+        /* 滑动条容器 */
+        .slider-container {
+            margin-bottom: 30px;
+        }
+
+        .slider-track {
+            position: relative;
+            height: 60px;
+            background: linear-gradient(to right, #e0e7ff, #c7d2fe, #a5b4fc, #818cf8, #6366f1);
+            border-radius: 30px;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: visible;
+        }
+
+        /* 目标区域 */
+        .target-zone {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 60px;
+            background: rgba(34, 197, 94, 0.3);
+            border: 3px dashed #22c55e;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        .target-zone.active {
+            background: rgba(34, 197, 94, 0.5);
+            border-color: #16a34a;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.6);
+        }
+
+        /* 滑块 */
+        .slider-thumb {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70px;
+            height: 70px;
+            z-index: 2;
+            transition: all 0.1s ease;
+        }
+
+        .slider-thumb-inner {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 0 4px white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .slider-thumb-inner::before {
+            content: '⬌';
+            font-size: 24px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .slider-thumb.in-target .slider-thumb-inner {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            animation: pulse 0.5s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* 刻度显示 */
+        .scale-marks {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding: 0 5px;
+            font-size: 11px;
+            color: #64748b;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* 当前位置显示 */
+        .current-position {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .position-label {
+            font-size: 14px;
+            color: #64748b;
+            margin-right: 8px;
+        }
+
+        .position-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* 进度条 */
+        .progress-container {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f0fdf4;
+            border-radius: 12px;
+            border: 2px solid #bbf7d0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .progress-container.visible {
+            opacity: 1;
+        }
+
+        .progress-label {
+            font-size: 14px;
+            color: #166534;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background: #dcfce7;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+            width: 0%;
+            transition: width 0.1s linear;
+            border-radius: 10px;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: #166534;
+            text-align: right;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* 状态提示 */
+        .status-message {
+            text-align: center;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .status-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .status-text {
+            font-size: 15px;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .status-message.warning {
+            background: #fef3c7;
+            border: 2px solid #fde047;
+        }
+
+        .status-message.warning .status-text {
+            color: #854d0e;
+        }
+
+        .status-message.success {
+            background: #dcfce7;
+            border: 2px solid #86efac;
+        }
+
+        .status-message.success .status-text {
+            color: #166534;
+        }
+
+        /* 陀螺仪信息 */
+        .gyro-info {
+            padding: 15px;
+            background: #f1f5f9;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .gyro-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .gyro-data {
+            font-size: 13px;
+            color: #334155;
+            font-family: 'Courier New', monospace;
+        }
+
+        .gyro-data strong {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        /* 验证成功遮罩 */
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .success-overlay.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .success-content {
+            background: white;
+            padding: 50px 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            animation: scaleIn 0.4s ease;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            color: white;
+            margin: 0 auto 20px;
+            animation: successPulse 0.6s ease;
+        }
+
+        @keyframes successPulse {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .success-content h2 {
+            font-size: 28px;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .success-content p {
+            font-size: 16px;
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+
+        .retry-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .retry-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .retry-button:active {
+            transform: translateY(0);
+        }
+
+        /* 权限请求遮罩 */
+        .permission-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .permission-overlay.show {
+            display: flex;
+        }
+
+        .permission-content {
+            background: white;
+            padding: 50px 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .permission-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .permission-content h2 {
+            font-size: 24px;
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+
+        .permission-content p {
+            font-size: 15px;
+            color: #64748b;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .permission-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .permission-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .permission-button:active {
+            transform: translateY(0);
+        }
+
+        /* 页脚 */
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: white;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        footer a {
+            color: #8A2BE2;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 26px;
+            }
+            
+            .target-value {
+                font-size: 40px;
+            }
+            
+            .verification-box {
+                padding: 20px;
+            }
+            
+            .slider-track {
+                height: 50px;
+            }
+            
+            .slider-thumb {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .success-content,
+            .permission-content {
+                padding: 40px 30px;
+                margin: 0 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>验证您不是机器人🤖</h1>
+            <p class="subtitle">倾斜手机左右移动滑块进行验证</p>
+        </div>
+
+        <div class="verification-box">
+            <!-- 目标值显示 -->
+            <div class="target-display">
+                <div class="target-label">目标位置</div>
+                <div class="target-value" id="targetValue">0.500</div>
+                <div class="target-hint">将滑块移动到此位置并保持3秒</div>
+            </div>
+
+            <!-- 滑动条容器 -->
+            <div class="slider-container">
+                <div class="slider-track">
+                    <!-- 目标区域 -->
+                    <div class="target-zone" id="targetZone"></div>
+                    <!-- 滑块 -->
+                    <div class="slider-thumb" id="sliderThumb">
+                        <div class="slider-thumb-inner"></div>
+                    </div>
+                </div>
+                
+                <!-- 刻度显示 -->
+                <div class="scale-marks">
+                    <span>0.000</span>
+                    <span>0.250</span>
+                    <span>0.500</span>
+                    <span>0.750</span>
+                    <span>1.000</span>
+                </div>
+            </div>
+
+            <!-- 当前位置显示 -->
+            <div class="current-position">
+                <span class="position-label">当前位置：</span>
+                <span class="position-value" id="currentPosition">0.500</span>
+            </div>
+
+            <!-- 进度条 -->
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-label">保持时间</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">0.0s / 1.0s</div>
+            </div>
+
+            <!-- 状态提示 -->
+            <div class="status-message" id="statusMessage">
+                <div class="status-icon">📱</div>
+                <div class="status-text">请倾斜手机开始验证</div>
+            </div>
+
+            <!-- 陀螺仪数据显示 -->
+            <div class="gyro-info" id="gyroInfo">
+                <div class="gyro-label">陀螺仪状态</div>
+                <div class="gyro-data">
+                    <span>γ (左右): <strong id="gyroGamma">0</strong>°</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 验证成功提示 -->
+        <div class="success-overlay" id="successOverlay">
+            <div class="success-content">
+                <div class="success-icon">✓</div>
+                <h2>验证成功！</h2>
+                <p>您已通过陀螺仪验证</p>
+                <button 
+  class="retry-button" 
+  id="retryButton"
+  onclick="window.open('home.html', '_blank')">点击进入</button>
+            </div>
+        </div>
+
+        <!-- 权限请求提示 -->
+        <div class="permission-overlay" id="permissionOverlay">
+            <div class="permission-content">
+                <div class="permission-icon">🔐</div>
+                <h2>需要陀螺仪权限</h2>
+                <p>请允许访问设备方向传感器以继续验证</p>
+                <button class="permission-button" id="requestPermissionButton">授权访问</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 验证系统类
+        class GyroVerification {
+            constructor() {
+                // DOM元素
+                this.targetValue = document.getElementById('targetValue');
+                this.currentPosition = document.getElementById('currentPosition');
+                this.sliderThumb = document.getElementById('sliderThumb');
+                this.targetZone = document.getElementById('targetZone');
+                this.progressContainer = document.getElementById('progressContainer');
+                this.progressFill = document.getElementById('progressFill');
+                this.progressText = document.getElementById('progressText');
+                this.statusMessage = document.getElementById('statusMessage');
+                this.gyroGamma = document.getElementById('gyroGamma');
+                this.successOverlay = document.getElementById('successOverlay');
+                this.permissionOverlay = document.getElementById('permissionOverlay');
+                this.requestPermissionButton = document.getElementById('requestPermissionButton');
+                this.retryButton = document.getElementById('retryButton');
+
+                // 检查必要的DOM元素是否存在
+                if (!this.validateElements()) {
+                    console.error('必要的DOM元素未找到');
+                    return;
+                }
+
+                // 验证参数
+                this.target = this.generateRandomTarget(); // 目标值 (0-1)
+                this.currentPos = 0.5; // 当前位置 (0-1)
+                this.tolerance = 0.01; // 容差范围
+                this.holdTime = 3000; // 需要保持的时间(毫秒)
+                this.holdStartTime = null; // 开始保持的时间
+                this.isHolding = false; // 是否正在保持
+                this.isVerified = false; // 是否已验证成功
+                
+                // 惯性滑动参数
+                this.velocity = 0; // 当前速度
+                this.acceleration = 0; // 当前加速度
+                this.friction = 0.95; // 摩擦系数 (0-1，越小摩擦越大)
+                this.accelerationFactor = 0.002; // 加速度系数
+                this.maxVelocity = 0.05; // 最大速度
+                this.bounceBack = 0.6; // 边界反弹系数
+                
+                // 陀螺仪参数
+                this.maxTilt = 30; // 最大倾斜角度
+                this.lastUpdateTime = Date.now(); // 上次更新时间
+                
+                // 动画帧ID
+                this.animationFrameId = null;
+                this.physicsAnimationId = null;
+
+                this.init();
+            }
+
+            // 验证DOM元素
+            validateElements() {
+                const requiredElements = [
+                    this.targetValue, this.currentPosition, this.sliderThumb,
+                    this.targetZone, this.progressContainer, this.progressFill,
+                    this.progressText, this.statusMessage, this.gyroGamma,
+                    this.successOverlay, this.permissionOverlay,
+                    this.requestPermissionButton, this.retryButton
+                ];
+                return requiredElements.every(el => el !== null);
+            }
+
+            // 生成随机目标值(保留3位小数)
+            generateRandomTarget() {
+                return parseFloat((Math.random()).toFixed(3));
+            }
+
+            // 初始化
+            init() {
+                try {
+                    this.updateTargetDisplay();
+                    this.updateSliderPosition();
+                    this.updateTargetZone();
+                    this.bindEvents();
+                    this.checkGyroSupport();
+                } catch (error) {
+                    console.error('初始化失败:', error);
+                    this.updateStatus('❌', '初始化失败，请刷新页面', 'warning');
+                }
+            }
+
+            // 检查陀螺仪支持
+            checkGyroSupport() {
+                try {
+                    if (typeof window.DeviceOrientationEvent !== 'undefined') {
+                        // iOS 13+ 需要请求权限
+                        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                            this.showPermissionOverlay();
+                        } else {
+                            // Android 或旧版iOS，直接启动
+                            this.startGyroListening();
+                        }
+                    } else {
+                        this.updateStatus('❌', '您的设备不支持陀螺仪', 'warning');
+                    }
+                } catch (error) {
+                    console.error('检查陀螺仪支持失败:', error);
+                    this.updateStatus('❌', '陀螺仪检测失败', 'warning');
+                }
+            }
+
+            // 显示权限请求遮罩
+            showPermissionOverlay() {
+                if (this.permissionOverlay) {
+                    this.permissionOverlay.classList.add('show');
+                }
+            }
+
+            // 隐藏权限请求遮罩
+            hidePermissionOverlay() {
+                if (this.permissionOverlay) {
+                    this.permissionOverlay.classList.remove('show');
+                }
+            }
+
+            // 请求陀螺仪权限
+            async requestPermission() {
+                try {
+                    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                        const permission = await DeviceOrientationEvent.requestPermission();
+                        if (permission === 'granted') {
+                            this.hidePermissionOverlay();
+                            this.startGyroListening();
+                        } else {
+                            this.updateStatus('❌', '权限被拒绝，无法使用陀螺仪', 'warning');
+                        }
+                    } else {
+                        // 不需要权限，直接启动
+                        this.hidePermissionOverlay();
+                        this.startGyroListening();
+                    }
+                } catch (error) {
+                    console.error('请求权限失败:', error);
+                    this.updateStatus('❌', '请求权限失败', 'warning');
+                }
+            }
+
+            // 开始监听陀螺仪
+            startGyroListening() {
+                try {
+                    window.addEventListener('deviceorientation', (event) => {
+                        this.handleOrientation(event);
+                    }, false);
+                    this.updateStatus('✅', '陀螺仪已启动，开始倾斜手机', 'success');
+                } catch (error) {
+                    console.error('启动陀螺仪监听失败:', error);
+                    this.updateStatus('❌', '陀螺仪启动失败', 'warning');
+                }
+            }
+
+            // 处理设备方向变化
+            handleOrientation(event) {
+                try {
+                    if (this.isVerified) return;
+
+                    // gamma: 左右倾斜 (-90 到 90)
+                    let gamma = event.gamma;
+                    
+                    if (gamma === null || gamma === undefined) return;
+
+                    // 更新显示
+                    if (this.gyroGamma) {
+                        this.gyroGamma.textContent = gamma.toFixed(1);
+                    }
+
+                    // 限制角度范围
+                    gamma = Math.max(-this.maxTilt, Math.min(this.maxTilt, gamma));
+
+                    // 根据倾斜角度计算加速度
+                    // gamma为负时向左加速，为正时向右加速
+                    this.acceleration = (gamma / this.maxTilt) * this.accelerationFactor;
+
+                    // 启动物理引擎（如果还未启动）
+                    if (!this.physicsAnimationId) {
+                        this.startPhysicsEngine();
+                    }
+                } catch (error) {
+                    console.error('处理设备方向失败:', error);
+                }
+            }
+
+            // 启动物理引擎
+            startPhysicsEngine() {
+                const updatePhysics = () => {
+                    try {
+                        if (this.isVerified) {
+                            this.physicsAnimationId = null;
+                            return;
+                        }
+
+                        const currentTime = Date.now();
+                        const deltaTime = currentTime - this.lastUpdateTime;
+                        this.lastUpdateTime = currentTime;
+
+                        // 更新速度（加上加速度）
+                        this.velocity += this.acceleration;
+
+                        // 应用摩擦力
+                        this.velocity *= this.friction;
+
+                        // 限制最大速度
+                        this.velocity = Math.max(-this.maxVelocity, Math.min(this.maxVelocity, this.velocity));
+
+                        // 更新位置
+                        this.currentPos += this.velocity;
+
+                        // 边界检测和反弹
+                        if (this.currentPos < 0) {
+                            this.currentPos = 0;
+                            this.velocity = -this.velocity * this.bounceBack; // 反弹
+                        } else if (this.currentPos > 1) {
+                            this.currentPos = 1;
+                            this.velocity = -this.velocity * this.bounceBack; // 反弹
+                        }
+
+                        // 如果速度很小且没有加速度，停止物理引擎
+                        if (Math.abs(this.velocity) < 0.0001 && Math.abs(this.acceleration) < 0.00001) {
+                            this.velocity = 0;
+                        }
+
+                        // 更新UI
+                        this.updateSliderPosition();
+                        this.updateCurrentPositionDisplay();
+
+                        // 检查是否在目标区域
+                        this.checkTargetReached();
+
+                        // 继续动画
+                        this.physicsAnimationId = requestAnimationFrame(updatePhysics);
+                    } catch (error) {
+                        console.error('物理引擎更新失败:', error);
+                    }
+                };
+
+                this.lastUpdateTime = Date.now();
+                this.physicsAnimationId = requestAnimationFrame(updatePhysics);
+            }
+
+            // 更新目标值显示
+            updateTargetDisplay() {
+                if (this.targetValue) {
+                    this.targetValue.textContent = this.target.toFixed(3);
+                }
+            }
+
+            // 更新当前位置显示
+            updateCurrentPositionDisplay() {
+                if (this.currentPosition) {
+                    this.currentPosition.textContent = this.currentPos.toFixed(3);
+                }
+            }
+
+            // 更新滑块位置
+            updateSliderPosition() {
+                try {
+                    if (!this.sliderThumb || !this.sliderThumb.parentElement) return;
+                    
+                    const trackWidth = this.sliderThumb.parentElement.offsetWidth;
+                    const thumbWidth = this.sliderThumb.offsetWidth;
+                    const maxLeft = trackWidth - thumbWidth;
+                    const left = this.currentPos * maxLeft;
+                    
+                    this.sliderThumb.style.left = `${left}px`;
+                    this.sliderThumb.style.transform = 'translateY(-50%)';
+                } catch (error) {
+                    console.error('更新滑块位置失败:', error);
+                }
+            }
+
+            // 更新目标区域位置
+            updateTargetZone() {
+                try {
+                    if (!this.targetZone || !this.targetZone.parentElement) return;
+                    
+                    const trackWidth = this.targetZone.parentElement.offsetWidth;
+                    const zoneWidth = 60;
+                    const left = this.target * (trackWidth - zoneWidth);
+                    
+                    this.targetZone.style.left = `${left}px`;
+                } catch (error) {
+                    console.error('更新目标区域位置失败:', error);
+                }
+            }
+
+            // 检查是否到达目标区域
+            checkTargetReached() {
+                try {
+                    const distance = Math.abs(this.currentPos - this.target);
+                    const isInTarget = distance <= this.tolerance;
+
+                    if (isInTarget) {
+                        if (!this.isHolding) {
+                            // 刚进入目标区域
+                            this.isHolding = true;
+                            this.holdStartTime = Date.now();
+                            if (this.targetZone) this.targetZone.classList.add('active');
+                            if (this.sliderThumb) this.sliderThumb.classList.add('in-target');
+                            if (this.progressContainer) this.progressContainer.classList.add('visible');
+                            this.updateStatus('🎯', '保持位置不动...', 'success');
+                            this.startHoldTimer();
+                        }
+                    } else {
+                        if (this.isHolding) {
+                            // 离开目标区域
+                            this.resetHold();
+                            this.updateStatus('📱', '请移动到目标位置', '');
+                        }
+                    }
+                } catch (error) {
+                    console.error('检查目标区域失败:', error);
+                }
+            }
+
+            // 开始保持计时
+            startHoldTimer() {
+                const updateProgress = () => {
+                    try {
+                        if (!this.isHolding || this.isVerified) return;
+
+                        const elapsed = Date.now() - this.holdStartTime;
+                        const progress = Math.min(elapsed / this.holdTime, 1);
+
+                        // 更新进度条
+                        if (this.progressFill) {
+                            this.progressFill.style.width = `${progress * 100}%`;
+                        }
+                        if (this.progressText) {
+                            this.progressText.textContent = `${(elapsed / 1000).toFixed(1)}s / 1.0s`;
+                        }
+
+                        if (progress >= 1) {
+                            // 验证成功
+                            this.onVerificationSuccess();
+                        } else {
+                            this.animationFrameId = requestAnimationFrame(updateProgress);
+                        }
+                    } catch (error) {
+                        console.error('更新进度失败:', error);
+                    }
+                };
+
+                this.animationFrameId = requestAnimationFrame(updateProgress);
+            }
+
+            // 重置保持状态
+            resetHold() {
+                try {
+                    this.isHolding = false;
+                    this.holdStartTime = null;
+                    if (this.targetZone) this.targetZone.classList.remove('active');
+                    if (this.sliderThumb) this.sliderThumb.classList.remove('in-target');
+                    if (this.progressContainer) this.progressContainer.classList.remove('visible');
+                    if (this.progressFill) this.progressFill.style.width = '0%';
+                    if (this.progressText) this.progressText.textContent = '0.0s / 1.0s';
+                    
+                    if (this.animationFrameId) {
+                        cancelAnimationFrame(this.animationFrameId);
+                        this.animationFrameId = null;
+                    }
+                } catch (error) {
+                    console.error('重置保持状态失败:', error);
+                }
+            }
+
+            // 验证成功
+            onVerificationSuccess() {
+                try {
+                    this.isVerified = true;
+                    this.updateStatus('🎉', '验证成功！', 'success');
+                    
+                    // 显示成功遮罩
+                    setTimeout(() => {
+                        if (this.successOverlay) {
+                            this.successOverlay.classList.add('show');
+                        }
+                    }, 500);
+                } catch (error) {
+                    console.error('验证成功处理失败:', error);
+                }
+            }
+
+            // 更新状态消息
+            updateStatus(icon, text, type) {
+                try {
+                    if (!this.statusMessage) return;
+                    
+                    const statusIcon = this.statusMessage.querySelector('.status-icon');
+                    const statusText = this.statusMessage.querySelector('.status-text');
+                    
+                    if (statusIcon) statusIcon.textContent = icon;
+                    if (statusText) statusText.textContent = text;
+                    
+                    this.statusMessage.className = 'status-message';
+                    if (type) {
+                        this.statusMessage.classList.add(type);
+                    }
+                } catch (error) {
+                    console.error('更新状态消息失败:', error);
+                }
+            }
+
+            // 重置验证
+            reset() {
+                try {
+                    this.isVerified = false;
+                    this.target = this.generateRandomTarget();
+                    this.currentPos = 0.5;
+                    this.velocity = 0;
+                    this.acceleration = 0;
+                    this.lastUpdateTime = Date.now();
+                    
+                    // 停止物理引擎
+                    if (this.physicsAnimationId) {
+                        cancelAnimationFrame(this.physicsAnimationId);
+                        this.physicsAnimationId = null;
+                    }
+                    
+                    this.resetHold();
+                    this.updateTargetDisplay();
+                    this.updateSliderPosition();
+                    this.updateTargetZone();
+                    this.updateCurrentPositionDisplay();
+                    if (this.successOverlay) {
+                        this.successOverlay.classList.remove('show');
+                    }
+                    this.updateStatus('📱', '请倾斜手机开始验证', '');
+                } catch (error) {
+                    console.error('重置验证失败:', error);
+                }
+            }
+
+            // 绑定事件
+            bindEvents() {
+                try {
+                    // 权限请求按钮
+                    if (this.requestPermissionButton) {
+                        this.requestPermissionButton.addEventListener('click', () => {
+                            this.requestPermission();
+                        });
+                    }
+
+                    // 重试按钮
+                    if (this.retryButton) {
+                        this.retryButton.addEventListener('click', () => {
+                            this.reset();
+                        });
+                    }
+
+                    // 窗口大小变化时更新位置
+                    window.addEventListener('resize', () => {
+                        this.updateSliderPosition();
+                        this.updateTargetZone();
+                    });
+                } catch (error) {
+                    console.error('绑定事件失败:', error);
+                }
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const verification = new GyroVerification();
+            } catch (error) {
+                console.error('创建验证实例失败:', error);
+            }
+        });
+    </script>
+</body>
+</html>

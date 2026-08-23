@@ -8,61 +8,139 @@
     <link rel="stylesheet" href="mdui-v1.0.1/css/mdui.min.css">
     <script src="mdui-v1.0.1/js/mdui.min.js"></script>
     <title>设置</title>
+    <style>
+        * {
+            scrollbar-width: thin;
+        }
+        body {
+            background: linear-gradient(135deg, #050020 0%, #100035 50%, #001030 100%);
+            min-height: 100vh;
+        }
+        /* 顶部导航渐变霓虹 */
+        .mdui-appbar-fixed .mdui-toolbar {
+            background: linear-gradient(90deg, #7928ca, #ff0080, #00c6ff) !important;
+            box-shadow: 0 0 18px #ff008077, 0 0 35px #00c6ff55 !important;
+        }
+        .mdui-typo-title {
+            color: #fff;
+            text-shadow: 0 0 10px #ffffff99;
+            font-weight: 600;
+        }
+        /* 列表容器 */
+        .mdui-list {
+            background: rgba(255,255,255,0.04);
+            border-radius: 16px;
+            padding: 8px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 0 24px #7928ca33;
+        }
+        /* 分组标题 */
+        .mdui-subheader {
+            color: #00e5ff !important;
+            text-shadow: 0 0 8px #00e5ff88;
+            font-weight: 500;
+        }
+        /* 列表项通用 */
+        .mdui-list-item {
+            color: #f0f0f0 !important;
+            border-radius: 12px;
+            margin: 4px 10px;
+            transition: all 0.3s ease;
+        }
+        /* 点击悬浮霓虹发光 */
+        .mdui-list-item:hover {
+            background: rgba(255,255,255,0.08) !important;
+            box-shadow: 0 0 14px #ff008066, 0 0 28px #00c6ff44;
+            transform: scale(1.015);
+        }
+        /* 图标霓虹发光 */
+        .mdui-list-item-icon {
+            text-shadow: 0 0 10px currentColor, 0 0 22px currentColor;
+        }
+        .mdui-list-item-title {
+            color: #ffffff !important;
+            font-size: 15px;
+        }
+        .mdui-list-item-text {
+            color: #cccccc !important;
+        }
+    </style>
 </head>
 
-<body class="mdui-theme-primary-blue-grey mdui-theme-accent-blue mdui-appbar-with-toolbar">
-    <div class="mdui-appbar mdui-appbar-fixed mdui-shadow-1">
-        <div class="mdui-toolbar mdui-color-theme-50">
+<body class="mdui-theme-layout-dark">
+    <div class="mdui-appbar mdui-appbar-fixed">
+        <div class="mdui-toolbar">
             <a class="mdui-typo-title">设置</a>
         </div>
     </div>
-    <ul class="mdui-list mdui-center" style="max-width: 640px;">
+    <!-- 紧凑顶部间距 margin-top:16px -->
+    <ul class="mdui-list mdui-center" style="max-width: 640px;margin-top:16px;">
         <li class="mdui-subheader">设备</li>
+        <!-- 显示：屏幕图标 -->
         <li class="mdui-list-item mdui-ripple" onclick="javascript:switchActivity('Settings-Display.html');">
-            <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-theme">brightness_medium</i>
+            <i class="mdui-list-item-icon mdui-icon material-icons" style="color:#00e5ff">desktop_windows</i>
             <div class="mdui-list-item-content">
                 <div class="mdui-list-item-title">显示</div>
                 <div class="mdui-list-item-text">亮度、壁纸、深色主题</div>
             </div>
         </li>
+        <!-- 应用：应用盒子 -->
         <li class="mdui-list-item mdui-ripple" onclick="javascript:switchActivity('Settings-Apps.html');">
-            <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-theme">adb</i>
+            <i class="mdui-list-item-icon mdui-icon material-icons" style="color:#7bff60">apps</i>
             <div class="mdui-list-item-content">
                 <div class="mdui-list-item-title">应用</div>
                 <div class="mdui-list-item-text" id="appNumber"></div>
             </div>
         </li>
+        <!-- 电池 -->
         <li class="mdui-list-item mdui-ripple" onclick="javascript:switchActivity('Settings-Battery.html');">
-            <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-theme">battery_full</i>
+            <i class="mdui-list-item-icon mdui-icon material-icons" style="color:#ffdd00">battery_charging_full</i>
             <div class="mdui-list-item-content">
                 <div class="mdui-list-item-title">电池</div>
                 <div class="mdui-list-item-text" id="batteryInfo"></div>
             </div>
         </li>
         <li class="mdui-subheader">系统</li>
+        <!-- 开发者：终端代码 -->
         <li class="mdui-list-item mdui-ripple" onclick="javascript:switchActivity('Settings-DevOptions.html');" id="devOptions">
-            <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-theme">code</i>
+            <i class="mdui-list-item-icon mdui-icon material-icons" style="color:#ff5c93">terminal</i>
             <div class="mdui-list-item-content">
                 <div class="mdui-list-item-title">开发者选项</div>
-                <div class="mdui-list-item-text">实验性功能</div>
+                <div class="mdui-list-item-text" id="terminal"></div>
             </div>
         </li>
+        <!-- 关于本机 -->
         <li class="mdui-list-item mdui-ripple" onclick="javascript:switchActivity('Settings-AboutDevice.html');">
-            <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-theme">info_outline</i>
+            <i class="mdui-list-item-icon mdui-icon material-icons" style="color:#b37bff">phone_android</i>
             <div class="mdui-list-item-content">
                 <div class="mdui-list-item-title">关于设备</div>
-                <div class="mdui-list-item-text" id="versionName"></div>
+                <div class="mdui-list-item-text" id="versionName1"></div>
             </div>
         </li>
+        <!-- 更新：下载箭头 -->
         <li class="mdui-list-item mdui-ripple" onclick="javascript:switchActivity('update.html');">
-            <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-theme">info_outline</i>
+            <i class="mdui-list-item-icon mdui-icon material-icons" style="color:#00ffa3">system_update_alt</i>
             <div class="mdui-list-item-content">
                 <div class="mdui-list-item-title">客户端更新</div>
-                <div class="mdui-list-item-text" id="versionName"></div>
+                <div class="mdui-list-item-text" id="versionName2"></div>
             </div>
         </li>
     </ul>
     <script>
+        // 工具函数
+        function gebi(id) {
+            return document.getElementById(id);
+        }
+        function postScript(script) {
+            var scriptStr = script.toString();
+            var postData = {
+                "type": "JavaScript",
+                "script": scriptStr
+            };
+            window.parent.postMessage(JSON.stringify(postData), "/");
+        }
+
         //接入 API：切换活动
         function switchActivity(url, back = false) {
             var postData = {
@@ -72,11 +150,12 @@
             };
             window.parent.postMessage(JSON.stringify(postData), "/");
         }
+
         //获取深色主题设置
         if (localStorage.getItem("darkTheme") == "true") {
             document.body.classList.add("mdui-theme-layout-dark");
             postScript(function() {
-                gebi("statusBar").style.background = "#212121";
+                gebi("statusBar").style.background = "#050020";
                 gebi("statusBar").style.color = "#fff";
             });
         } else {
@@ -85,23 +164,30 @@
                 gebi("statusBar").style.color = "#000";
             });
         }
+
         //获取开发者选项启用状态
         if (localStorage.getItem("devMode") != 1) {
-            document.getElementById("devOptions").style.display = "none";
+            gebi("devOptions").style.display = "none";
         }
+
         //函数：获取电池信息
         function getBatteryInfo() {
             navigator.getBattery().then(function(battery) {
-                document.getElementById("batteryInfo").innerText = (battery.level * 100).toFixed(0) + "% - " + (battery.charging ? "正在充电" : "未在充电");
+                gebi("batteryInfo").innerText = (battery.level * 100).toFixed(0) + "% - " + (battery.charging ? "正在充电" : "未在充电");
             });
         }
+
         //事件：页面加载完成
         window.onload = function() {
             getBatteryInfo();
-            document.getElementById("versionName").innerText = "当前版本： " + versionName;
-            document.getElementById("appNumber").innerText = "已安装 " + JSON.parse(localStorage.getItem("apps")).length + " 个应用";
+            let versionName = localStorage.getItem("sysVersion") || "2.2.0";
+            gebi("versionName1").innerText = "当前版本： " + versionName;
+            gebi("versionName2").innerText = "当前版本： " + versionName;
+            let appList = JSON.parse(localStorage.getItem("apps")||"[]");
+            gebi("appNumber").innerText = "已安装 " + appList.length + " 个应用";
         };
-        //事件：电池信息改变
+
+        //电池实时监听
         navigator.getBattery().then(function(battery) {
             battery.onlevelchange = function() {
                 getBatteryInfo();
@@ -110,17 +196,7 @@
                 getBatteryInfo();
             };
         });
-        //接入 API：执行 JavaScript 脚本
-        function postScript(script) {
-            var scriptStr = script.toString();
-            var postData = {
-                "type": "JavaScript",
-                "script": scriptStr
-            };
-            window.parent.postMessage(JSON.stringify(postData), "/");
-        }
     </script>
     <script src="Update.js"></script>
 </body>
-
 </html>

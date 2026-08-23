@@ -1,142 +1,125 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404错误❌</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>404错误</title>
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Microsoft Yahei",sans-serif;
+}
+body{
+    background:#e6f7fc;
+    min-height:100vh;
+    padding:12px 16px;
+}
+/* 顶部区域直接清空，不再放刷新按钮 */
+.top-empty{
+    height:24px;
+}
+/* Logo紧凑适配 */
+.logo-box{
+    width:75%;
+    max-width:340px;
+    margin:0 auto 22px;
+    padding:6px;
+}
+.custom-logo{
+    width:100%;
+    height:auto;
+    display:block;
+    object-fit:contain;
+}
+/* 系统名称 */
+.system-name{
+    text-align:center;
+    font-size:clamp(24px,6vw,30px);
+    color:#222;
+    margin-bottom:20px;
+}
+/* 404标题+右侧红叉 */
+.err-wrap{
+    position:relative;
+    margin-bottom:20px;
+}
+.err-text{
+    font-size:clamp(40px,12vw,72px);
+    font-weight:bold;
+}
+.big-red-x{
+    position:absolute;
+    right:0;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:clamp(60px,18vw,120px);
+    color:#f33;
+}
+/* 黄色提示栏 */
+.tip-yellow{
+    background:#ffd400;
+    padding:18px 16px;
+    text-align:center;
+    font-size:clamp(20px,7vw,32px);
+    line-height:1.7;
+    font-weight:500;
+}
+/* 返回官网按钮 */
+.back-btn-wrap{
+    text-align:center;
+    margin-top:26px;
+}
+.back-official-btn{
+    width:80%;
+    max-width:420px;
+    padding:14px 36px;
+    background:#0044dd;
+    color:#ffffff;
+    border:none;
+    border-radius:10px;
+    font-size:clamp(20px,5vw,26px);
+    cursor:pointer;
+    transition:background 0.2s;
+}
+.back-official-btn:hover{
+    background:#0033bb;
+}
+</style>
 </head>
 <body>
-<style>
-    body, html {
-        height: 100%;
-        margin: 0;
-        width: 100%;
-        font-family: 'Arial', sans-serif;
-        background-image: url("https://cosdome-1300413531.cos.ap-chengdu.myqcloud.com/ce541622ce6c2d6cf8d6e12a8716f6abf4afea9df010-lTs72S_fw1200webp.webp");
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: cover;
-    }
+<!-- 顶部空白占位，移除右上角刷新按钮 -->
+<div class="top-empty"></div>
 
-    .container {
-        height: 100%;
-        /*text-align: center;*/
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+<!-- 自定义Logo区域 -->
+<div class="logo-box">
+    <img class="custom-logo" id="logoImg" alt="logo">
+</div>
 
-    .maintenance-message {
-        /*background: linear-gradient(135deg, #ada996, #f2f2f2, #dbdbdb, #eaeaea);*/
-        padding: 40px;
-        border-radius: 4px;
-        width: 100%;
-        max-width: 680px;
-        box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
-    }
+<div class="system-name">进恩哥系统</div>
 
-    h1 {
-        margin-top: 0;
-        font-weight: 900;
-        color: #000;
-        font-size: 46px;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        text-align: center;
-    }
+<div class="err-wrap">
+    <div class="err-text">404错误</div>
+    <span class="big-red-x">❌</span>
+</div>
 
+<div class="tip-yellow">
+您访问了一个不存在的页面，请您核对站点再试！
+</div>
 
-    .content_p {
-        font-size: 18px;
-        line-height: 1.5em;
-        margin-top: 20px;
-        color: rgba(0, 0, 0, .64);
-        font-weight: 700;
-    }
+<div class="back-btn-wrap">
+    <button class="back-official-btn" id="goUrl">点击我返回官网</button>
+</div>
 
-    form {
-        margin-top: 20px;
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
-    }
+<script>
+const logoImgSrc = "favicon.png";
+document.getElementById('logoImg').src = logoImgSrc;
 
-    input[type="password"] {
-        width: 100%;
-    }
-
-    input[type="password"], input[type="submit"] {
-        padding: 18px 24px;
-        border: none;
-        border-radius: 5px;
-        box-shadow: rgb(187 187 187 / 5%) 0px 1px 0px, rgb(198 198 198 / 10%) 0px 0px 8px;
-    }
-
-    input[type="submit"] {
-        cursor: pointer;
-        background-color: #0063ff;
-        color: white;
-        font-weight: bold;
-    }
-
-    input[type="submit"]:hover {
-        background-color: #0053d9;
-    }
-
-    .progress-bar {
-        width: 100%;
-        height: 20px;
-        background-color: #ddd;
-        border-radius: 10px;
-        overflow: hidden;
-        margin: 10px auto;
-    }
-
-    .progress {
-        height: 100%;
-        width: 0%;
-        background-color: #eaeaea;
-        border-radius: 10px;
-        animation: loading 10s ease-in-out infinite;
-    }
-
-    @keyframes loading {
-        0% {
-            width: 0%;
-        }
-        50% {
-            width: 100%;
-        }
-        100% {
-            width: 0%;
-        }
-    }
-
-
-    @media (max-width: 600px) {
-        .maintenance-message {
-            padding: 15px;
-            font-size: 14px;
-            box-shadow: none;
-        }
-    }
-
-</style>
-<div class="container">
-    <div class="maintenance-message">
-        <table width="100%" border="0" align="center"><tr><td align="center">
-                                <div class="main-left">
-                            <!--Logo-->
-                            <div class="main-img">
-                                <img src="https://s11.ax1x.com/2023/09/04/pPDgudJ.png" alt="img">
-                                <div class="img-title">
-                                    <span class="img-title"></span>
-                                    <span class="img-text">进恩哥资源仓库</span>
-                                      </div>
-        <h1>404错误❌<</h1>
-        <div class="content_p"><p><span style="background-color: rgb(241, 196, 15);">您访问了一个不存在的页面，请您核对站点再试！</span>
-        </div>
-<a href="https://jinenge.us.kg" target="_self"><span class="link-name">点击我返回官网</span>                                           
+const officialSite = "https://jinenge.us.kg";
+document.getElementById('goUrl').addEventListener('click',()=>{
+    window.location.href = officialSite;
+})
+</script>
 </body>
 </html>
