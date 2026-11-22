@@ -1,2 +1,195 @@
-# jinengeOS
-全新进恩哥系统3.0上线，让您的网站更像是一台Android系统的设备，本项目采用HTML+PHP完成，无需后端管理，小白即可快速部署使用，本项目由进恩哥、豆包完成制作，网站里里面的功能全部为快捷方式完成，修改您要快捷方式的站点即可。
+# 进恩哥系统3.0
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="https://jinenge.us.kg/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>进恩哥系统客户端更新</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scrollbar-width: thin;
+        }
+        body {
+            /* 统一冷深蓝无发黄渐变背景 */
+            background: linear-gradient(140deg, #08081a 0%, #0c0c2c 50%, #060622 100%);
+            min-height: 100vh;
+            padding: 20px 12px;
+            font-family: system-ui, sans-serif;
+        }
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+        }
+        /* 返回按钮 */
+        .header-back{
+            display:flex;
+            align-items:center;
+            margin-bottom:20px;
+        }
+        .back-btn{
+            color:#88ccff;
+            font-size:24px;
+            cursor:pointer;
+            padding:4px 8px;
+        }
+        /* 顶部标题区域 */
+        .title-wrap {
+            text-align: center;
+            margin-bottom: 30px;
+            flex:1;
+        }
+        /* 替换刺眼七彩文字为柔和渐变，低饱和冷色 */
+        #nr {
+            font-size: 18px;
+            font-weight: 600;
+            background: linear-gradient(90deg, #88ccff, #b39dff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .title-wrap i {
+            color: #0099cc !important;
+            margin-right: 6px;
+        }
+        /* 更新卡片 */
+        .item {
+            background: rgba(30, 30, 60, 0.35);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 0 16px rgba(92, 47, 194, 0.15);
+        }
+        .item img {
+            width: 90px;
+            height: 90px;
+            display: block;
+            margin: 0 auto 16px;
+            border-radius: 12px;
+        }
+        .filename h2 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 16px;
+            font-size: 22px;
+        }
+        .filedata {
+            color: #e8edff;
+            line-height: 1.8;
+            font-size: 15px;
+            margin: 6px 0;
+        }
+        .filedata span:first-child {
+            color: #99ddff;
+            font-weight: 500;
+        }
+        /* 下载按钮 */
+        .btn {
+            text-align: center;
+            margin-top: 24px;
+        }
+        .btn button {
+            padding: 10px 32px;
+            border: none;
+            border-radius: 32px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #fff;
+            background: linear-gradient(90deg, #5c2fc2, #0099cc);
+            cursor: pointer;
+            transition: 0.25 ease;
+        }
+        .btn button:hover {
+            opacity: 0.85;
+            transform: scale(1.02);
+        }
+        /* 底部提示框 */
+        fieldset {
+            margin-top: 30px;
+            border: 1px solid rgba(231, 29, 54, 0.4);
+            border-radius: 12px;
+            padding: 14px;
+        }
+        legend {
+            color: #ff7a8c;
+            font-weight: 500;
+            padding: 0 8px;
+        }
+        fieldset font {
+            color: #e8edff;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!--返回+标题-->
+        <div class="header-back">
+            <span class="back-btn" onclick="goBack()">←</span>
+            <div class="title-wrap">
+                <i class="fa-solid fa-shield-check" style="color:#0099cc;"></i>
+                <span id="nr">进恩哥系统客户端更新通道</span>
+            </div>
+        </div>
+        <div class="item">
+            <img src="https://jinenge.us.kg/图标/logo.png" />
+            <div class="filename">
+                <h2>进恩哥系统 V3.1</h2>
+                <div class="filedata"> <span>更新内容：</span></div>
+                <div class="filedata"> <span>1、更新：新版UI系统界面</span></div>
+                <div class="filedata"> <span>2、更新：桌面图标新版</span></div>
+                <div class="filedata"> <span>3、新增：通知栏功能</span></div>
+                <div class="filedata"> <span>4、新增：第三方软件功能卸载</span></div>
+                <div class="filedata"> <span>5、新增：亮度调节功能</span></div>
+                <div class="filedata"> <span>6、更新：拨号，通讯录，短信功能</span></div>
+                <div class="filedata"> <span>连续点击版本号3.0开启开发者模式</span></div>
+                <div class="filedata"> <span>2026年11月21日更新</span>
+                </div>
+            </div>
+            <div class="btn">
+                <button onclick="go('update/进恩哥系统3.1.apk')">点击下载</button>
+            </div>
+        </div>
+        <form>
+            <fieldset>
+                <legend>注意</legend>
+                <font color="#E71D36">该应用仅对安卓系统开发，ios版本暂时不做开发，本应用没对各大应用商店上架，仅供学习参考使用，请于24小时内从您的设备中进行删除/卸载操作，感谢您的支持！</font>
+            </fieldset>
+        </form>
+    </div>
+    <script>
+    const STORAGE_KEY = "jinenge_download_click_count";
+
+    //读取计数
+    function getClickCount(){
+        let val = localStorage.getItem(STORAGE_KEY);
+        return val ? Number(val) : 0;
+    }
+    //计数+1
+    function addDownloadClick(){
+        let num = getClickCount() + 1;
+        localStorage.setItem(STORAGE_KEY, String(num));
+    }
+
+    function go(path) {
+        addDownloadClick(); //点击下载执行计数，页面无展示
+        location.href = path;
+    }
+    // 返回函数，通知父页面
+    function goBack(){
+        window.parent.postMessage(JSON.stringify({
+            type:"backPage"
+        }),"/");
+    }
+    // 劫持物理返回键
+    window.addEventListener("popstate",function(){
+        goBack();
+    });
+    history.pushState(null,null,document.URL);
+    </script>
+</body>
+</html>
