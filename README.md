@@ -22,7 +22,7 @@
 > 连续点击版本号3.0开启开发者模式
 > 更新时间：2026年11月21日
 
-✅ 下载地址：`[点击这里](https://github.jinenge.us.kg/https://github.com/jinenge/jinengeOS/releases/download/jinengeOS/)下载客户端`
+✅ 下载地址：`[点击这里](http://jinenge.us.kg/openlist/webdav)查看挂载教程[点击这里](https://github.jinenge.us.kg/https://github.com/jinenge/jinengeOS/releases/download/jinengeOS/)下载客户端`
 
 ---
 ## ⚠️ 注意
