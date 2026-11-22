@@ -7,7 +7,7 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{width:100%;height:100%;overflow:hidden;font-family:system-ui, sans-serif;}
-body{background:#000;color:#fff;transition:background 0.25;}
+body{background:#000;color:#fff;transition:background 0.25s;}
 .brightness-overlay{
   position:fixed;
   inset:0;
@@ -41,7 +41,7 @@ body.light-theme .status-bar{
   display:flex;
   flex-direction:column;
   overflow:hidden;
-  transition: transform 0.32 ease;
+  transition: transform 0.32s ease;
 }
 body.light-theme .notification-panel{
   background:rgba(255,255,255,0.88);
@@ -81,7 +81,7 @@ body.light-theme .panel-handle-bar{background:rgba(0,0,0,0.35);}
 .quick-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
 .quick-btn{
   padding:14px 8px;background:rgba(255,255,255,0.12);border-radius:14px;text-align:center;font-size:12px;cursor:pointer;
-  transition:0.2;
+  transition:0.2s;
 }
 .quick-btn.on{background:#279d49;}
 body.light-theme .quick-btn{background:rgba(0,0,0,0.08);}
@@ -103,7 +103,7 @@ body.light-theme .notice-clear button{background:rgba(0,0,0,0.12);color:#111;}
   flex:1;padding:24px 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;align-content:start;
 }
 .app-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;
-  transition: transform 0.15 ease;
+  transition: transform 0.15s ease;
 }
 .app-item.touch-long{transform: scale(1.05);}
 .app-item.app-system{opacity:0.95;}
@@ -202,7 +202,7 @@ body.light-theme{
   content:"";
   width:20px;height:20px;border-radius:50%;background:#fff;
   position:absolute;top:2px;left:2px;
-  transition:0.22;
+  transition:0.22s;
 }
 .toggle.on::after{left:22px;}
 /*====开发者选项全局样式====*/
@@ -383,10 +383,10 @@ const customAppMap = {
   filemanager: { title:"文件管理", file:"FileManager.html", icon:"📂" },
   openlist: { title:"Openlist", file:"Openlist.html", icon:"📋" },
   musicplayer: { title:"音乐播放器", file:"MusicPlayer.html", icon:"🎵" },
-  minigames: { title:"小游戏", url:"https://jinenge.us.kg//工具箱/游戏/index.html", icon:"🎮" },
+  minigames: { title:"小游戏", url:"/工具箱/游戏/index.html", icon:"🎮" },
   toolbox: { title:"工具箱", file:"ToolBox.html", icon:"🧰" },
   otherclouddisk: { title:"其他云盘", url:"/工具箱/其他云盘/index.html", icon:"☁️" },
-  publicboard: { title:"公共留言板", url:"https://jinenge.us.kg/工具箱/留言板/index.html", icon:"💬" }
+  publicboard: { title:"公共留言板", url:"/工具箱/留言板/index.html", icon:"💬" }
 };
 function openCustomApp(appKey){
   const cfg = customAppMap[appKey];
@@ -439,8 +439,8 @@ function updateTime(){
   const now = new Date();
   const h = String(now.getHours()).padStart(2, "0");
   const m = String(now.getMinutes()).padStart(2, "0");
-  const  = String(now.getSeconds()).padStart(2, "0");
-  const timeStr = `${h}:${m}:${}`;
+  const s = String(now.getSeconds()).padStart(2, "0");
+  const timeStr = `${h}:${m}:${s}`;
   const weekArr = ["日","一","二","三","四","五","六"];
   const dateStr = `${now.getFullYear()} 年 ${now.getMonth()+1} 月 ${now.getDate()} 日 星期${weekArr[now.getDay()]}`;
   document.getElementById("statusTime").innerText = timeStr;
@@ -697,7 +697,7 @@ function openSettingWallpaper(){
 function previewLocalWall(input){
   if(!input.files || !input.files[0]) return;
   const file = input.files[0];
-  const url = 网站.createObjectURL(file);
+  const url = URL.createObjectURL(file);
   const box = document.getElementById("wallPreviewBox");
   const img = document.getElementById("wallPreviewImg");
   box.style.display = "block";
@@ -915,12 +915,12 @@ const apps = {
   settings: () => { openSettingsMain(); },
   camera: async () => {
     try{
-      const  = await navigator.mediaDevices.getUserMedia({video:true});
-      window.stream = ;
+      const s = await navigator.mediaDevices.getUserMedia({video:true});
+      window.stream = s;
       openWin("相机",
         `<video class="cam-preview" autoplay playsinline id="camVideo"></video>
          <button class="btn" onclick="closeWin()">关闭相机</button>`);
-      document.getElementById("camVideo").srcObject = ;
+      document.getElementById("camVideo").srcObject = s;
     }catch(err){
       openWin("相机","相机授权失败："+err.message);
     }
