@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Jinenge Web‑ADB 刷机控制台</title>
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+html,body{
+    width:100%;
+    height:100%;
+    background:#0a0a0e;
+    color:#4ee068;
+    font-family:Consolas,monospace,system-ui;
+    overflow:hidden;
+}
+body{
+    padding:12px;
+}
+#main{
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+}
+.header-title{
+    color:#58f0ff;
+    font-size:17px;
+    height:48px;
+    line-height:48px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-shrink:0;
+}
+.time-text{
+    color:#77dd88;
+    font-size:15px;
+}
+.tab-bar{
+    display:flex;
+    gap:8px;
+    height:42px;
+    margin-bottom:10px;
+    flex-shrink:0;
+}
+.tab{
+    border:1px solid #2b5536;
+    padding:0 12px;
+    border-radius:6px;
+    font-size:14px;
+    color:#88ffaa;
+    background:#142c20;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+}
+.tab.active{
+    background:#153322;
+    color:#ffffff;
+    border-color:#4ee068;
+}
+.panels{
+    flex:1;
+    min-height:0;
+    overflow:hidden;
+}
+.panel{
+    width:100%;
+    height:100%;
+    display:none;
+    flex-direction:column;
+    overflow:hidden;
+}
+.panel.show{
+    display:flex;
+}
+.term{
+    flex:1;
+    min-height:0;
+    overflow-x:auto;
+    overflow-y:auto;
+    white-space:pre;
+    font-size:13px;
+    line-height:1.5;
+    padding:4px 2px;
+}
+.input-line{
+    display:flex;
+    align-items:center;
+    height:42px;
+    margin-top:6px;
+    flex-shrink:0;
+}
+.prompt{
+    white-space:nowrap;
+    padding-right:6px;
+    color:#4ee068;
+    font-size:13px;
+}
+#cmdInput{
+    flex:1;
+    height:100%;
+    background:transparent;
+    border:none;
+    outline:none;
+    color:#4ee068;
+    font:inherit;
+    font-size:13px;
+}
+.landscape-warn{
+    position:fixed;
+    left:0;top:0;
+    width:100vw;height:100vh;
+    background:#0a0a0e;
+    z-index:9999;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    color:#88ffaa;
+    text-align:center;
+    padding:20px;
+    font-size:16px;
+}
+@media (orientation:landscape){
+    .landscape-warn{
+        display:flex;
+    }
+    #main{
+        display:none;
+    }
+}
+@media(max-width:400px){
+    .header-title{
+        font-size:16px;
+        height:44px;
+        line-height:44px;
+    }
+    .tab{
+        font-size:13px;
+        padding:0 10px;
+    }
+    .term{
+        font-size:12px;
+    }
+    .prompt,#cmdInput{
+        font-size:12px;
+    }
+}
+::-webkit-scrollbar{
+    width:5px;
+    height:5px;
+}
+::-webkit-scrollbar-thumb{
+    background:#20442c;
+    border-radius:3px;
+}
+</style>
+<script type="module">
+import { Adb } from 'https://cdn.jsdelivr.net/npm/@yume-chan/adb@0.21.0/+esm';
+import { AdbWebUsbBackend } from 'https://cdn.jsdelivr.net/npm/@yume-chan/adb-daemon-webusb@0.21.0/+esm';
+import { AdbWebCredentialStore } from 'https://cdn.jsdelivr.net/npm/@yume-chan/adb-credential-web@0.21.0/+esm';
+import { Fastboot } from 'https://cdn.jsdelivr.net/npm/@yume-chan/fastboot@0.21.0/+esm';
+window.Adb = Adb;
+window.AdbWebUsbBackend = AdbWebUsbBackend;
+window.AdbWebCredentialStore = AdbWebCredentialStore;
+window.Fastboot = Fastboot;
+</script>
+</head>
+<body>
+<div class="landscape-warn">请切换竖屏使用控制台</div>
+<div id="main">
+    <div class="header-title">
+        <span>⟨进恩哥系统刷机控制台⟩</span>
+        <span class="time-text" id="clock">00:00:00</span>
+    </div>
+    <div class="tab-bar">
+        <div class="tab active" data-target-id="terminalPanel">终端</div>
+        <div class="tab" data-target-id="cmdHelpPanel">常用命令</div>
+    </div>
+    <div class="panels">
+        <div class="panel show" id="terminalPanel">
+            <div class="term" id="mainTerm"></div>
+            <div class="input-line">
+                <span class="prompt">root@jinengeOS:~$</span>
+                <input id="cmdInput" autocomplete="off" spellcheck="false">
+            </div>
+        </div>
+        <div class="panel" id="cmdHelpPanel">
+            <div class="term" id="cmdHelpTerm"></div>
+        </div>
+    </div>
+</div>
+<input type="file" id="fileSelect" style="display:none" accept=".img,.bin">
+<script>
+let adbDevice = null;
+let fastbootDevice = null;
+
+//时钟
+function updateClock(){
+    const d=new Date();
+    document.getElementById("clock").innerText = d.toLocaleTimeString();
+}
+setInterval(updateClock,1000);
+updateClock();
+
+//tab切换
+const tabs = document.querySelectorAll(".tab");
+tabs.forEach(tab=>{
+    tab.onclick=()=>{
+        tabs.forEach(t=>t.classList.remove("active"));
+        tab.classList.add("active");
+        const tid = tab.getAttribute("data-target-id");
+        document.querySelectorAll(".panel").forEach(p=>p.classList.remove("show"));
+        document.getElementById(tid).classList.add("show");
+    }
+})
+
+const cmdLines = [
+"help                查看全部指令",
+"clear               清屏",
+"status              查看设备连接状态",
+"",
+"==== ADB命令 ====",
+"adb-connect         连接WebUSB安卓设备",
+"adb-disconnect      断开adb/fastboot设备",
+"adb-shell 指令      执行shell，例 adb-shell getprop ro.build.version.release",
+"adb-reboot          普通重启手机",
+"adb-reboot-bl       重启进入fastboot",
+"adb-reboot-fastboot 重启进入fastbootd动态分区模式",
+"adb-screenshot      截图自动下载保存",
+"adb-getprop         获取系统版本属性",
+"adb-battery         获取电池状态",
+"adb-logcat          导出系统日志",
+"",
+"==== Fastboot刷机命令 ====",
+"fb-connect          连接fastboot设备",
+"fb-getvar           getvar all读取设备信息",
+"fb-continue         continue启动系统",
+"fb-reboot           fastboot模式重启",
+"fb-erase 分区名     擦除分区【高危】例 fb-erase boot",
+"fb-flash 分区名     刷写镜像【高危！】例 fb-flash boot，弹出选择img文件",
+"fb-oem unlock       OEM解锁",
+"fb-oem lock         OEM加锁",
+];
+document.getElementById("cmdHelpTerm").textContent = cmdLines.join("\n");
+
+const mainTerm = document.getElementById("mainTerm");
+const cmdInput = document.getElementById("cmdInput");
+const fileSelect = document.getElementById("fileSelect");
+
+function termPrint(text){
+    mainTerm.textContent += text + "\n";
+    mainTerm.scrollTop = mainTerm.scrollHeight;
+}
+
+termPrint("Jinenge‑OS Web‑ADB刷机控制台");
+termPrint("1、电脑端：Windows需要安装ADB驱动；Mac无需驱动");
+termPrint("2、手机OTG运行：原版Chrome浏览器，目标手机开启USB调试");
+termPrint("输入 help 查看全部可用指令");
+
+cmdInput.onkeydown = async function(e){
+    if(e.key !== "Enter") return;
+    const cmd = cmdInput.value.trim();
+    cmdInput.value = "";
+    if(!cmd){
+        termPrint("root@jinengeOS:~$");
+        return;
+    }
+    termPrint("root@jinengeOS:~$ "+cmd);
+    await handleCommand(cmd);
+}
+
+async function handleCommand(line){
+    const args = line.split(/\s+/);
+    const cmd = args[0];
+
+    switch(cmd){
+        case "help":
+            termPrint("\n"+cmdLines.join("\n")+"\n");
+            break;
+        case "clear":
+            mainTerm.textContent = "";
+            break;
+        case "status":
+            termPrint("ADB设备: "+(adbDevice?"✅已连接":"❌未连接"));
+            termPrint("Fastboot设备: "+(fastbootDevice?"✅已连接":"❌未连接"));
+            break;
+
+        //ADB
+        case "adb-connect":{
+            if(!navigator.usb){
+                termPrint("❌浏览器不支持WebUSB，请使用Chrome");
+                return;
+            }
+            try{
+                termPrint("🔌请求USB ADB设备...");
+                const backend = await AdbWebUsbBackend.requestDevice();
+                const credStore = new AdbWebCredentialStore();
+                const dev = await Adb.connect(backend, credStore);
+                adbDevice = dev;
+                termPrint("✅ADB连接成功");
+                dev.onDisconnected = ()=>{
+                    termPrint("⚠️ADB设备断开");
+                    adbDevice=null;
+                }
+            }catch(e){
+                termPrint("❌失败:"+e.message);
+            }
+            break;
+        }
+        case "adb-disconnect":{
+            if(adbDevice) await adbDevice.close();
+            if(fastbootDevice) await fastbootDevice.close();
+            adbDevice=null;fastbootDevice=null;
+            termPrint("✅全部设备已断开");
+            break;
+        }
+        case "adb-shell":{
+            if(!adbDevice){termPrint("❌ADB未连接");return;}
+            const subcmd = args.slice(1).join(" ");
+            if(!subcmd){termPrint("用法 adb-shell 命令");return;}
+            try{
+                const shell = await adbDevice.shell(subcmd);
+                let buf="";
+                for await(const c of shell.stdout) buf+=c;
+                termPrint(buf);
+            }catch(e){termPrint("❌执行错误:"+e.message);}
+            break;
+        }
+        case "adb-reboot":{
+            if(!adbDevice){termPrint("❌ADB未连接");return;}
+            termPrint("🔄发送普通重启");
+            await adbDevice.reboot("");
+            termPrint("✅手机正在重启");
+            break;
+        }
+        case "adb-reboot-bl":{
+            if(!adbDevice){termPrint("❌ADB未连接");return;}
+            termPrint("🔄重启进入bootloader");
+            await adbDevice.reboot("bootloader");
+            termPrint("✅进入fastboot，请执行 fb-connect");
+            break;
+        }
+        case "adb-reboot-fastboot":{
+            if(!adbDevice){termPrint("❌ADB未连接");return;}
+            termPrint("🔄重启进入fastbootd");
+            await adbDevice.reboot("fastboot");
+            termPrint("✅进入fastbootd，请执行 fb-connect");
+            break;
+        }
+        case "adb-screenshot":{
+            if(!adbDevice){termPrint("❌ADB未连接");return;}
+            termPrint("📷获取截图...");
+            try{
+                const raw = await adbDevice.screencap();
+                const blob = new Blob([raw], {type:"image/png"});
+                const url = URL.createObjectURL(blob);
+                termPrint("✅截图完成: "+url);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = "screenshot-"+new Date().getTime()+".png";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            }catch(e){
+                termPrint("❌截图失败: "+e.message);
+            }
+            break;
+        }
+        case "adb-getprop":{
+            if(!adbDevice){termPrint("❌ADB未连接");return;}
+            try{
+                const shell = await adbDevice.shell("getprop ro.build.version.release;getprop ro.product.model");
+                let buf="";
+                for await(const c of shell.stdout) buf+=c;
+                termPrint(buf);
+            }catch(e){termPrint("❌执行错误:"+e.message);}
+            break;
+        }
+        case "adb-battery":{
+            if(!adbDevice){termPrint("❌ADB未连接");return;}
+            try{
+                const shell = await adbDevice.shell("dumpsys battery");
+                let buf="";
+                for await(const c of shell.stdout) buf+=c;
+                termPrint(buf);
+            }catch(e){termPrint("❌执行错误:"+e.message);}
+            break;
+        }
+        case "adb-logcat":{
+            if(!adbDevice){termPrint("❌ADB未连接");return;}
+            termPrint("⚠️导出d模式日志");
+            try{
+                const shell = await adbDevice.shell("logcat -d");
+                let buf="";
+                for await(const c of shell.stdout) buf+=c;
+                termPrint(buf);
+            }catch(e){termPrint("❌执行错误:"+e.message);}
+            break;
+        }
+
+        //Fastboot
+        case "fb-connect":{
+            if(!navigator.usb){termPrint("❌浏览器不支持WebUSB");return;}
+            try{
+                termPrint("🔌请求Fastboot设备");
+                const usbDev = await navigator.usb.requestDevice({filters:[{classCode:0xff}]});
+                await usbDev.open();
+                await usbDev.selectConfiguration(1);
+                await usbDev.claimInterface(0);
+                const fb = new Fastboot(usbDev);
+                fastbootDevice = fb;
+                termPrint("✅Fastboot连接成功");
+                fb.onDisconnected = ()=>{
+                    termPrint("⚠️Fastboot断开");
+                    fastbootDevice=null;
+                }
+            }catch(e){termPrint("❌失败:"+e.message);}
+            break;
+        }
+        case "fb-getvar":{
+            if(!fastbootDevice){termPrint("❌Fastboot未连接");return;}
+            const res = await fastbootDevice.getvar("all");
+            termPrint(JSON.stringify(res,null,2));
+            break;
+        }
+        case "fb-continue":{
+            if(!fastbootDevice){termPrint("❌Fastboot未连接");return;}
+            await fastbootDevice.continue();
+            termPrint("✅continue，启动安卓系统");
+            break;
+        }
+        case "fb-reboot":{
+            if(!fastbootDevice){termPrint("❌Fastboot未连接");return;}
+            await fastbootDevice.reboot();
+            termPrint("✅fastboot下发重启指令");
+            break;
+        }
+        case "fb-erase":{
+            if(!fastbootDevice){termPrint("❌Fastboot未连接");return;}
+            const part = args[1];
+            if(!part){termPrint("用法 fb-erase 分区名，例 fb-erase boot");return;}
+            if(!confirm("⚠️高危！确认擦除分区【"+part+"】，操作不当直接变砖！确定继续？")){
+                termPrint("已取消擦除");
+                return;
+            }
+            try{
+                await fastbootDevice.erase(part);
+                termPrint("✅分区 "+part+" 擦除完成");
+            }catch(e){termPrint("❌擦除失败:"+e.message);}
+            break;
+        }
+        case "fb-flash":{
+            if(!fastbootDevice){termPrint("❌Fastboot未连接");return;}
+            const part = args[1];
+            if(!part){
+                termPrint("用法 fb-flash 分区名，例 fb-flash boot");
+                return;
+            }
+            if(!confirm("⚠️高危！刷写镜像到【"+part+"】，错误镜像直接变砖！确认继续？")){
+                termPrint("已取消刷写");
+                return;
+            }
+            termPrint("📂请选择本地img/bin镜像文件...");
+            fileSelect.onchange = async function(){
+                const file = fileSelect.files[0];
+                if(!file){
+                    termPrint("❌未选择文件");
+                    fileSelect.value="";
+                    return;
+                }
+                try{
+                    termPrint("🚀开始刷写 "+part+"，文件："+file.name+"，大小："+(file.size/1024/1024).toFixed(2)+"MB");
+                    const buf = await file.arrayBuffer();
+                    await fastbootDevice.flash(part, new Uint8Array(buf));
+                    termPrint("✅刷写 "+part+" 完成！");
+                }catch(e){
+                    termPrint("❌刷写失败："+e.message);
+                }
+                fileSelect.value="";
+            }
+            fileSelect.click();
+            break;
+        }
+        case "fb-oem":{
+            if(!fastbootDevice){termPrint("❌Fastboot未连接");return;}
+            const sub = args.slice(1).join(" ");
+            if(!sub){termPrint("用法 fb-oem unlock / fb-oem lock");return;}
+            try{
+                const ret = await fastbootDevice.rawCommand("oem "+sub);
+                termPrint(ret);
+            }catch(e){termPrint("❌oem指令失败:"+e.message);}
+            break;
+        }
+        default:
+            termPrint("❌命令不存在，输入 help 查看可用命令");
+    }
+}
+cmdInput.focus();
+</script>
+</body>
+</html>

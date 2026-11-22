@@ -1,0 +1,108 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Microsoft YaHei", sans-serif;
+}
+body {
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+    background-size: 400% 400%;
+    animation: bgFlow 20s ease infinite;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    overflow: hidden;
+    /* 禁止手机端页面缩放 */
+    touch-action: manipulation;
+}
+@keyframes bgFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+.countdown-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px 15px;
+    text-align: center;
+    width: 100%;
+    max-width: 380px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+}
+.title {
+    font-size: 1.8rem;
+    color: #ffd700;
+    margin-bottom: 8px;
+    text-shadow: 0 0 12px rgba(255, 215, 0, 0.8);
+}
+.subtitle {
+    font-size: 0.9rem;
+    color: #ffffff;
+    margin-bottom: 25px;
+    opacity: 0.8;
+}
+.time-display {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+.time-item {
+    background: linear-gradient(135deg, #ff6b35, #ffd700);
+    color: #1a1a2e;
+    width: 22%;
+    aspect-ratio: 1/1;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-weight: bold;
+}
+.time-number {
+    font-size: 1.4rem;
+}
+.time-unit {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+}
+.footer {
+    color: #ffffff;
+    opacity: 0.7;
+    font-size: 0.8rem;
+}
+#fireworks {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+.fireworks-active #fireworks {
+    opacity: 1;
+}
+.fireworks-active .countdown-container {
+    opacity: 0.8;
+}
+/* 针对小屏手机额外适配 */
+@media (max-width: 320px) {
+    .title {
+        font-size: 1.5rem;
+    }
+    .time-number {
+        font-size: 1.2rem;
+    }
+    .time-unit {
+        font-size: 0.6rem;
+    }
+}

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎧 女生电台</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui,sans-serif;margin:0;padding:0}
+body{
+  background:#0f1628;
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;padding:10px;color:#fff;
+}
+.radio{
+  width:100%;max-width:360px;
+  background:rgba(20,25,45,0.9);
+  border:2px solid #f9a8d4;
+  border-radius:20px;
+  padding:24px;
+  box-shadow:0 0 30px #f9a8d466, 0 0 60px #f9a8d433;
+}
+.title{
+  text-align:center;color:#f9a8d4;text-shadow:0 0 12px #f9a8d4;
+  font-size:20px;margin-bottom:16px
+}
+.station{
+  width:100%;padding:12px;border-radius:10px;
+  background:#1e293b;color:#fff;border:1px solid #f9a8d4;
+  margin-bottom:16px;font-size:14px
+}
+.status{
+  text-align:center;color:#ddd;font-size:14px;
+  margin-bottom:14px;min-height:20px
+}
+.vol-row{
+  display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.vol-row span{color:#f9a8d4;font-size:14px}
+.vol{
+  flex:1;height:6px;border-radius:3px;
+  background:#334155;-webkit-appearance:none;
+}
+.vol::-webkit-slider-thumb{
+  -webkit-appearance:none;width:18px;height:18px;
+  background:#f9a8d4;border-radius:50%;box-shadow:0 0 10px #f9a8d4
+}
+.btns{display:flex;gap:14px}
+button{
+  flex:1;padding:15px 0;border:none;border-radius:12px;
+  font-weight:bold;font-size:15px;cursor:pointer
+}
+.play{background:#f9a8d4;color:#000;box-shadow:0 0 15px #f9a8d4}
+.stop{background:#60a5fa;color:#000;box-shadow:0 0 15px #60a5fa}
+button:disabled{background:#334155;color:#999;box-shadow:none}
+</style>
+</head>
+<body>
+
+<div class="radio">
+  <div class="title">🎧 女生专属电台</div>
+  
+  <select class="station" id="station">
+    <option value="">--- 温柔音乐 ---</option>
+    <option value="https://live.94dd.com/fm993/hls.m3u8">华语温柔女声</option>
+    <option value="https://live.94dd.com/fm899/hls.m3u8">欧美抒情女声</option>
+    <option value="https://live.94dd.com/fm947/hls.m3u8">轻音乐/古典</option>
+    <option value="https://live.94dd.com/fm1018/hls.m3u8">日系治愈/J-pop</option>
+
+    <option value="">--- 情感夜听 ---</option>
+    <option value="https://satellitepull.cnr.cn/live/wxgdyyzs/playlist.m3u8">夜听·情感故事</option>
+    <option value="https://ngcdn004.cnr.cn/live/czs/index.m3u8">女性成长·读书</option>
+    <option value="https://live.94dd.com/fm1078/hls.m3u8">睡前治愈·轻音乐</option>
+
+    <option value="">--- 轻松流行 ---</option>
+    <option value="https://live.94dd.com/fm914/hls.m3u8">城市流行·轻快</option>
+    <option value="https://live.94dd.com/fm955/hls.m3u8">文艺民谣·小众</option>
+    <option value="https://media.vos.com.cn/live/hls/1g.m3u8">海峡之声·文艺</option>
+  </select>
+
+  <div class="status" id="status">准备就绪</div>
+
+  <div class="vol-row">
+    <span>音量</span>
+    <input type="range" class="vol" id="vol" min="0" max="100" value="70">
+  </div>
+
+  <div class="btns">
+    <button id="play">播放</button>
+    <button id="stop">停止</button>
+  </div>
+</div>
+
+<script>
+const audio = new Audio();
+audio.preload = 'none';
+
+const station = document.getElementById('station');
+const status = document.getElementById('status');
+const vol = document.getElementById('vol');
+const play = document.getElementById('play');
+const stop = document.getElementById('stop');
+
+vol.addEventListener('input', () => {
+  audio.volume = vol.value / 100;
+});
+audio.volume = vol.value / 100;
+
+play.addEventListener('click', async () => {
+  const url = station.value.trim();
+  if (!url || url.startsWith('---')) {
+    status.textContent = '请选一个电台';
+    return;
+  }
+
+  try {
+    play.disabled = true;
+    status.textContent = '加载中...';
+    audio.pause();
+    audio.src = url;
+    await audio.play();
+    status.textContent = '🎵 正在播放';
+  } catch (e) {
+    status.textContent = '❌ 播放失败';
+    play.disabled = false;
+    console.error(e);
+  }
+});
+
+stop.addEventListener('click', () => {
+  audio.pause();
+  audio.currentTime = 0;
+  status.textContent = '⏹ 已停止';
+  play.disabled = false;
+});
+
+audio.addEventListener('error', () => {
+  status.textContent = '⚠️ 链接异常';
+  play.disabled = false;
+});
+</script>
+</body>
+</html>

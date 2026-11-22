@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎧 全国FM电台</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui,sans-serif;margin:0;padding:0}
+body{
+  background:#0f172a;
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;padding:12px;color:#fff;
+}
+.radio{
+  width:100%;max-width:360px;
+  background:rgba(15,23,42,0.95);
+  border:2px solid #f0abfc;
+  border-radius:22px;
+  padding:26px;
+  box-shadow:0 0 30px #f0abfc66, 0 0 70px #f0abfc33;
+}
+.title{
+  text-align:center;color:#f0abfc;text-shadow:0 0 12px #f0abfc;
+  font-size:21px;margin-bottom:18px
+}
+.station{
+  width:100%;padding:13px;border-radius:12px;
+  background:#1e293b;color:#fff;border:1px solid #f0abfc;
+  margin-bottom:18px;font-size:15px
+}
+.status{
+  text-align:center;color:#ddd;font-size:15px;
+  margin-bottom:16px;min-height:22px
+}
+.vol-row{
+  display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.vol-row span{color:#f0abfc;font-size:15px}
+.vol{
+  flex:1;height:7px;border-radius:4px;
+  background:#334155;-webkit-appearance:none;
+}
+.vol::-webkit-slider-thumb{
+  -webkit-appearance:none;width:18px;height:18px;
+  background:#f0abfc;border-radius:50%;box-shadow:0 0 10px #f0abfc
+}
+.btns{display:flex;gap:16px}
+button{
+  flex:1;padding:16px 0;border:none;border-radius:14px;
+  font-weight:bold;font-size:16px;cursor:pointer
+}
+.play{background:#f0abfc;color:#000;box-shadow:0 0 18px #f0abfc}
+.stop{background:#a78bfa;color:#000;box-shadow:0 0 18px #a78bfa}
+button:disabled{background:#334155;color:#999;box-shadow:none}
+</style>
+</head>
+<body>
+
+<div class="radio">
+  <div class="title">🎧 全国FM广播电台</div>
+  
+  <select class="station" id="station">
+            <option value="">=====中央总台全系【央视稳定中转源】=====</option>
+            <option value="https://aaclive.cctv.com/asp/h5live/cnr/zgzs.m3u8">中国之声</option>
+            <option value="https://aaclive.cctv.com/asp/h5live/cnr/jjzs.m3u8">经济之声</option>
+            <option value="https://aaclive.cctv.com/asp/h5live/cnr/yyzs.m3u8">音乐之声</option>
+            <option value="https://aaclive.cctv.com/asp/h5live/cnr/dszs.m3u8">经典音乐广播</option>
+            <option value="https://aaclive.cctv.com/asp/h5live/cnr/dawanshan.m3u8">大湾区之声</option>
+            <option value="https://aaclive.cctv.com/asp/h5live/cnr/taihai.m3u8">台海之声</option>
+            <option value="https://aaclive.cctv.com/asp/h5live/cnr/shenzhou.m3u8">神州之声</option>
+            <option value="https://aaclive.cctv.com/asp/h5live/cnr/wenyi.m3u8">文艺之声</option>
+            <option value="https://aaclive.cctv.com/asp/h5live/cnr/minzu.m3u8">民族之声</option>
+
+            <option value="">=====广东省｜省台+珠三角地市【广东广电中转】=====</option>
+            <option value="https://live.rgd.com.cn/aac/xwgb.m3u8">广东新闻FM91.4(省台)</option>
+            <option value="https://live.rgd.com.cn/aac/yyzs.m3u8">广东音乐FM99.3(省台)</option>
+            <option value="https://live.rgd.com.cn/aac/zjjj.m3u8">珠江经济FM97.4(省台)</option>
+            <option value="https://live.rgd.com.cn/aac/ycjt.m3u8">羊城交通FM105.2(广州)</option>
+            <option value="https://live.rgd.com.cn/aac/gzys.m3u8">广州汽车音乐FM102.7</option>
+            <option value="https://live.rgd.com.cn/aac/szjt.m3u8">深圳交通FM106.2</option>
+            <option value="https://live.rgd.com.cn/aac/szxw.m3u8">深圳新闻FM89.8</option>
+            <option value="https://live.rgd.com.cn/aac/fsyy.m3u8">佛山音乐FM98.5</option>
+            <option value="https://live.rgd.com.cn/aac/zhjt.m3u8">珠海交通FM87.5</option>
+            <option value="https://live.rgd.com.cn/aac/dgjt.m3u8">东莞交通FM107.5</option>
+            <option value="https://live.rgd.com.cn/aac/zsyy.m3u8">中山音乐FM96.7</option>
+
+            <option value="">=====北京市｜省台+地市=====</option>
+            <option value="https://liveaudio.rbc.cn/fm1039.aac.m3u8">北京交通FM103.9</option>
+            <option value="https://liveaudio.rbc.cn/fm974.aac.m3u8">北京音乐FM97.4</option>
+            <option value="https://liveaudio.rbc.cn/fm1006.aac.m3u8">北京新闻FM100.6</option>
+
+            <option value="">=====天津市｜省台+地市=====</option>
+            <option value="https://aac.tjradio.com/xinwen.m3u8">天津新闻FM97.2</option>
+            <option value="https://aac.tjradio.com/jiaotong.m3u8">天津交通FM106.8</option>
+
+            <option value="">=====河北省｜省台+石家庄=====</option>
+            <option value="https://aac.hebtv.com/zonghe.m3u8">河北新闻FM104.3(省台)</option>
+            <option value="https://aac.hebtv.com/jiaotong.m3u8">河北交通FM99.2(省台)</option>
+            <option value="https://aac.hebtv.com/sjzjt.m3u8">石家庄交通FM94.6</option>
+
+            <option value="">=====山西省｜省台+太原=====</option>
+            <option value="https://aac.sxrtv.com/xinwen.m3u8">山西新闻FM90.4(省台)</option>
+            <option value="https://aac.sxrtv.com/jiaotong.m3u8">山西交通FM88.0(省台)</option>
+            <option value="https://aac.sxrtv.com/tyjt.m3u8">太原交通FM107</option>
+
+            <option value="">=====上海市｜省台+市区=====</option>
+            <option value="https://live.smgbb.cn/aac/fm934.m3u8">上海交通FM93.4</option>
+            <option value="https://live.smgbb.cn/aac/am990.m3u8">上海新闻AM990</option>
+            <option value="https://live.smgbb.cn/aac/fm101.m3u8">上海动感101 FM101</option>
+            <option value="https://live.smgbb.cn/aac/fm1057.m3u8">上海交通FM105.7</option>
+
+            <option value="">=====江苏省｜省台+南京/苏州/无锡=====</option>
+            <option value="https://aac.vojs.cn/jsxw.m3u8">江苏新闻FM93.7(省台)</option>
+            <option value="https://aac.vojs.cn/jiaotong.m3u8">江苏交通FM101.1(省台)</option>
+            <option value="https://aac.vojs.cn/njjt.m3u8">南京交通FM102.4</option>
+            <option value="https://aac.vojs.cn/szjt.m3u8">苏州交通FM104.8</option>
+            <option value="https://aac.vojs.cn/wxjt.m3u8">无锡交通FM106.9</option>
+
+            <option value="">=====浙江省｜省台+杭州/宁波=====</option>
+            <option value="https://aac.cztv.com/fm988.m3u8">浙江新闻FM98.8(省台)</option>
+            <option value="https://aac.cztv.com/fm93.m3u8">浙江交通FM93.0(省台)</option>
+            <option value="https://aac.cztv.com/hzjt.m3u8">杭州交通91.8 FM91.8</option>
+            <option value="https://aac.cztv.com/nbjt.m3u8">宁波交通FM93.9</option>
+
+            <option value="">=====四川省｜省台+成都=====</option>
+            <option value="https://aac.sctv.com/fm1061.m3u8">四川新闻FM106.1(省台)</option>
+            <option value="https://aac.sctv.com/fm1017.m3u8">四川交通FM101.7(省台)</option>
+            <option value="https://aac.sctv.com/cdjt.m3u8">成都交通FM91.4</option>
+
+            <option value="">=====湖北省｜省台+武汉=====</option>
+            <option value="https://aac.hbtv.com.cn/zonghe.m3u8">湖北新闻FM104.6(省台)</option>
+            <option value="https://aac.hbtv.com.cn/jiaotong.m3u8">湖北交通FM92.7(省台)</option>
+            <option value="https://aac.hbtv.com.cn/whjt.m3u8">武汉交通FM92.7</option>
+
+            <option value="">=====湖南省｜省台+长沙=====</option>
+            <option value="https://aac.hnradio.com/fm938.m3u8">湖南新闻FM93.8(省台)</option>
+            <option value="https://aac.hnradio.com/fm918.m3u8">湖南交通FM91.8(省台)</option>
+            <option value="https://aac.hnradio.com/csjt.m3u8">长沙交通FM95.5</option>
+
+            <option value="">=====山东省｜省台+济南/青岛=====</option>
+            <option value="https://aac.sdgb.cn/xinwen.m3u8">山东新闻FM95.0(省台)</option>
+            <option value="https://aac.sdgb.cn/jiaotong.m3u8">山东交通FM101.1(省台)</option>
+            <option value="https://aac.sdgb.cn/jnjt.m3u8">济南交通FM103.1</option>
+            <option value="https://aac.sdgb.cn/qdjt.m3u8">青岛交通FM89.7</option>
+
+            <option value="">=====福建省｜省台+福州/厦门=====</option>
+            <option value="https://aac.fjtv.net/xinwen.m3u8">福建新闻FM103.6(省台)</option>
+            <option value="https://aac.fjtv.net/jiaotong.m3u8">福建交通FM100.7(省台)</option>
+            <option value="https://aac.fjtv.net/fzjt.m3u8">福州交通FM87.6</option>
+            <option value="https://aac.fjtv.net/xmjt.m3u8">厦门交通FM107</option>
+
+            <option value="">=====重庆市｜省台+主城=====</option>
+            <option value="https://aac.cqcb.com/xinwen.m3u8">重庆新闻FM96.8</option>
+            <option value="https://aac.cqcb.com/jiaotong.m3u8">重庆交通FM95.5</option>
+
+            <option value="">=====河南省｜省台+郑州=====</option>
+            <option value="https://aac.hntv.ha.cn/xinwen.m3u8">河南新闻FM95.4(省台)</option>
+            <option value="https://aac.hntv.ha.cn/jiaotong.m3u8">河南交通FM104.1(省台)</option>
+            <option value="https://aac.hntv.ha.cn/zzjt.m3u8">郑州交通FM91.2</option>
+
+            <option value="">=====辽宁省｜省台+沈阳/大连=====</option>
+            <option value="https://aac.lntv.cn/xinwen.m3u8">辽宁新闻FM104.5(省台)</option>
+            <option value="https://aac.lntv.cn/jiaotong.m3u8">辽宁交通FM97.5(省台)</option>
+            <option value="https://aac.lntv.cn/syjt.m3u8">沈阳交通FM98.6</option>
+            <option value="https://aac.lntv.cn/dljt.m3u8">大连交通FM93.1</option>
+
+            <option value="">=====陕西省｜省台+西安=====</option>
+            <option value="https://aac.snrtv.com/xinwen.m3u8">陕西新闻FM106.6(省台)</option>
+            <option value="https://aac.snrtv.com/jiaotong.m3u8">陕西交通FM91.6(省台)</option>
+            <option value="https://aac.snrtv.com/xajt.m3u8">西安交通FM104.3</option>
+
+            <option value="">=====广西｜省台+南宁=====</option>
+            <option value="https://aac.gxntv.cn/xinwen.m3u8">广西新闻FM91.0(省台)</option>
+            <option value="https://aac.gxntv.cn/jiaotong.m3u8">广西交通FM100.3(省台)</option>
+            <option value="https://aac.gxntv.cn/nnjt.m3u8">南宁交通FM93.0</option>
+
+            <option value="">=====云南｜省台+昆明=====</option>
+            <option value="https://aac.yntv.cn/xinwen.m3u8">云南新闻FM105.8(省台)</option>
+            <option value="https://aac.yntv.cn/jiaotong.m3u8">云南交通FM91.8(省台)</option>
+            <option value="https://aac.yntv.cn/kmjt.m3u8">昆明交通FM95.4</option>
+  </select>
+
+  <div class="status" id="status">准备就绪</div>
+
+  <div class="vol-row">
+    <span>音量</span>
+    <input type="range" class="vol" id="vol" min="0" max="100" value="70">
+  </div>
+
+  <div class="btns">
+    <button id="play">播放</button>
+    <button id="stop">停止</button>
+  </div>
+</div>
+
+<script>
+// 引入HLS.js兼容更多流
+const script = document.createElement('script');
+script.src = 'https://cdn.jsdelivr.net/npm/hls.js@1';
+document.head.appendChild(script);
+
+let audio;
+script.onload = () => {
+  audio = new Audio();
+  init();
+};
+
+function init(){
+  const station = document.getElementById('station');
+  const status = document.getElementById('status');
+  const vol = document.getElementById('vol');
+  const play = document.getElementById('play');
+  const stop = document.getElementById('stop');
+
+  vol.addEventListener('input', () => {
+    audio.volume = vol.value / 100;
+  });
+  audio.volume = vol.value / 100;
+
+  // 播放（兼容HLS）
+  play.addEventListener('click', async () => {
+    const url = station.value.trim();
+    if (!url || url.startsWith('---')) {
+      status.textContent = '请选一个电台';
+      return;
+    }
+
+    try {
+      play.disabled = true;
+      status.textContent = '加载中...';
+      audio.pause();
+
+      if (Hls.isSupported() && url.endsWith('m3u8')) {
+        const hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(audio);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          audio.play();
+          status.textContent = '🎵 正在播放';
+        });
+      } else {
+        audio.src = url;
+        await audio.play();
+        status.textContent = '🎵 正在播放';
+      }
+    } catch (e) {
+      status.textContent = '❌ 播放失败';
+      play.disabled = false;
+      console.error(e);
+    }
+  });
+
+  // 停止
+  stop.addEventListener('click', () => {
+    audio.pause();
+    audio.currentTime = 0;
+    status.textContent = '⏹ 已停止';
+    play.disabled = false;
+  });
+
+  audio.addEventListener('error', () => {
+    status.textContent = '⚠️ 链接异常';
+    play.disabled = false;
+  });
+}
+</script>
+</body>
+</html>

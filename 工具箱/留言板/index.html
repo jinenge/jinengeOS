@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>进恩哥系统留言板</title>
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:system-ui,sans-serif
+}
+
+body{
+    background:#050510;
+    background-image: linear-gradient(135deg,#101028 0%,#050510 100%);
+    color:#e0e0ff;
+    padding:16px;
+    padding-bottom:100px;
+}
+
+.container{
+    max-width:700px;
+    margin:0 auto
+}
+
+.title{
+    text-align:center;
+    font-size:26px;
+    margin-bottom:16px;
+    color:#0ff;
+    text-shadow:0 0 10px #0ff,0 0 25px #00f;
+}
+
+/* 顶部发送区 */
+.send-box{
+    background:rgba(20,20,50,.7);
+    border:1px solid #0ff8;
+    border-radius:16px;
+    padding:14px;
+    margin-bottom:16px;
+    backdrop-filter:blur(10px)
+}
+
+.send-box input,
+.send-box textarea{
+    width:100%;
+    background:#111234;
+    border:1px solid #0ff6;
+    border-radius:10px;
+    padding:12px;
+    color:#fff;
+    margin-bottom:10px;
+    outline:none
+}
+
+.send-box textarea{
+    height:80px;
+    resize:none;
+}
+
+.send-box button{
+    width:100%;
+    padding:13px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(90deg,#00f,#0ff);
+    color:#000;
+    font-weight:bold;
+    box-shadow:0 0 15px #0ff8;
+    cursor:pointer
+}
+
+/* 聊天列表 */
+.chat-list{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+}
+
+/* 一条留言（楼主） */
+.msg{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:8px;
+}
+
+/* 楼主昵称 + IP时间 */
+.msg-head{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12px;
+    color:#88a;
+    padding:0 8px;
+}
+
+.msg-head .nick{
+    color:#0ff;
+    font-weight:bold;
+}
+
+/* 楼主气泡 */
+.bubble-main{
+    max-width:78%;
+    background:linear-gradient(135deg,#1a1a44,#222266);
+    border:1px solid #0ff6;
+    border-radius:18px 4px 18px 18px;
+    padding:12px 14px;
+    color:#e8f0ff;
+    line-height:1.5;
+    word-break:break-word;
+    box-shadow:0 4px 14px #00000044;
+}
+
+/* 回复区域 */
+.reply-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    width:100%;
+    padding-right:40px;
+}
+
+/* 回复气泡 */
+.reply{
+    max-width:78%;
+    background:rgba(255,255,255,.06);
+    border:1px solid #0ff3;
+    border-radius:4px 18px 18px 18px;
+    padding:10px 12px;
+    color:#dfe8ff;
+    line-height:1.45;
+    word-break:break-word;
+}
+
+.reply .reply-meta{
+    font-size:11px;
+    color:#88a;
+    margin-bottom:4px;
+}
+
+/* 回复按钮 */
+.reply-btn{
+    margin-top:4px;
+    padding:10px 14px;
+    background:#00ffff22;
+    border:1px solid #0ff;
+    border-radius:8px;
+    color:#0ff;
+    cursor:pointer;
+    font-size:14px;
+    min-height:44px;
+    -webkit-tap-highlight-color:rgba(0,0,0,0);
+    align-self:flex-start;
+}
+
+/* 内置回复弹窗 */
+.overlay{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    background:rgba(0,0,0,0.65);
+    display:none;
+    z-index:9999;
+}
+
+.reply-modal{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:86%;
+    max-width:420px;
+    background:#444448;
+    border-radius:14px;
+    padding:20px;
+}
+
+.reply-modal h3{
+    color:#eee;
+    margin-bottom:14px;
+    font-size:18px;
+}
+
+.reply-modal input{
+    width:100%;
+    padding:12px;
+    background:#222;
+    border:none;
+    border-radius:8px;
+    color:#fff;
+    margin-bottom:16px;
+    outline:none
+}
+
+.modal-buttons{
+    display:flex;
+    gap:10px;
+    justify-content:flex-end;
+}
+
+.modal-buttons button{
+    padding:9px 18px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:15px;
+}
+
+.modal-cancel{
+    background:transparent;
+    color:#88cccc;
+}
+
+.modal-ok{
+    background:#28b952;
+    color:#fff;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="title">🌃 进恩哥系统留言板</div>
+
+    <div class="send-box">
+        <input name="nick" id="nick" placeholder="输入昵称">
+        <textarea name="msg" id="msg" placeholder="输入消息…"></textarea>
+        <button onclick="send()">发送消息</button>
+    </div>
+
+    <div class="chat-list" id="list"></div>
+</div>
+
+<!-- 内置回复弹窗 -->
+<div class="overlay" id="replyOverlay">
+    <div class="reply-modal">
+        <h3>回复内容：</h3>
+        <input id="replyInput" placeholder="请输入回复内容">
+        <div class="modal-buttons">
+            <button class="modal-cancel" id="modalCancel">取消</button>
+            <button class="modal-ok" id="modalOk">回复</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentReplyMid = null;
+
+function load(){
+    fetch("list.php").then(r=>r.text()).then(h=>{
+        document.getElementById("list").innerHTML = h;
+    });
+}
+
+function send(){
+    let n = document.getElementById("nick").value || "匿名";
+    let t = document.getElementById("msg").value;
+
+    if(!t) return;
+
+    let fd = new FormData();
+    fd.append("nick", n);
+    fd.append("msg", t);
+
+    fetch("post.php", {
+        method:"POST",
+        body:fd
+    }).then(()=>{
+        document.getElementById("msg").value = "";
+        load();
+    });
+}
+
+// 打开回复弹窗
+window.reply = function(mid){
+    currentReplyMid = mid;
+    document.getElementById("replyInput").value = "";
+    document.getElementById("replyOverlay").style.display = "block";
+    document.getElementById("replyInput").focus();
+}
+
+// 关闭弹窗
+function closeModal(){
+    document.getElementById("replyOverlay").style.display = "none";
+    currentReplyMid = null;
+}
+
+// 提交回复
+function submitReply(){
+    let val = document.getElementById("replyInput").value.trim();
+
+    if(!val || !currentReplyMid){
+        closeModal();
+        return;
+    }
+
+    let fd = new FormData();
+    fd.append("mid", currentReplyMid);
+    fd.append("content", val);
+
+    fetch("reply.php", {
+        method:"POST",
+        body:fd
+    }).then(()=>{
+        closeModal();
+        load();
+    });
+}
+
+// 弹窗事件
+document.getElementById("modalCancel").addEventListener("click", closeModal);
+document.getElementById("modalOk").addEventListener("click", submitReply);
+
+document.getElementById("replyOverlay").addEventListener("click", function(e){
+    if(e.target === this) closeModal();
+});
+
+load();
+setInterval(load, 4000);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,364 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统测试页面 - 请勿触碰</title>
+    <style>
+        :root {
+            --bg-color: #f0f0f0;
+            --text-color: #333;
+            --accent: #007bff;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            transition: all 0.5s ease;
+            cursor: crosshair;
+        }
+
+        h1 { font-size: 2rem; margin-bottom: 10px; }
+        p { max-width: 600px; text-align: center; line-height: 1.6; }
+
+        /* 彩蛋 1: 假装严肃的按钮 */
+        #do-not-click {
+            padding: 15px 30px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 0 #c0392b;
+            transition: transform 0.1s;
+        }
+        #do-not-click:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        /* 彩蛋 2: 逃跑的按钮 */
+        #runaway-btn {
+            position: absolute;
+            padding: 10px 20px;
+            background: #2ed573;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            top: 10%;
+            right: 10%;
+            transition: all 0.2s ease-out;
+            z-index: 100;
+        }
+
+        /* 彩蛋 3: 隐形文字 */
+        .invisible-text {
+            color: var(--bg-color);
+            user-select: none;
+            cursor: help;
+        }
+        .invisible-text:hover {
+            color: #ff00ff;
+            font-weight: bold;
+            transform: rotate(-10deg) scale(1.2);
+            transition: 0.3s;
+        }
+
+        /* 彩蛋 4: 康威定理跑马灯 */
+        #marquee-container {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: black;
+            color: lime;
+            font-family: monospace;
+            padding: 5px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            z-index: 999;
+        }
+        
+        /* 彩蛋 5: 鼠标跟随特效容器 */
+        .trail {
+            position: absolute;
+            height: 10px;
+            width: 10px;
+            border-radius: 50%;
+            background: rgba(0, 0, 255, 0.5);
+            pointer-events: none;
+            animation: fade 1s linear forwards;
+        }
+
+        @keyframes fade {
+            to { opacity: 0; transform: scale(0); }
+        }
+
+        /* 彩蛋 6: 疯狂模式类 */
+        body.crazy-mode {
+            animation: rainbow-bg 2s infinite;
+            font-family: 'Comic Sans MS', cursive;
+        }
+        body.crazy-mode * {
+            animation: shake 0.5s infinite;
+        }
+
+        @keyframes rainbow-bg {
+            0% { background-color: red; }
+            20% { background-color: orange; }
+            40% { background-color: yellow; }
+            60% { background-color: green; }
+            80% { background-color: blue; }
+            100% { background-color: violet; }
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        /* 隐藏的图片 */
+        #secret-img {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 300px;
+            border: 5px solid gold;
+            z-index: 2000;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+        #secret-img.show {
+            transform: translate(-50%, -50%) scale(1) rotate(360deg);
+        }
+
+        /* 控制台提示样式 */
+        .console-hint {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 正常内容 -->
+    <h1 id="main-title">系统正在初始化...</h1>
+    <p>这是一个非常严肃的测试页面。请不要随意点击任何按钮，也不要尝试寻找不存在的秘密。</p>
+    <p>进度：<span id="progress">0</span>%</p>
+    
+    <button id="do-not-click">⚠️ 绝对不要点击此按钮 ⚠️</button>
+    
+    <p class="console-hint">按 F12 查看开发者控制台获取“重要”信息</p>
+
+    <!-- 隐形文字彩蛋 -->
+    <div style="margin-top: 50px;">
+        这里什么也没有 <span class="invisible-text">除非你选中我或者把鼠标放上来！我是隐形的！</span> 真的没有。
+    </div>
+
+    <!-- 逃跑按钮 -->
+    <button id="runaway-btn">来抓我呀!</button>
+
+    <!-- 底部跑马灯 -->
+    <div id="marquee-container">
+        <marquee scrollamount="15" direction="left">
+            ⚠️ 警告：检测到用户智商过高，系统即将崩溃... ⚠️ 其实并没有崩溃，只是在开玩笑... ⚠️ 你的鼠标很漂亮... ⚠️ 别看了，后面没东西了... ⚠️ 
+        </marquee>
+    </div>
+
+    <!-- 隐藏图片 (使用占位图) -->
+    <img id="secret-img" src="https://media.tenor.com/On7kvXhzml4AAAAj/minion-bob.gif" alt="Secret">
+
+    <script>
+        // --- 彩蛋 1: 进度条乱跳 ---
+        const progressEl = document.getElementById('progress');
+        let progress = 0;
+        setInterval(() => {
+            if(Math.random() > 0.7) {
+                progress += Math.floor(Math.random() * 5);
+                if(progress > 100) progress = 0;
+                progressEl.innerText = progress;
+                if(progress === 69) {
+                    document.body.style.transform = "rotate(180deg)";
+                    setTimeout(() => document.body.style.transform = "rotate(0deg)", 1000);
+                }
+            }
+        }, 200);
+
+        // --- 彩蛋 2: 绝对不要点的按钮 ---
+        const doomBtn = document.getElementById('do-not-click');
+        let clickCount = 0;
+        doomBtn.addEventListener('click', () => {
+            clickCount++;
+            const messages = [
+                "我说了不要点！",
+                "再点一次试试？",
+                "你真的很有毅力...",
+                "好吧，你赢了，准备起飞！",
+                "3...", "2...", "1..."
+            ];
+            
+            if(clickCount <= 5) {
+                doomBtn.innerText = messages[clickCount];
+                doomBtn.style.backgroundColor = `hsl(${Math.random()*360}, 70%, 50%)`;
+            } else if (clickCount === 6) {
+                document.body.classList.add('crazy-mode');
+                doomBtn.innerText = "🤪 疯狂模式启动！ 🤪";
+                playAudio(); // 尝试播放声音（浏览器可能拦截）
+            } else {
+                alert("够了！刷新页面吧！");
+                location.reload();
+            }
+        });
+
+        // --- 彩蛋 3: 逃跑的按钮 ---
+        const runaway = document.getElementById('runaway-btn');
+        runaway.addEventListener('mouseover', () => {
+            const x = Math.random() * (window.innerWidth - 100);
+            const y = Math.random() * (window.innerHeight - 100);
+            runaway.style.left = x + 'px';
+            runaway.style.top = y + 'px';
+            runaway.style.position = 'fixed'; // 确保它能满屏跑
+            runaway.innerText = "抓不到略略略";
+        });
+        runaway.addEventListener('click', () => {
+            alert("怎么可能？！你是怎么做到的？你是黑客吗？");
+            document.title = "被黑了的页面";
+        });
+
+        // --- 彩蛋 4: 鼠标拖尾 ---
+        document.addEventListener('mousemove', (e) => {
+            const trail = document.createElement('div');
+            trail.className = 'trail';
+            trail.style.left = e.pageX + 'px';
+            trail.style.top = e.pageY + 'px';
+            trail.style.background = `hsl(${Math.random()*360}, 100%, 50%)`;
+            document.body.appendChild(trail);
+            setTimeout(() => trail.remove(), 1000);
+        });
+
+        // --- 彩蛋 5: Konami Code (上上下下左右左右BA) ---
+        const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+        let konamiIndex = 0;
+        document.addEventListener('keydown', (e) => {
+            if(e.key === konamiCode[konamiIndex]) {
+                konamiIndex++;
+                if(konamiIndex === konamiCode.length) {
+                    activateSuperMode();
+                    konamiIndex = 0;
+                }
+            } else {
+                konamiIndex = 0;
+            }
+        });
+
+        function activateSuperMode() {
+            alert("🎮 作弊码激活！上帝模式开启！");
+            document.body.innerHTML = "<h1 style='font-size:5rem; color:gold;'>YOU WIN!</h1><p>你发现了终极彩蛋。</p><img src='https://media.tenor.com/images/6d630936325033633333333333333333/tenor.gif' />";
+            document.body.style.background = "black";
+            // 创建很多漂浮的表情
+            setInterval(() => {
+                const emoji = document.createElement('div');
+                emoji.innerText = ['🍕','🚀','👽','💩','🎉'][Math.floor(Math.random()*5)];
+                emoji.style.position = 'fixed';
+                emoji.style.left = Math.random() * 100 + 'vw';
+                emoji.style.top = '-50px';
+                emoji.style.fontSize = '2rem';
+                emoji.style.transition = 'top 5s linear';
+                document.body.appendChild(emoji);
+                setTimeout(() => emoji.style.top = '110vh', 100);
+                setTimeout(() => emoji.remove(), 5000);
+            }, 200);
+        }
+
+        // --- 彩蛋 6: 标题栏恶作剧 ---
+        let titleInterval;
+        document.addEventListener('mouseleave', () => {
+            document.title = "喂！别走啊！回来！";
+        });
+        document.addEventListener('mouseenter', () => {
+            document.title = "系统测试页面 - 请勿触碰";
+        });
+
+        // --- 彩蛋 7: 右键菜单拦截 ---
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            alert("右键禁用！\n...\n.\n.\n骗你的，这只是个普通的alert。");
+        });
+
+        // --- 彩蛋 8: 控制台日志 ---
+        console.log("%c 嘿！开发者你好！ ", "background: #000; color: #fff; font-size: 20px; padding: 10px;");
+        console.log("如果你在看这里，说明你很聪明。");
+        console.log("输入 'document.body.classList.add(\"crazy-mode\")' 可以手动开启疯狂模式。");
+        console.log("或者输入 'alert(\"Hello World\")' 来测试这个世界是否真实。");
+        
+        // --- 彩蛋 9: 长时间不动 ---
+        let idleTime = 0;
+        setInterval(() => {
+            idleTime++;
+            if(idleTime > 10) { // 10秒不动
+                document.body.style.filter = "grayscale(100%) blur(2px)";
+                document.querySelector('h1').innerText = "你睡着了吗？";
+            }
+        }, 1000);
+        document.onmousemove = resetIdle;
+        document.onkeypress = resetIdle;
+        function resetIdle() {
+            idleTime = 0;
+            document.body.style.filter = "none";
+            document.querySelector('h1').innerText = "系统正在初始化...";
+        }
+
+        // --- 彩蛋 10: 点击背景召唤神图 ---
+        let bgClicks = 0;
+        document.body.addEventListener('click', (e) => {
+            if(e.target === document.body) {
+                bgClicks++;
+                if(bgClicks === 5) {
+                    const img = document.getElementById('secret-img');
+                    img.classList.add('show');
+                    setTimeout(() => img.classList.remove('show'), 3000);
+                }
+            }
+        });
+
+        // 简单的音频上下文（为了避免自动播放策略问题，仅在交互后触发）
+        function playAudio() {
+            // 这里只是模拟，实际浏览器需要用户交互才能播放声音
+            // 如果要真实播放，需要引入 Audio 对象
+            console.log("🔊 哔哔哔！疯狂的声音！");
+        }
+
+        // --- 彩蛋 11: 日期恶作剧 (如果是特定日期) ---
+        const today = new Date();
+        if(today.getMonth() === 3 && today.getDate() === 1) { // 4月1日
+            document.body.innerHTML = "<h1>404 NOT FOUND</h1><p>你的电脑已经自毁了。</p>";
+            document.body.style.background = "blue";
+            document.body.style.color = "white";
+        }
+
+    </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"271840db97984e64bfedbd32b7ac485f","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
