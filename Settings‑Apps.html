@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>应用</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow-x:hidden;background:#070014;color:#fff;font-family:system-ui,-apple-system,sans-serif;min-height:100vh}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(circle at 15% 15%,rgba(121,40,202,.35),transparent 26%),
+    radial-gradient(circle at 85% 30%,rgba(255,0,128,.25),transparent 28%),
+    radial-gradient(circle at 40% 85%,rgba(0,198,255,.28),transparent 32%),
+    linear-gradient(180deg,#070014 0%,#0a0024 45%,#050020 100%);
+}
+.appbar{
+  position:sticky;top:0;z-index:20;height:56px;
+  display:flex;align-items:center;gap:12px;padding:0 10px;
+  background:rgba(7,0,20,.78);
+  border-bottom:1px solid rgba(160,80,255,.25);
+  box-shadow:0 6px 24px rgba(121,40,202,.35);
+}
+.back-btn,.add-btn{
+  min-width:44px;min-height:44px;border:none;border-radius:50%;
+  background:rgba(255,255,255,.08);color:#fff;font-size:20px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 12px rgba(160,80,255,.45),inset 0 0 10px rgba(255,255,255,.06);
+}
+.page-title{
+  flex:1;font-size:19px;font-weight:600;
+  text-shadow:0 0 10px rgba(255,255,255,.55),0 0 22px rgba(160,80,255,.45);
+}
+.container{
+  position:relative;z-index:10;
+  max-width:min(720px,calc(100vw - 20px));
+  margin:14px auto 0;padding:0 10px 40px;
+}
+.list{
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(160,80,255,.18);
+  border-radius:18px;
+  padding:6px 0;
+  box-shadow:0 0 24px rgba(121,40,202,.22),inset 0 0 18px rgba(255,255,255,.02);
+}
+.app-row{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:64px;
+  border-bottom:1px dashed rgba(255,255,255,.08);
+  transition:.25s;
+}
+.app-row:last-child{border-bottom:none}
+.app-row:hover{
+  background:rgba(255,255,255,.055);
+  box-shadow:0 0 14px rgba(255,0,128,.35),0 0 22px rgba(0,198,255,.25);
+}
+.avatar{
+  width:48px;height:48px;border-radius:10px;overflow:hidden;flex-shrink:0;
+  border:1px solid rgba(160,80,255,.35);
+  box-shadow:0 0 12px rgba(160,80,255,.45);
+  background:#1a0033;
+}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.app-name{
+  flex:1;font-size:15px;color:#fff;
+  text-shadow:0 0 8px rgba(255,255,255,.4);
+  word-break:break-all;
+}
+.icon-btn{
+  min-width:44px;min-height:44px;border:none;background:transparent;
+  color:#ff88cc;font-size:20px;cursor:pointer;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  text-shadow:0 0 10px rgba(255,136,204,.65);
+}
+.empty{
+  text-align:center;padding:40px 10px;color:#9aa7d4;font-size:14px;
+  text-shadow:0 0 8px rgba(102,229,255,.35);
+}
+.modal-mask{
+  position:fixed;inset:0;background:rgba(0,0,0,.72);
+  display:none;align-items:center;justify-content:center;z-index:50;
+  padding:12px;
+}
+.modal-mask.show{display:flex}
+.modal-box{
+  width:100%;max-width:340px;
+  background:linear-gradient(180deg,#12002a,#070014);
+  border:1px solid rgba(160,80,255,.3);
+  border-radius:20px;padding:20px;
+  box-shadow:0 0 30px rgba(121,40,202,.45),inset 0 0 20px rgba(255,255,255,.04);
+}
+.modal-title{
+  font-size:17px;font-weight:600;margin-bottom:16px;
+  text-shadow:0 0 10px rgba(255,255,255,.55),0 0 18px rgba(160,80,255,.45);
+}
+.form-item{margin-bottom:12px}
+.form-item label{
+  display:block;font-size:13px;color:#9aa7d4;margin-bottom:6px;
+  text-shadow:0 0 6px rgba(102,229,255,.35);
+}
+.form-item input{
+  width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(160,80,255,.25);
+  background:rgba(255,255,255,.05);color:#fff;font-size:14px;outline:none;
+  box-shadow:inset 0 0 10px rgba(121,40,202,.15);
+}
+.form-item input:focus{border-color:#ff0080;box-shadow:0 0 12px rgba(255,0,128,.45)}
+.modal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+.btn{
+  min-width:72px;min-height:44px;padding:0 16px;border:none;border-radius:10px;
+  font-size:14px;cursor:pointer;color:#fff;font-weight:500;
+}
+.btn-cancel{background:#2a1a44}
+.btn-ok{
+  background:linear-gradient(90deg,#7928ca,#ff0080);
+  box-shadow:0 0 14px rgba(255,0,128,.55);
+}
+.btn-danger{
+  background:#c02840;
+}
+</style>
+</head>
+<body>
+<div class="appbar">
+  <button class="back-btn" onclick="goBack()">←</button>
+  <div class="page-title">应用</div>
+  <button class="add-btn" onclick="openAddModal()">+</button>
+</div>
+<div class="container">
+  <div class="list" id="appList"></div>
+  <div class="empty" id="noApp" style="display:none">没有已安装的应用</div>
+</div>
+<!-- 添加应用弹窗 -->
+<div class="modal-mask" id="addModal">
+  <div class="modal-box">
+    <div class="modal-title">添加应用</div>
+    <div class="form-item"><label>图标URL</label><input id="icon" type="url" /></div>
+    <div class="form-item"><label>名称</label><input id="name" type="text" /></div>
+    <div class="form-item"><label>URL</label><input id="url" type="url" /></div>
+    <div class="form-item"><label>状态栏背景色</label><input id="color1" type="color" /></div>
+    <div class="form-item"><label>导航栏背景色</label><input id="color2" type="color" /></div>
+    <div class="form-item"><label>状态栏文本色</label><input id="textColor" type="color" /></div>
+    <div class="modal-btns">
+      <button class="btn btn-cancel" onclick="closeAddModal()">取消</button>
+      <button class="btn btn-ok" onclick="addTheApp()">确认</button>
+    </div>
+  </div>
+</div>
+<!--卸载确认弹窗 -->
+<div class="modal-mask" id="uninstallModal">
+  <div class="modal-box">
+    <div class="modal-title" id="uninstallTitle">确认卸载</div>
+    <p style="margin-bottom:10px;color:#ddd;">卸载后该应用数据将会被移除，无法恢复。</p>
+    <div class="modal-btns">
+      <button class="btn btn-cancel" onclick="closeUninstallModal()">取消</button>
+      <button class="btn btn-danger" onclick="doUninstall()">确认卸载</button>
+    </div>
+  </div>
+</div>
+<script>
+// =========统一返回函数=========
+function goBack(){
+  if(window.parent !== window){
+    parent.postMessage(JSON.stringify({type:"backPage"}),"*");
+  }
+}
+window.addEventListener('popstate',function(e){
+  e.preventDefault();
+  goBack();
+  history.pushState(null, null, location.href);
+});
+history.pushState(null, null, location.href);
+
+function gebi(id){return document.getElementById(id)}
+let pendingUninstallIndex = null;
+
+function postToast(msg){
+  window.parent.postMessage(JSON.stringify({type:"toast",message:msg}),"/");
+}
+function addApp(icon,name,url,c1,c2,tc){
+  window.parent.postMessage(JSON.stringify({type:"addApp",icon,name,url,color1:c1,color2:c2,textColor:tc}),"/");
+}
+function clickTrash(index, appName){
+  pendingUninstallIndex = index;
+  gebi("uninstallTitle").innerText = `确认卸载「${appName}」`;
+  gebi("uninstallModal").classList.add("show");
+}
+function closeUninstallModal(){
+  gebi("uninstallModal").classList.remove("show");
+  pendingUninstallIndex = null;
+}
+function doUninstall(){
+  if(pendingUninstallIndex === null) return;
+  window.parent.postMessage(JSON.stringify({type:"removeApp",index:pendingUninstallIndex}),"/");
+  closeUninstallModal();
+  freshApps();
+}
+function openThirdApp(url){
+  window.parent.postMessage(JSON.stringify({type:"openThirdApp",appUrl:url}),"/");
+}
+function openAddModal(){
+  gebi("addModal").classList.add("show");
+  gebi("icon").value="https://";
+  gebi("name").value="";
+  gebi("url").value="https://";
+  gebi("color1").value="#000000";
+  gebi("color2").value="#000000";
+  gebi("textColor").value="#ffffff";
+}
+function closeAddModal(){gebi("addModal").classList.remove("show")}
+function freshApps(){
+  const apps=JSON.parse(localStorage.getItem("apps")||"[]");
+  const list=gebi("appList");
+  const tip=gebi("noApp");
+  if(!apps.length){list.innerHTML="";tip.style.display="block";return}
+  tip.style.display="none";
+  list.innerHTML=apps.map((a,i)=>`
+    <div class="app-row">
+      <div class="avatar"><img loading="lazy" src="${a.icon}" onerror="this.style.background='#1a0033'" /></div>
+      <div class="app-name">${a.name}</div>
+      <button class="icon-btn" onclick="openThirdApp('${a.url}')">▶</button>
+      <button class="icon-btn" onclick="clickTrash(${i},'${a.name}')">🗑</button>
+    </div>`).join("");
+}
+function addTheApp(){
+  const icon=gebi("icon").value.trim();
+  const name=gebi("name").value.trim();
+  const url=gebi("url").value.trim();
+  if(!icon||!name||!url){postToast("请将表单填充完整");return}
+  addApp(icon,name,url,gebi("color1").value,gebi("color2").value,gebi("textColor").value);
+  closeAddModal();
+  freshApps();
+}
+window.onload=freshApps;
+</script>
+</body>
+</html>

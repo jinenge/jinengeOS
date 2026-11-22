@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>通讯录</title>
+<style>
+*{
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  margin:0;
+  padding:0;
+}
+html, body {
+  background:#ffffff;
+  color:#111;
+  height:100%;
+  overflow:hidden;
+}
+.container {
+  max-width: 480px;
+  margin: 0 auto;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  position:relative;
+  overflow:hidden;
+}
+
+.top-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px 20px 8px;
+  flex-shrink:0;
+}
+.page-title{
+  font-size:34px;
+  color:#4080ff;
+  font-weight:600;
+}
+.top-right{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+.add-btn,.setting-btn{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:#4080ff;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  cursor:pointer;
+}
+
+/* 联系人列表 */
+.contact-wrap{
+  flex:1;
+  overflow-y:auto;
+  padding:8px 20px;
+}
+.contact-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 0;
+  border-bottom:1px solid #f1f1f1;
+  user-select:none;
+}
+.contact-info .name{
+  font-size:17px;
+  margin-bottom:4px;
+}
+.contact-info .phone{
+  font-size:14px;
+  color:#666;
+}
+.empty-tip{
+  text-align:center;
+  color:#aaa;
+  padding:40px 0;
+}
+
+/* 操作弹窗：拨号 / 发短信 */
+.action-mask{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.4);
+  display:none;
+  z-index:98;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.action-box{
+  width:100%;
+  max-width:320px;
+  background:#fff;
+  border-radius:16px;
+  padding:22px;
+  text-align:center;
+}
+.action-tip{
+  font-size:16px;
+  margin-bottom:20px;
+}
+.action-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.action-row button{
+  flex:1;
+  padding:11px;
+  border:none;
+  border-radius:10px;
+  font-size:15px;
+  cursor:pointer;
+}
+.btn-call{
+  background:#28b952;
+  color:#fff;
+}
+.btn-sms{
+  background:#4080ff;
+  color:#fff;
+}
+.btn-cancel{
+  background:#eee;
+  color:#333;
+}
+
+/* 添加联系人弹窗 */
+.pop-mask{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.4);
+  display:none;
+  z-index:99;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.pop-box{
+  width:100%;
+  max-width:360px;
+  background:#fff;
+  border-radius:16px;
+  padding:20px;
+}
+.pop-title{
+  font-size:18px;
+  font-weight:bold;
+  margin-bottom:16px;
+  text-align:center;
+}
+.pop-box input{
+  width:100%;
+  padding:12px;
+  border:1px solid #ddd;
+  border-radius:10px;
+  margin-bottom:12px;
+  font-size:16px;
+}
+.pop-row{
+  display:flex;
+  gap:12px;
+  margin-top:8px;
+}
+.pop-row button{
+  flex:1;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+  cursor:pointer;
+}
+.btn-cancel{
+  background:#eee;
+  color:#333;
+}
+.btn-save{
+  background:#4080ff;
+  color:#fff;
+}
+
+/* 删除确认弹窗 */
+.del-mask{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.4);
+  display:none;
+  z-index:100;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.del-box{
+  width:100%;
+  max-width:320px;
+  background:#fff;
+  border-radius:16px;
+  padding:22px;
+  text-align:center;
+}
+.del-txt{
+  font-size:16px;
+  margin-bottom:20px;
+}
+.del-row{
+  display:flex;
+  gap:10px;
+}
+.del-cancel{
+  background:#eee;
+}
+.del-ok{
+  background:#f44336;
+  color:#fff;
+}
+.del-row button{
+  flex:1;
+  padding:11px;
+  border:none;
+  border-radius:10px;
+  font-size:15px;
+  cursor:pointer;
+}
+
+/* 设置弹窗 */
+.setting-mask{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.4);
+  display:none;
+  z-index:101;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.setting-box{
+  width:100%;
+  max-width:380px;
+  background:#fff;
+  border-radius:16px;
+  padding:20px;
+  max-height:80vh;
+  overflow-y:auto;
+}
+.set-title{
+  font-size:18px;
+  font-weight:bold;
+  margin-bottom:16px;
+  text-align:center;
+}
+.set-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 0;
+  border-bottom:1px solid #f1f1f1;
+}
+.set-item-left{
+  font-size:15px;
+}
+.set-item select{
+  padding:6px 8px;
+  border:1px solid #ddd;
+  border-radius:8px;
+}
+.toggle{
+  width:44px;
+  height:24px;
+  background:#ddd;
+  border-radius:999px;
+  position:relative;
+  cursor:pointer;
+  transition:0.2s;
+}
+.toggle.on{
+  background:#4080ff;
+}
+.toggle::after{
+  content:"";
+  width:18px;
+  height:18px;
+  background:#fff;
+  border-radius:50%;
+  position:absolute;
+  top:3px;
+  left:3px;
+  transition:0.2s;
+}
+.toggle.on::after{
+  left:23px;
+}
+.set-btn{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  margin-top:10px;
+  font-size:15px;
+  cursor:pointer;
+}
+.btn-export{
+  background:#28b952;
+  color:#fff;
+}
+.btn-import{
+  background:#4080ff;
+  color:#fff;
+}
+.btn-clearall{
+  background:#f44336;
+  color:#fff;
+}
+.set-close{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  margin-top:12px;
+  background:#eee;
+  font-size:15px;
+  cursor:pointer;
+}
+#fileInput{
+  display:none;
+}
+
+/* 底部导航 */
+.bottom-nav{
+  display:flex;
+  border-top:1px solid #eee;
+  padding:10px 0 calc(10px + env(safe-area-inset-bottom));
+  background:#fff;
+  flex-shrink:0;
+}
+.nav-item{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  font-size:12px;
+  color:#888;
+  cursor:pointer;
+}
+.nav-item.active{
+  color:#4080ff;
+}
+.nav-item .icon{
+  font-size:22px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="top-bar">
+    <div class="page-title">通讯录</div>
+    <div class="top-right">
+      <div class="setting-btn" onclick="openSetting()">⚙</div>
+      <div class="add-btn" onclick="openAdd()">+</div>
+    </div>
+  </div>
+
+  <div class="contact-wrap" id="contactWrap"></div>
+
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="location.href='phone.html'">
+      <div class="icon">📞</div>
+      <div>拨号</div>
+    </div>
+    <div class="nav-item active">
+      <div class="icon">👥</div>
+      <div>通讯录</div>
+    </div>
+    <div class="nav-item" onclick="location.href='mms.html'">
+      <div class="icon">💬</div>
+      <div>短信</div>
+    </div>
+  </div>
+</div>
+
+<!-- 操作弹窗：拨号 / 发短信 -->
+<div class="action-mask" id="actionMask" onclick="closeAction()">
+  <div class="action-box" onclick="event.stopPropagation()">
+    <div class="action-tip" id="actionTip"></div>
+    <div class="action-row">
+      <button class="btn-call" onclick="callNumber()">拨号</button>
+      <button class="btn-sms" onclick="sendSms()">发短信</button>
+      <button class="btn-cancel" onclick="closeAction()">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 添加联系人弹窗 -->
+<div class="pop-mask" id="addMask" onclick="closeAdd()">
+  <div class="pop-box" onclick="event.stopPropagation()">
+    <div class="pop-title">新建联系人</div>
+    <input id="cName" placeholder="姓名">
+    <input id="cPhone" placeholder="手机号">
+    <div class="pop-row">
+      <button class="btn-cancel" onclick="closeAdd()">取消</button>
+      <button class="btn-save" onclick="saveContact()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 删除确认弹窗 -->
+<div class="del-mask" id="delMask" onclick="closeDel()">
+  <div class="del-box" onclick="event.stopPropagation()">
+    <div class="del-txt" id="delTip">确定删除该联系人？</div>
+    <div class="del-row">
+      <button class="del-cancel" onclick="closeDel()">取消</button>
+      <button class="del-ok" onclick="doDelete()">删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 设置弹窗 -->
+<div class="setting-mask" id="setMask" onclick="closeSetting()">
+  <div class="setting-box" onclick="event.stopPropagation()">
+    <div class="set-title">通讯录设置</div>
+    <div class="set-item">
+      <div class="set-item-left">排序方式</div>
+      <select id="sortType" onchange="saveSetting()">
+        <option value="name">按姓名</option>
+        <option value="time">按添加时间</option>
+      </select>
+    </div>
+    <div class="set-item">
+      <div class="set-item-left">只显示有号码联系人</div>
+      <div class="toggle" id="toggleShowPhone" onclick="toggleSet('showOnlyPhone')"></div>
+    </div>
+    <div class="set-item">
+      <div class="set-item-left">自动合并重复联系人</div>
+      <div class="toggle" id="toggleMerge" onclick="toggleSet('autoMerge')"></div>
+    </div>
+    <button class="set-btn btn-export" onclick="exportContact()">导出备份</button>
+    <button class="set-btn btn-import" onclick="triggerImport()">导入联系人</button>
+    <input type="file" id="fileInput" accept=".json" onchange="importContact(this)">
+    <button class="set-btn btn-clearall" onclick="clearAllContact()">清空全部联系人</button>
+    <button class="set-close" onclick="closeSetting()">关闭</button>
+  </div>
+</div>
+
+<script>
+let contactList = JSON.parse(localStorage.getItem("contactList") || "[]");
+let setConfig = JSON.parse(localStorage.getItem("contactSet") || JSON.stringify({
+  sortType:"name",
+  showOnlyPhone:false,
+  autoMerge:false
+}));
+let currentIndex = null;
+let delIndex = null;
+const LONG_PRESS_TIME = 700;
+let pressTimer = null;
+let touchStartX = 0;
+let touchStartY = 0;
+
+// 加载设置到UI
+function loadSetUI(){
+  document.getElementById("sortType").value = setConfig.sortType;
+  setConfig.showOnlyPhone ? document.getElementById("toggleShowPhone").classList.add("on") : document.getElementById("toggleShowPhone").classList.remove("on");
+  setConfig.autoMerge ? document.getElementById("toggleMerge").classList.add("on") : document.getElementById("toggleMerge").classList.remove("on");
+}
+function saveSetting(){
+  setConfig.sortType = document.getElementById("sortType").value;
+  localStorage.setItem("contactSet",JSON.stringify(setConfig));
+  render();
+}
+function toggleSet(key){
+  setConfig[key] = !setConfig[key];
+  localStorage.setItem("contactSet",JSON.stringify(setConfig));
+  loadSetUI();
+  render();
+}
+
+// 合并重复联系人
+function mergeRepeat(){
+  if(!setConfig.autoMerge) return;
+  let map = {};
+  contactList.forEach(item=>{
+    let k = item.phone;
+    if(map[k]) return;
+    map[k] = item;
+  })
+  contactList = Object.values(map);
+  saveContactList();
+}
+function saveContactList(){
+  localStorage.setItem("contactList",JSON.stringify(contactList));
+}
+
+function render(){
+  mergeRepeat();
+  let list = [...contactList];
+  if(setConfig.showOnlyPhone){
+    list = list.filter(i=>i.phone && i.phone.trim()!="");
+  }
+  if(setConfig.sortType === "name"){
+    list.sort((a,b)=>a.name.localeCompare(b.name,"zh-CN"));
+  }else{
+    list.sort((a,b)=>b.timeStamp - a.timeStamp);
+  }
+  const wrap = document.getElementById("contactWrap");
+  if(list.length === 0){
+    wrap.innerHTML = `<div class="empty-tip">暂无联系人，点右上角 + 添加</div>`;
+    return;
+  }
+  let html = "";
+  list.forEach((item,idx)=>{
+    html += `
+    <div class="contact-item" data-idx="${idx}" data-realidx="${contactList.indexOf(item)}">
+      <div class="contact-info">
+        <div class="name">${item.name}</div>
+        <div class="phone">${item.phone}</div>
+      </div>
+    </div>
+    `
+  })
+  wrap.innerHTML = html;
+
+  document.querySelectorAll(".contact-item").forEach(el=>{
+    const realIdx = Number(el.dataset.realidx);
+    el.addEventListener("touchstart",(e)=>{
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      pressTimer = setTimeout(()=>{
+        delIndex = realIdx;
+        document.getElementById("delTip").innerText = `确定删除【${contactList[realIdx].name}】？`;
+        document.getElementById("delMask").style.display = "flex";
+      },LONG_PRESS_TIME)
+    })
+    el.addEventListener("touchmove",(e)=>{
+      const dx = Math.abs(e.touches[0].clientX - touchStartX);
+      const dy = Math.abs(e.touches[0].clientY - touchStartY);
+      if(dx>10 || dy>10) clearTimeout(pressTimer);
+    })
+    el.addEventListener("touchend",()=>{
+      clearTimeout(pressTimer);
+    })
+    el.addEventListener("click",()=>{
+      currentIndex = realIdx;
+      document.getElementById("actionTip").innerText = contactList[realIdx].name + " - " + contactList[realIdx].phone;
+      document.getElementById("actionMask").style.display = "flex";
+    })
+  })
+}
+
+// 拨号、发短信
+function callNumber(){
+  location.href = `tel:${contactList[currentIndex].phone}`;
+  closeAction();
+}
+function sendSms(){
+  location.href = `sms:${contactList[currentIndex].phone}`;
+  closeAction();
+}
+function closeAction(){
+  document.getElementById("actionMask").style.display = "none";
+  currentIndex = null;
+}
+
+// 删除
+function doDelete(){
+  contactList.splice(delIndex,1);
+  saveContactList();
+  closeDel();
+  render();
+}
+function closeDel(){
+  document.getElementById("delMask").style.display = "none";
+  delIndex = null;
+}
+
+// 添加联系人
+function openAdd(){
+  document.getElementById("addMask").style.display = "flex";
+}
+function closeAdd(){
+  document.getElementById("addMask").style.display = "none";
+  document.getElementById("cName").value = "";
+  document.getElementById("cPhone").value = "";
+}
+function saveContact(){
+  const name = document.getElementById("cName").value.trim();
+  const phone = document.getElementById("cPhone").value.trim();
+  if(!name || !phone){
+    alert("姓名和号码不能为空");
+    return;
+  }
+  contactList.push({name,phone,timeStamp:Date.now()});
+  saveContactList();
+  closeAdd();
+  render();
+}
+
+// 设置弹窗
+function openSetting(){
+  loadSetUI();
+  document.getElementById("setMask").style.display = "flex";
+}
+function closeSetting(){
+  document.getElementById("setMask").style.display = "none";
+}
+function exportContact(){
+  let blob = new Blob([JSON.stringify(contactList,null,2)],{type:"application/json"});
+  let a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "通讯录备份.json";
+  a.click();
+}
+function triggerImport(){
+  document.getElementById("fileInput").click();
+}
+function importContact(input){
+  let file = input.files[0];
+  if(!file) return;
+  let reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      let arr = JSON.parse(e.target.result);
+      contactList = contactList.concat(arr);
+      saveContactList();
+      render();
+      alert("导入成功");
+    }catch(err){
+      alert("备份文件格式错误！");
+    }
+  }
+  reader.readAsText(file);
+  input.value = "";
+}
+function clearAllContact(){
+  if(!confirm("确定清空全部联系人？此操作不可恢复！")) return;
+  contactList = [];
+  saveContactList();
+  render();
+}
+
+// 返回桌面
+function goBack(){
+  parent.postMessage(JSON.stringify({type:"closePage"}),"*");
+}
+window.addEventListener('popstate',()=>goBack());
+history.pushState({},'');
+
+loadSetUI();
+render();
+</script>
+</body>
+</html>

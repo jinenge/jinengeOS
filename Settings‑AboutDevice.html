@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>关于设备</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#121218;color:#eee;padding:24px;font-size:17px}
+.back{padding:14px 24px;background:#28b952;border:none;border-radius:14px;color:#fff;font-size:16px;margin-bottom:24px;cursor:pointer;}
+.item{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #222;align-items:center;}
+.item a{color:#42a5f5;text-decoration:none;}
+.item a:hover{text-decoration:underline;}
+.version-text{cursor:pointer;user-select:none;}
+.dev-entry{
+  margin-top:24px;
+  padding:14px 12px;
+  background:#2c3f52;
+  border-radius:14px;
+  cursor:pointer;
+}
+.dev-entry .sub{
+  font-size:12px;
+  color:#b8c8d8;
+  margin-top:4px;
+}
+</style>
+</head>
+<body>
+  <button class="back" onclick="goBack()">← 返回</button>
+  <h2 style="margin-bottom:16px">关于设备</h2>
+  <div class="item">
+    <span>进恩哥系统版本</span>
+    <span class="version-text" id="verClick">3.1</span>
+  </div>
+  <div class="item"><span>系统构建日期</span><span>2026‑11‑21</span></div>
+  <div class="item"><span>系统开发者</span><span>进恩哥，豆包</span></div>
+  <div class="item">
+    <span>开源地址</span>
+    <span><a target="_blank" href="https://github.com/jinenge/jinengeOS">https://github.com/jinenge/jinengeOS</a></span>
+  </div>
+  <div id="devWrap"></div>
+<script>
+// =========统一返回逻辑=========
+function goBack(){
+  if(window.parent !== window){
+    parent.postMessage(JSON.stringify({type:"backPage"}),"*");
+  }
+}
+window.addEventListener('popstate',function(e){
+  e.preventDefault();
+  goBack();
+  history.pushState(null, null, location.href);
+});
+history.pushState(null, null, location.href);
+
+// 发送消息给父桌面，由父负责打开开发者选项页面，禁止子页面直接操作parent内部函数
+function openDevOptions(){
+  parent.postMessage(JSON.stringify({type:"switchActivity",url:"Settings‑DevOptions.html"}),"*");
+}
+
+function renderDevEntry(){
+  const wrap = document.getElementById("devWrap");
+  wrap.innerHTML = `
+  <div class="dev-entry" onclick="openDevOptions()">
+    <div>⚙️ 开发者选项</div>
+    <div class="sub">系统调试、高级功能</div>
+  </div>
+  `;
+}
+
+let clickCount = 0;
+const verDom = document.getElementById("verClick");
+if(localStorage.getItem("devMode") === "1"){
+  renderDevEntry();
+}
+verDom.addEventListener("click",()=>{
+  if(localStorage.getItem("devMode") === "1"){
+    return;
+  }
+  clickCount += 1;
+  const remain = 7 - clickCount;
+  if(clickCount >= 7){
+    localStorage.setItem("devMode","1");
+    renderDevEntry();
+  }
+});
+</script>
+</body>
+</html>

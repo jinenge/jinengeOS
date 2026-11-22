@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>404错误</title>
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Microsoft Yahei",sans-serif;
+}
+body{
+    background:#e6f7fc;
+    min-height:100vh;
+    padding:12px 16px;
+}
+/* 顶部区域直接清空，不再放刷新按钮 */
+.top-empty{
+    height:24px;
+}
+/* Logo紧凑适配 */
+.logo-box{
+    width:75%;
+    max-width:340px;
+    margin:0 auto 22px;
+    padding:6px;
+}
+.custom-logo{
+    width:100%;
+    height:auto;
+    display:block;
+    object-fit:contain;
+}
+/* 系统名称 */
+.system-name{
+    text-align:center;
+    font-size:clamp(24px,6vw,30px);
+    color:#222;
+    margin-bottom:20px;
+}
+/* 404标题+右侧红叉 */
+.err-wrap{
+    position:relative;
+    margin-bottom:20px;
+}
+.err-text{
+    font-size:clamp(40px,12vw,72px);
+    font-weight:bold;
+}
+.big-red-x{
+    position:absolute;
+    right:0;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:clamp(60px,18vw,120px);
+    color:#f33;
+}
+/* 黄色提示栏 */
+.tip-yellow{
+    background:#ffd400;
+    padding:18px 16px;
+    text-align:center;
+    font-size:clamp(20px,7vw,32px);
+    line-height:1.7;
+    font-weight:500;
+}
+/* 返回官网按钮 */
+.back-btn-wrap{
+    text-align:center;
+    margin-top:26px;
+}
+.back-official-btn{
+    width:80%;
+    max-width:420px;
+    padding:14px 36px;
+    background:#0044dd;
+    color:#ffffff;
+    border:none;
+    border-radius:10px;
+    font-size:clamp(20px,5vw,26px);
+    cursor:pointer;
+    transition:background 0.2s;
+}
+.back-official-btn:hover{
+    background:#0033bb;
+}
+</style>
+</head>
+<body>
+<!-- 顶部空白占位，移除右上角刷新按钮 -->
+<div class="top-empty"></div>
+
+<!-- 自定义Logo区域 -->
+<div class="logo-box">
+    <img class="custom-logo" id="logoImg" alt="logo">
+</div>
+
+<div class="system-name">进恩哥系统</div>
+
+<div class="err-wrap">
+    <div class="err-text">404错误</div>
+    <span class="big-red-x">❌</span>
+</div>
+
+<div class="tip-yellow">
+您访问了一个不存在的页面，请您核对站点再试！
+</div>
+
+<div class="back-btn-wrap">
+    <button class="back-official-btn" id="goUrl">点击我返回官网</button>
+</div>
+
+<script>
+const logoImgSrc = "favicon.png";
+document.getElementById('logoImg').src = logoImgSrc;
+
+const officialSite = "https://jinenge.us.kg";
+document.getElementById('goUrl').addEventListener('click',()=>{
+    window.location.href = officialSite;
+})
+</script>
+</body>
+</html>

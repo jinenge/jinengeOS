@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>进恩哥系统3.1</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:system-ui, sans-serif;}
+body{background:#000;color:#fff;transition:background 0.25s;}
+.brightness-overlay{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:#000;
+  z-index: 9999;
+  opacity: 0;
+}
+.android-desktop{
+  width:100%;height:100%;
+  background-size:cover;background-position:center;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  z-index:2;
+}
+.status-bar{
+  height:36px;padding:0 14px;display:flex;justify-content:space-between;align-items:center;
+  font-size:13px;flex-shrink:0;
+  background:#000;
+}
+body.light-theme .status-bar{
+  background:rgba(255,255,255,0.65);
+  color:#111;
+}
+.notification-panel{
+  position:absolute;top:0;left:0;width:100%;background:rgba(20,20,20,0.92);backdrop-filter:blur(16px);
+  transform:translateY(-100%);
+  z-index:99;
+  max-height:86vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  transition: transform 0.32s ease;
+}
+body.light-theme .notification-panel{
+  background:rgba(255,255,255,0.88);
+  color:#111;
+}
+.notification-panel.active{transform:translateY(0);}
+.panel-top{
+  padding:44px 20px 10px;
+  flex-shrink:0;
+}
+.panel-clock{
+  font-size:42px;font-weight:300;margin-bottom:6px;
+}
+.panel-clock-date{
+  font-size:14px;color:#ddd;
+}
+body.light-theme .panel-clock-date{color:#444;}
+.panel-body{
+  padding:0 20px 14px;
+  overflow-y:auto;
+  flex:1 1 auto;
+}
+.panel-handle-area{
+  width:100%;height:48px;
+  flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  background:rgba(20,20,20,0.4);
+}
+body.light-theme .panel-handle-area{background:rgba(255,255,255,0.35);}
+.panel-handle-bar{
+  width:45px;height:5px;border-radius:999px;
+  background:rgba(255,255,255,0.45);
+}
+body.light-theme .panel-handle-bar{background:rgba(0,0,0,0.35);}
+.panel-title{font-size:16px;font-weight:500;margin-bottom:14px;}
+.quick-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+.quick-btn{
+  padding:14px 8px;background:rgba(255,255,255,0.12);border-radius:14px;text-align:center;font-size:12px;cursor:pointer;
+  transition:0.2s;
+}
+.quick-btn.on{background:#279d49;}
+body.light-theme .quick-btn{background:rgba(0,0,0,0.08);}
+.slider-wrap{margin:14px 0;}
+.slider-wrap label{font-size:13px;color:#ddd;display:block;margin-bottom:6px;}
+body.light-theme .slider-wrap label{color:#333;}
+.slider-wrap input[type="range"]{width:100%;}
+.notice-box{
+  background:rgba(255,255,255,0.08);border-radius:14px;padding:12px;margin-bottom:10px;
+  font-size:13px;color:#eee;
+}
+body.light-theme .notice-box{background:rgba(0,0,0,0.06);color:#222;}
+.notice-clear{text-align:right;margin-top:8px;}
+.notice-clear button{
+  background:rgba(255,255,255,0.15);color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;
+}
+body.light-theme .notice-clear button{background:rgba(0,0,0,0.12);color:#111;}
+.desktop-apps{
+  flex:1;padding:24px 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;align-content:start;
+}
+.app-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;
+  transition: transform 0.15s ease;
+}
+.app-item.touch-long{transform: scale(1.05);}
+.app-item.app-system{opacity:0.95;}
+.app-item.app-third{opacity:1;}
+.app-icon{
+  width:56px;height:56px;border-radius:16px;background:rgba(255,255,255,0.2);
+  display:flex;align-items:center;justify-content:center;font-size:28px;
+  backdrop-filter:blur(10px);
+}
+.app-icon-img{
+  width:56px;height:56px;border-radius:16px;
+  object-fit:cover;
+}
+.app-name{
+  font-size:11px;
+  color:#ffffff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.75);
+}
+.dock{
+  height:68px;width:92%;margin:0 auto 12px;background:rgba(255,255,255,0.15);
+  border-radius:24px;display:flex;justify-content:space-around;align-items:center;padding:0 16px;
+  backdrop-filter:blur(10px);flex-shrink:0;
+}
+.dock-icon{
+  width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,0.2);
+  display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;
+}
+.appstore-iframe-wrap{
+  position:fixed;inset:0;
+  z-index:9998;
+  display:none;
+  background:#000;
+  flex-direction:column;
+}
+#appStoreFrame{
+  width:100%;
+  flex:1;
+  border:none;
+}
+.win-mask{
+  position:fixed;inset:0;background:rgba(0,0,0.6);display:none;
+  align-items:center;justify-content:center;z-index:100;padding:20px;
+}
+.window{
+  width:100%;max-width:380px;max-height:82vh;background:#223344;color:#fff;
+  border-radius:22px;overflow:hidden;display:flex;flex-direction:column;
+}
+.win-title{
+  padding:16px 20px;background:#28b952;display:flex;justify-content:space-between;align-items:center;
+  font-weight:bold;font-size:18px;
+}
+.win-body{padding:16px 20px;overflow-y:auto;flex:1;}
+.win-close{cursor:pointer;font-size:22px;padding:4px 8px;}
+.cam-preview{width:100%;height:240px;background:#000;border-radius:12px;object-fit:cover;margin-top:10px;}
+.btn{
+  display:block;width:100%;padding:14px;margin:10px 0;background:#28b952;color:#fff;
+  border:none;border-radius:12px;font-size:15px;cursor:pointer;
+}
+.btn.del{background:#e53935;}
+body.light-theme{
+  background:#f4f4f4;
+  color:#111;
+}
+.setting-group-label{
+  color:#88ccff;
+  font-size:15px;
+  margin:12px 0 8px;
+}
+.setting-item{
+  padding:14px 12px;
+  background:#2c3f52;
+  border-radius:14px;
+  margin-bottom:10px;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+.setting-item .sub{
+  font-size:12px;
+  color:#b8c8d8;
+}
+.toggle-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 10px;
+  background:#2c3f52;
+  border-radius:12px;
+  margin-bottom:8px;
+}
+.toggle{
+  width:44px;height:24px;border-radius:999px;background:#444;
+  position:relative;cursor:pointer;
+}
+.toggle.on{background:#28b952;}
+.toggle::after{
+  content:"";
+  width:20px;height:20px;border-radius:50%;background:#fff;
+  position:absolute;top:2px;left:2px;
+  transition:0.22s;
+}
+.toggle.on::after{left:22px;}
+/*====开发者选项全局样式====*/
+.dev-layout-border * {
+  outline: 1px solid #ff4488 !important;
+}
+</style>
+</head>
+<body>
+<div class="brightness-overlay" id="brightOverlay"></div>
+<div class="appstore-iframe-wrap" id="appStoreWrap">
+  <iframe id="appStoreFrame" src=""></iframe>
+</div>
+<div class="android-desktop" id="desktop">
+  <div class="status-bar" id="statusBar">
+    <span id="statusTime">00:00:00</span>
+    <span>📶 🔋</span>
+  </div>
+  <div class="notification-panel" id="notifyPanel">
+    <div class="panel-top" id="panelTop">
+      <div class="panel-clock" id="panelClock">00:00:00</div>
+      <div class="panel-clock-date" id="panelDate"></div>
+    </div>
+    <div class="panel-body" id="panelBody">
+      <div class="panel-title">快捷设置</div>
+      <div class="quick-row">
+        <div class="quick-btn" id="btnWifi" onclick="toggleWifi()">WiFi</div>
+        <div class="quick-btn" id="btnBt" onclick="toggleBluetooth()">蓝牙</div>
+        <div class="quick-btn" id="btnAir" onclick="toggleAirplane()">飞行</div>
+        <div class="quick-btn" id="btnFlash" onclick="toggleFlash()">手电筒</div>
+        <div class="quick-btn" id="btnRotate" onclick="toggleRotate()">自动旋转</div>
+        <div class="quick-btn" id="btnVib" onclick="toggleVibrate()">振动</div>
+        <div class="quick-btn" id="btnFull" onclick="toggleFullscreen()">全屏</div>
+        <div class="quick-btn" id="btnTheme" onclick="toggleTheme()">深色切换</div>
+        <div class="quick-btn" id="btnLocation" onclick="quickLocation()">定位</div>
+        <div class="quick-btn" id="btnRestart" onclick="location.reload()">重启</div>
+      </div>
+      <div class="slider-wrap">
+        <label>亮度：<span id="brightVal">80</span>%</label>
+        <input type="range" min="10" max="100" value="80" id="brightSlider">
+      </div>
+      <div class="slider-wrap">
+        <label>音量：<span id="volVal">60</span>%</label>
+        <input type="range" min="0" max="100" value="60" id="volSlider" oninput="setVolume(this.value)">
+      </div>
+      <div class="panel-title">通知</div>
+      <div id="noticeList">
+        <div class="notice-box">❤️通知：3.1新版UI已经更新</div>
+        <div class="notice-box">📱 全新使用新版功能等你体验</div>
+      </div>
+      <div class="notice-clear">
+        <button onclick="clearNotices()">清空通知</button>
+      </div>
+    </div>
+    <div class="panel-handle-area" id="panelHandle">
+      <div class="panel-handle-bar"></div>
+    </div>
+  </div>
+  <div class="desktop-apps" id="desktopAppsContainer"></div>
+  <!-- Dock：拨号、短信、百度、应用商店 -->
+  <div class="dock" id="dockEl">
+  <div class="dock-icon" data-app="phone">📞</div>
+  <div class="dock-icon" data-app="mms">💬</div>
+  <div class="dock-icon" data-app="baidulink">🌐</div>
+  <div class="dock-icon" data-app="appstore">🍁</div>
+</div>
+  </div>
+</div>
+<div class="win-mask" id="winMask">
+  <div class="window">
+    <div class="win-title">
+      <span id="winTitle">窗口</span>
+      <span class="win-close" id="winClose">✕</span>
+    </div>
+    <div class="win-body" id="winBody"></div>
+  </div>
+</div>
+<script>
+//=====开发者选项全局效果=====
+let devConfig = JSON.parse(localStorage.getItem("devConfig")||`{"touchPoint":false,"layoutBorder":false,"zeroAnim":false,"forceGpu":false,"minWidthDp":0}`);
+const touchDot = document.createElement("div");
+touchDot.style.cssText = `position:fixed;width:24px;height:24px;border-radius:50%;background:rgba(255,80,80,0.65);border:2px solid #ffeeee;pointer-events:none;z-index:99999;display:none;transform:translate(-50%,-50%);`;
+document.body.appendChild(touchDot);
+function applyDevConfig(){
+  if(devConfig.touchPoint){
+    touchDot.style.display="block";
+    document.addEventListener("touchmove",onTouchDot);
+    document.addEventListener("touchstart",onTouchDot);
+  }else{
+    touchDot.style.display="none";
+    document.removeEventListener("touchmove",onTouchDot);
+    document.removeEventListener("touchstart",onTouchDot);
+  }
+  if(devConfig.layoutBorder){
+    document.body.classList.add("dev-layout-border");
+  }else{
+    document.body.classList.remove("dev-layout-border");
+  }
+  if(devConfig.zeroAnim){
+    document.documentElement.style.setProperty("--anim-speed","0s");
+    document.body.style.transition="none !important";
+  }else{
+    document.documentElement.style.setProperty("--anim-speed","0.22s");
+    document.body.style.transition="";
+  }
+  if(devConfig.forceGpu){
+    document.body.style.transform="translateZ(0)";
+  }else{
+    document.body.style.transform="";
+  }
+  if(devConfig.minWidthDp >0){
+    document.body.style.maxWidth = devConfig.minWidthDp + "px";
+    document.body.style.margin="0 auto";
+  }else{
+    document.body.style.maxWidth = "";
+    document.body.style.margin = "";
+  }
+}
+function onTouchDot(e){
+  touchDot.style.left = e.touches[0].clientX + "px";
+  touchDot.style.top = e.touches[0].clientY + "px";
+}
+//===================================
+// =====全局顶层跳转函数=====
+function openSettingApps(){
+  closeWin();
+  const w = document.getElementById("appStoreWrap");
+  clearActivityStack();
+  pushActivity("Settings‑Apps.html");
+  w.style.display = "flex";
+}
+function openSettingBattery(){
+  closeWin();
+  const w = document.getElementById("appStoreWrap");
+  clearActivityStack();
+  pushActivity("Settings‑Battery.html");
+  w.style.display = "flex";
+}
+function openSettingAbout(){
+  closeWin();
+  const w = document.getElementById("appStoreWrap");
+  clearActivityStack();
+  pushActivity("Settings‑AboutDevice.html");
+  w.style.display = "flex";
+}
+function openSettingUpdate(){
+  closeWin();
+  const w = document.getElementById("appStoreWrap");
+  clearActivityStack();
+  pushActivity("update.html");
+  w.style.display = "flex";
+}
+async function getDeviceBatteryInfo(){
+  if(!navigator.getBattery){
+    return { support:false, level:null, charging:false, message:"当前浏览器不支持读取电池" };
+  }
+  try{
+    const battery = await navigator.getBattery();
+    return {
+      support:true,
+      level: Math.round(battery.level * 100),
+      charging: battery.charging
+    };
+  }catch(e){
+    return { support:false, level:null, charging:false, message:"读取电池失败" };
+  }
+}
+let activityStack = [];
+function pushActivity(url){activityStack.push(url);document.getElementById("appStoreFrame").src = url;}
+function popActivity(){
+  closeAppStore();
+}
+function clearActivityStack(){activityStack=[];}
+const customAppMap = {
+  contacts: { title:"通讯录", file:"contacts.html", icon:"👥" },
+  phone: { title:"拨号", file:"phone.html", icon:"📞" },
+  mms: { title:"短信", file:"mms.html", icon:"💬" },
+  filemanager: { title:"文件管理", file:"FileManager.html", icon:"📂" },
+  openlist: { title:"Openlist", file:"Openlist.html", icon:"📋" },
+  musicplayer: { title:"音乐播放器", file:"MusicPlayer.html", icon:"🎵" },
+  minigames: { title:"小游戏", url:"/工具箱/游戏/index.html", icon:"🎮" },
+  toolbox: { title:"工具箱", file:"ToolBox.html", icon:"🧰" },
+  otherclouddisk: { title:"其他云盘", url:"/工具箱/其他云盘/index.html", icon:"☁️" },
+  publicboard: { title:"公共留言板", url:"/工具箱/留言板/index.html", icon:"💬" }
+};
+function openCustomApp(appKey){
+  const cfg = customAppMap[appKey];
+  if(!cfg) return;
+  // 如果配置url，新开浏览器标签打开外部网页
+  if(cfg.url){
+    window.open(cfg.url,"_blank");
+    return;
+  }
+  // 没有url则iframe打开本地html
+  closeWin();
+  const w = document.getElementById("appStoreWrap");
+  clearActivityStack();
+  pushActivity(cfg.file);
+  w.style.display = "flex";
+}
+let settingState = {
+  autoBright: !!JSON.parse(localStorage.getItem("autoBright")||"false"),
+  grayScale: !!JSON.parse(localStorage.getItem("grayScale")||"false"),
+  eyeCare: !!JSON.parse(localStorage.getItem("eyeCare")||"false"),
+  screenTimeout: localStorage.getItem("screenTimeout")||"30",
+  fontSize: localStorage.getItem("fontSize")||"100"
+};
+// 亮度
+const brightSlider = document.getElementById("brightSlider");
+const brightValEl  = document.getElementById("brightVal");
+const brightOverlay = document.getElementById("brightOverlay");
+function setBrightness(val) {
+  let v = Number(val);
+  if (isNaN(v)) v = 80;
+  v = Math.max(10, Math.min(100, v));
+  brightSlider.value = v;
+  brightValEl.textContent = v;
+  brightOverlay.style.opacity = (1 - v / 100);
+  localStorage.setItem("brightnessValue", v);
+}
+brightSlider.oninput = function () {
+  setBrightness(this.value);
+};
+function loadBrightness() {
+  const saved = localStorage.getItem("brightnessValue");
+  if (saved !== null) {
+    setBrightness(saved);
+  } else {
+    setBrightness(80);
+  }
+}
+// 时钟带秒
+function updateTime(){
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, "0");
+  const m = String(now.getMinutes()).padStart(2, "0");
+  const s = String(now.getSeconds()).padStart(2, "0");
+  const timeStr = `${h}:${m}:${s}`;
+  const weekArr = ["日","一","二","三","四","五","六"];
+  const dateStr = `${now.getFullYear()} 年 ${now.getMonth()+1} 月 ${now.getDate()} 日 星期${weekArr[now.getDay()]}`;
+  document.getElementById("statusTime").innerText = timeStr;
+  document.getElementById("panelClock").innerText = timeStr;
+  document.getElementById("panelDate").innerText = dateStr;
+}
+updateTime();
+setInterval(updateTime, 1000);
+// 壁纸
+const LOCAL_WALLPAPER = "images/wallpaper.jpg";
+function startDynamicGradientWallpaper() {
+  const desktop = document.getElementById("desktop");
+  if (desktop._gradientAnimationId) return;
+  let hue = 0;
+  function animate() {
+    hue = (hue + 0.15) % 360;
+    desktop.style.backgroundImage = `linear-gradient(135deg,hsl(${hue},70%,18%),hsl(${(hue+60)%360},75%,28%),hsl(${(hue+120)%360},80%,22%),hsl(${(hue+200)%360},70%,20%))`;
+    desktop.style.backgroundSize = "400% 400%";
+    desktop._gradientAnimationId = requestAnimationFrame(animate);
+  }
+  animate();
+}
+function stopDynamicGradientWallpaper(){
+  const d = document.getElementById("desktop");
+  if(d._gradientAnimationId){
+    cancelAnimationFrame(d._gradientAnimationId);
+    d._gradientAnimationId = null;
+  }
+}
+function applyWallpaperToAll(bgUrl){
+  if(!bgUrl){
+    stopDynamicGradientWallpaper();
+    startDynamicGradientWallpaper();
+    localStorage.removeItem("wallpaperUrl");
+    return;
+  }
+  stopDynamicGradientWallpaper();
+  const desktop = document.getElementById("desktop");
+  desktop.style.background = "";
+  desktop.style.backgroundImage = `url(${bgUrl})`;
+  localStorage.setItem("wallpaperUrl", bgUrl);
+}
+function loadWallpaper(){
+  const savedWall = localStorage.getItem("wallpaperUrl");
+  if(savedWall){
+    applyWallpaperToAll(savedWall);
+  }else{
+    const img = new Image();
+    img.src = LOCAL_WALLPAPER;
+    img.onload = () => applyWallpaperToAll(LOCAL_WALLPAPER);
+    img.onerror = () => startDynamicGradientWallpaper();
+  }
+}
+// 快捷开关
+let state = {
+  wifi:false, bluetooth:false, airplane:false, flash:false,
+  rotate:false, vibrate:false, location:false, dark:true
+};
+function setBtn(id, on){
+  const el = document.getElementById(id);
+  if(!el) return;
+  on ? el.classList.add("on") : el.classList.remove("on");
+}
+function toggleWifi(){ state.wifi = !state.wifi; setBtn("btnWifi", state.wifi); }
+function toggleBluetooth(){ state.bluetooth = !state.bluetooth; setBtn("btnBt", state.bluetooth); }
+function toggleAirplane(){ state.airplane = !state.airplane; setBtn("btnAir", state.airplane); }
+function toggleFlash(){ state.flash = !state.flash; setBtn("btnFlash", state.flash); }
+function toggleRotate(){ state.rotate = !state.rotate; setBtn("btnRotate", state.rotate); }
+function toggleVibrate(){
+  state.vibrate = !state.vibrate;
+  setBtn("btnVib", state.vibrate);
+  if(state.vibrate && navigator.vibrate) navigator.vibrate([150,80,150]);
+}
+function quickLocation(){ state.location = !state.location; setBtn("btnLocation", state.location); openWin("定位","模拟定位开关切换"); }
+function toggleTheme(){
+  state.dark = !state.dark;
+  localStorage.setItem("darkTheme", String(state.dark));
+  setBtn("btnTheme", state.dark);
+  if(state.dark){
+    document.body.classList.remove("light-theme");
+    document.getElementById("statusBar").style.background = "#000";
+  }else{
+    document.body.classList.add("light-theme");
+    document.getElementById("statusBar").style.background = "";
+  }
+}
+function toggleFullscreen(){
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen().catch(()=>{});
+  }else{
+    if(document.exitFullscreen) document.exitFullscreen();
+  }
+}
+function setVolume(val){
+  document.getElementById("volVal").innerText = val;
+}
+function clearNotices(){
+  document.getElementById("noticeList").innerHTML = `<div class="notice-box">暂无通知</div>`;
+}
+// 通知栏 下拉 / 底部上滑收起
+const notifyPanel = document.getElementById("notifyPanel");
+const panelHandle  = document.getElementById("panelHandle");
+const desktop      = document.getElementById("desktop");
+let panelOpen = false;
+function closeNotifyPanel(){
+  notifyPanel.classList.remove("active");
+  panelOpen = false;
+}
+function openNotifyPanel(){
+  notifyPanel.classList.add("active");
+  panelOpen = true;
+}
+let dragStartY = 0, dragging = false;
+desktop.addEventListener("touchstart", e => {
+  const y = e.touches[0].clientY;
+  if (!panelOpen && y < 80) {
+    dragStartY = y;
+    dragging = true;
+  }
+});
+desktop.addEventListener("touchend", e => {
+  if (!dragging) return;
+  dragging = false;
+  const delta = e.changedTouches[0].clientY - dragStartY;
+  if (delta > 60) openNotifyPanel();
+});
+panelHandle.addEventListener("touchend", () => {
+  closeNotifyPanel();
+});
+panelHandle.onclick = closeNotifyPanel;
+// 设置弹窗主菜单
+function openSettingsMain(){
+  const appCount = JSON.parse(localStorage.getItem("apps") || "[]").length;
+  openWin("设置", `
+    <div class="setting-group-label">设备</div>
+    <div class="setting-item" onclick="openSettingDisplay()">
+      <span>🖥️ 显示</span>
+      <span class="sub">亮度、壁纸、深色主题、灰度、护眼等</span>
+    </div>
+    <div class="setting-item" onclick="openSettingApps()">
+      <span>📦 应用</span>
+      <span class="sub">已安装 ${appCount} 个应用</span>
+    </div>
+    <div class="setting-item" onclick="openSettingBattery()">
+      <span>🔋 电池</span>
+      <span class="sub">读取本机电量信息</span>
+    </div>
+    <div class="setting-group-label">系统</div>
+    <div class="setting-item" onclick="openSettingAbout()">
+      <span>📱 关于设备</span>
+      <span class="sub">当前版本：3.1</span>
+    </div>
+    <div class="setting-item" onclick="openSettingUpdate()">
+      <span>⬇️ 客户端更新</span>
+      <span class="sub">客户端更新专区</span>
+    </div>
+    <button class="btn" onclick="closeWin()">返回</button>
+  `);
+}
+function openSettingDisplay(){
+  const curBright = localStorage.getItem("brightnessValue")||80;
+  const isDark = localStorage.getItem("darkTheme")==="true";
+  const autoOn = settingState.autoBright;
+  const grayOn = settingState.grayScale;
+  const eyeOn  = settingState.eyeCare;
+  openWin("显示",`
+    <div class="slider-wrap">
+      <label>亮度：<span id="setBrightVal">${curBright}</span>%</label>
+      <input type="range" min="10" max="100" value="${curBright}" id="setBrightRange">
+    </div>
+    <div class="toggle-row">
+      <span>自动亮度</span>
+      <div class="toggle ${autoOn?'on':''}" id="tAutoBright" onclick="toggleAutoBright()"></div>
+    </div>
+    <div class="toggle-row">
+      <span>深色主题</span>
+      <div class="toggle ${isDark?'on':''}" id="tDark" onclick="toggleThemeFromSet()"></div>
+    </div>
+    <div class="toggle-row">
+      <span>灰度（单色）</span>
+      <div class="toggle ${grayOn?'on':''}" id="tGray" onclick="toggleGrayScale()"></div>
+    </div>
+    <div class="toggle-row">
+      <span>护眼模式</span>
+      <div class="toggle ${eyeOn?'on':''}" id="tEye" onclick="toggleEyeCare()"></div>
+    </div>
+    <div class="setting-item" onclick="openSettingWallpaper()">
+      <span>🖼️ 壁纸</span>
+      <span class="sub">动态渐变 / 自定义图片</span>
+    </div>
+    <div class="setting-item" onclick="openScreenTimeout()">
+      <span>⏱ 屏幕超时</span>
+      <span class="sub">当前：${settingState.screenTimeout} 秒</span>
+    </div>
+    <div class="setting-item" onclick="openFontSize()">
+      <span>🔤 字体大小</span>
+      <span class="sub">当前：${settingState.fontSize}%</span>
+    </div>
+    <button class="btn" onclick="openSettingsMain()">返回设置</button>
+  `);
+  document.getElementById("setBrightRange").oninput = function(){
+    setBrightness(this.value);
+    document.getElementById("setBrightVal").innerText = this.value;
+  };
+}
+function toggleAutoBright(){
+  settingState.autoBright = !settingState.autoBright;
+  localStorage.setItem("autoBright", settingState.autoBright);
+  openSettingDisplay();
+}
+function toggleGrayScale(){
+  settingState.grayScale = !settingState.grayScale;
+  localStorage.setItem("grayScale", settingState.grayScale);
+  document.body.style.filter = settingState.grayScale ? "grayscale(100%)" : "";
+  openSettingDisplay();
+}
+function toggleEyeCare(){
+  settingState.eyeCare = !settingState.eyeCare;
+  localStorage.setItem("eyeCare", settingState.eyeCare);
+  document.body.style.filter = settingState.eyeCare
+    ? (settingState.grayScale ? "grayscale(100%) sepia(0.45)" : "sepia(0.45)")
+    : (settingState.grayScale ? "grayscale(100%)" : "");
+  openSettingDisplay();
+}
+function toggleThemeFromSet(){
+  toggleTheme();
+  openSettingDisplay();
+}
+function openSettingWallpaper(){
+  openWin("壁纸",`
+    <div style="margin-bottom:12px;">
+      <p style="margin-bottom:8px;">当前：<span id="wallNow">动态渐变壁纸</span></p>
+    </div>
+    <div class="setting-item" style="margin-bottom:10px;">
+      <span>📷 选择本地图片</span>
+      <span class="sub">从相册选择壁纸</span>
+      <input type="file" id="wallFile" accept="image/*" style="margin-top:8px;width:100%;" onchange="previewLocalWall(this)">
+    </div>
+    <div class="setting-item" style="margin-bottom:10px;">
+      <span>🌐 网络图片地址</span>
+      <span class="sub">粘贴图片链接</span>
+      <input id="wallUrlInput" placeholder="https://xxx.jpg" style="margin-top:8px;width:100%;padding:8px;border-radius:8px;border:none;color:#111;">
+    </div>
+    <div id="wallPreviewBox" style="display:none;margin-bottom:10px;">
+      <p style="font-size:13px;">预览：</p>
+      <img id="wallPreviewImg" style="width:100%;height:160px;object-fit:cover;border-radius:12px;">
+    </div>
+    <button class="btn" onclick="confirmWallUrl()">使用网络图片</button>
+    <button class="btn" onclick="applyWallpaperToAll('')">启用动态渐变</button>
+    <button class="btn" onclick="openSettingDisplay()">返回显示</button>
+  `);
+}
+// 本地图片预览并应用
+function previewLocalWall(input){
+  if(!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const url = URL.createObjectURL(file);
+  const box = document.getElementById("wallPreviewBox");
+  const img = document.getElementById("wallPreviewImg");
+  box.style.display = "block";
+  img.src = url;
+  applyWallpaperToAll(url);
+  document.getElementById("wallNow").innerText = file.name;
+}
+// 应用网络地址壁纸
+function confirmWallUrl(){
+  const val = document.getElementById("wallUrlInput").value.trim();
+  if(!val){
+    alert("请输入图片地址");
+    return;
+  }
+  applyWallpaperToAll(val);
+  document.getElementById("wallNow").innerText = "网络图片";
+  closeWin();
+}
+function openScreenTimeout(){
+  openWin("屏幕超时",`
+    <p>选择自动熄屏时间</p>
+    <div class="setting-item" onclick="saveTimeout('15')">15 秒</div>
+    <div class="setting-item" onclick="saveTimeout('30')">30 秒</div>
+    <div class="setting-item" onclick="saveTimeout('60')">1 分钟</div>
+    <div class="setting-item" onclick="saveTimeout('300')">5 分钟</div>
+    <button class="btn" onclick="openSettingDisplay()">返回</button>
+  `);
+}
+function saveTimeout(v){
+  settingState.screenTimeout = v;
+  localStorage.setItem("screenTimeout", v);
+  openSettingDisplay();
+}
+function openFontSize(){
+  openWin("字体大小",`
+    <div class="slider-wrap">
+      <label>字体缩放：<span id="fsVal">${settingState.fontSize}</span>%</label>
+      <input type="range" min="80" max="130" value="${settingState.fontSize}" id="fsRange">
+    </div>
+    <button class="btn" onclick="applyFontSize()">确定</button>
+    <button class="btn" onclick="openSettingDisplay()">返回</button>
+  `);
+}
+function applyFontSize(){
+  const val = document.getElementById("fsRange").value;
+  settingState.fontSize = val;
+  localStorage.setItem("fontSize", val);
+  document.body.style.fontSize = `${parseInt(val)*0.16}px`;
+  openSettingDisplay();
+}
+// 应用列表
+let installedApps = JSON.parse(localStorage.getItem("apps") || "[]");
+function renderDesktopApps(){
+  const c = document.getElementById("desktopAppsContainer");
+  let systemHtml = `
+    <div class="app-item app-system" data-app="settings"><div class="app-icon">⚙️</div><div class="app-name">设置</div></div>
+    <div class="app-item app-system" data-app="contacts"><div class="app-icon">${customAppMap.contacts.icon}</div><div class="app-name">${customAppMap.contacts.title}</div></div>
+    <div class="app-item app-system" data-app="filemanager"><div class="app-icon">${customAppMap.filemanager.icon}</div><div class="app-name">${customAppMap.filemanager.title}</div></div>
+    <div class="app-item app-system" data-app="openlist"><div class="app-icon">${customAppMap.openlist.icon}</div><div class="app-name">${customAppMap.openlist.title}</div></div>
+    <div class="app-item app-system" data-app="musicplayer"><div class="app-icon">${customAppMap.musicplayer.icon}</div><div class="app-name">${customAppMap.musicplayer.title}</div></div>
+    <div class="app-item app-system" data-app="minigames"><div class="app-icon">${customAppMap.minigames.icon}</div><div class="app-name">${customAppMap.minigames.title}</div></div>
+    <div class="app-item app-system" data-app="toolbox"><div class="app-icon">${customAppMap.toolbox.icon}</div><div class="app-name">${customAppMap.toolbox.title}</div></div>
+    <div class="app-item app-system" data-app="otherclouddisk"><div class="app-icon">${customAppMap.otherclouddisk.icon}</div><div class="app-name">${customAppMap.otherclouddisk.title}</div></div>
+    <div class="app-item app-system" data-app="publicboard"><div class="app-icon">${customAppMap.publicboard.icon}</div><div class="app-name">${customAppMap.publicboard.title}</div></div>
+    <div class="app-item app-system" data-app="appstore"><div class="app-icon">🍁</div><div class="app-name">应用商店</div></div>
+    <div class="app-item app-system" data-app="camera"><div class="app-icon">📷</div><div class="app-name">相机</div></div>
+  `;
+  let thirdHtml = "";
+  installedApps.forEach((app, idx) => {
+    thirdHtml += `
+      <div class="app-item app-third" data-third-idx="${idx}">
+        <img src="${app.icon}" class="app-icon-img">
+        <div class="app-name">${app.name}</div>
+      </div>`;
+  });
+  c.innerHTML = systemHtml + thirdHtml;
+  bindDesktopClickAndLongPress();
+}
+function bindDesktopClickAndLongPress(){
+  document.querySelectorAll(".app-item").forEach(item => {
+    let longTimer = null;
+    const isSys = item.classList.contains("app-system");
+    const tidx  = item.dataset.thirdIdx;
+    item.addEventListener("touchstart", () => {
+      longTimer = setTimeout(() => {
+        if(isSys){
+          openWin("提示","<p>系统应用无法删除</p><button class=\"btn\" onclick=\"closeWin()\">确定</button>");
+        }else{
+          const app = installedApps[Number(tidx)];
+          openWin("删除应用",
+            `<p>确定要删除「${app.name}」吗？</p>
+             <button class=\"btn del\" onclick=\"delThirdApp(${tidx})\">删除</button>
+             <button class=\"btn\" onclick=\"closeWin()\">取消</button>`);
+        }
+        item.classList.add("touch-long");
+      }, 500);
+    });
+    item.addEventListener("touchmove", () => {
+      clearTimeout(longTimer);
+      item.classList.remove("touch-long");
+    });
+    item.addEventListener("touchend", () => {
+      clearTimeout(longTimer);
+      item.classList.remove("touch-long");
+    });
+    item.addEventListener("click", () => {
+      if(isSys){
+        const k = item.dataset.app;
+        if (apps[k]) apps[k]();
+      }else{
+        const idx = Number(tidx);
+        const info = installedApps[idx];
+        if(info && info.url) window.open(info.url, "_blank");
+      }
+    });
+  });
+}
+function delThirdApp(index){
+  installedApps.splice(index, 1);
+  localStorage.setItem("apps", JSON.stringify(installedApps));
+  closeWin();
+  renderDesktopApps();
+}
+// 应用商店
+function openAppStore(){
+  const w = document.getElementById("appStoreWrap");
+  clearActivityStack();
+  pushActivity("AppStore.html");
+  w.style.display = "flex";
+}
+function closeAppStore(){
+  const w = document.getElementById("appStoreWrap");
+  const f = document.getElementById("appStoreFrame");
+  w.style.display = "none";
+  f.src = "";
+  clearActivityStack();
+}
+// 消息监听
+window.addEventListener("message", evt => {
+  try {
+    const msg = JSON.parse(evt.data);
+    if(msg.type === "addApp"){
+      installedApps.push({
+        icon: msg.icon, name: msg.name, url: msg.url,
+        color1:msg.color1||"#000000",color2:msg.color2||"#000000",textColor:msg.textColor||"#ffffff"
+      });
+      localStorage.setItem("apps", JSON.stringify(installedApps));
+      renderDesktopApps();
+    }
+    if(msg.type === "backPage") closeAppStore();
+    if(msg.type === "closePage") {
+      // 来自商店关闭，携带 appIndex
+      console.log("商店页面关闭，点击的应用下标:", msg.appIndex);
+      closeAppStore();
+    }
+    //====接收AppStore传来带index绑定的事件====
+    if(msg.type === "appStore_click"){
+      console.log("商店点击应用，appIndex =", msg.appIndex);
+    }
+    if(msg.type === "appStore_installed"){
+      console.log("商店安装完成，appIndex =", msg.appIndex);
+    }
+    //=====开发者选项消息接收=====
+    if(msg.type === "devConfig"){
+      devConfig = msg.payload;
+      localStorage.setItem("devConfig", JSON.stringify(devConfig));
+      applyDevConfig();
+    }
+    if(msg.type === "devConfigReset"){
+      devConfig = {"touchPoint":false,"layoutBorder":false,"zeroAnim":false,"forceGpu":false,"minWidthDp":0};
+      localStorage.removeItem("devConfig");
+      applyDevConfig();
+    }
+    if(msg.type === "removeApp"){
+      const i = Number(msg.index);
+      installedApps.splice(i, 1);
+      localStorage.setItem("apps", JSON.stringify(installedApps));
+      renderDesktopApps();
+    }
+    if(msg.type === "openThirdApp"){
+      closeAppStore();
+      window.open(msg.appUrl, "_blank");
+    }
+    if(msg.type==="switchActivity"){
+      clearActivityStack();
+      pushActivity(msg.url);
+      document.getElementById("appStoreWrap").style.display="flex";
+    }
+    if(msg.type==="fullscreen"){
+      if(msg.enable){if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(e=>{});}
+      else{if(document.fullscreenElement) document.exitFullscreen();}
+    }
+  } catch(e) {
+    // 忽略非json消息
+  }
+});
+// 弹窗
+const winMask = document.getElementById("winMask");
+const winTitle = document.getElementById("winTitle");
+const winBody = document.getElementById("winBody");
+function openWin(title, html){
+  winTitle.innerText = title;
+  winBody.innerHTML = html;
+  winMask.style.display = "flex";
+}
+function closeWin(){
+  winMask.style.display = "none";
+}
+document.getElementById("winClose").onclick = closeWin;
+winMask.onclick = e => {
+  if(e.target === winMask) closeWin();
+};
+// 应用映射
+const apps = {
+  settings: () => { openSettingsMain(); },
+  camera: async () => {
+    try{
+      const s = await navigator.mediaDevices.getUserMedia({video:true});
+      window.stream = s;
+      openWin("相机",
+        `<video class="cam-preview" autoplay playsinline id="camVideo"></video>
+         <button class="btn" onclick="closeWin()">关闭相机</button>`);
+      document.getElementById("camVideo").srcObject = s;
+    }catch(err){
+      openWin("相机","相机授权失败："+err.message);
+    }
+  },
+  appstore: () => { openAppStore(); },
+  phone: () => openCustomApp("phone"),
+  mms: () => openCustomApp("mms"),
+  baidulink: ()=>{ window.open("https://www.baidu.com","_blank"); },
+  contacts: () => openCustomApp("contacts"),
+  filemanager: ()=>openCustomApp("filemanager"),
+  openlist: ()=>openCustomApp("openlist"),
+  musicplayer: ()=>openCustomApp("musicplayer"),
+  minigames: ()=>openCustomApp("minigames"),
+  toolbox: ()=>openCustomApp("toolbox"),
+  otherclouddisk: ()=>openCustomApp("otherclouddisk"),
+  publicboard: ()=>openCustomApp("publicboard")
+};
+document.querySelectorAll(".dock-icon").forEach(dock => {
+  dock.onclick = () => {
+    const k = dock.dataset.app;
+    if(apps[k]) apps[k]();
+  }
+});
+// 初始化
+(function boot(){
+  loadBrightness();
+  loadWallpaper();
+  renderDesktopApps();
+  if(settingState.grayScale || settingState.eyeCare){
+    document.body.style.filter = settingState.grayScale
+      ? (settingState.eyeCare ? "grayscale(100%) sepia(0.45)" : "grayscale(100%)")
+      : "sepia(0.45)";
+  }
+  applyDevConfig();
+})();
+</script>
+</body>
+</html>

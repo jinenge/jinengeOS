@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>在线音频语音报时</title>
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+html,body{
+  width:100%;
+  height:100%;
+  background:#0b0b18;
+  color:#fff;
+  font-family:system-ui,-apple-system,sans-serif;
+  overflow:hidden;
+}
+body{
+  padding:24px 16px;
+}
+.wrap{
+  max-width:480px;
+  margin:0 auto;
+}
+.time-big{
+  text-align:center;
+  font-size:82px;
+  font-weight:900;
+  letter-spacing:4px;
+  margin-top:40px;
+  color:#e8d8ff;
+  text-shadow:0 0 30px #aa66ff77;
+}
+.card{
+  background:rgba(255,255,255,0.06);
+  border-radius:24px;
+  padding:24px 20px;
+  margin-top:40px;
+  border:1px solid rgba(187,119,255,0.22);
+  backdrop-filter:blur(12px);
+}
+.card h3{
+  text-align:center;
+  color:#bb77ff;
+  margin-bottom:24px;
+  font-size:20px;
+}
+.row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 4px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+.row label{
+  font-size:16px;
+  color:#ddd;
+}
+.time-range{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin:20px 4px 10px;
+}
+select{
+  background:#1c1c32;
+  color:#fff;
+  border:none;
+  border-radius:12px;
+  padding:10px 12px;
+  font-size:16px;
+}
+select option{
+  background:#1c1c32;
+}
+.btn{
+  width:100%;
+  margin-top:24px;
+  padding:14px;
+  border-radius:16px;
+  border:none;
+  background:#8844dd;
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+}
+.tip{
+  margin-top:16px;
+  font-size:13px;
+  color:#888;
+  text-align:center;
+}
+input[type="checkbox"]{
+  width:24px;
+  height:24px;
+  accent-color:#bb77ff;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="time-big" id="curTime">00:00:00</div>
+
+  <div class="card">
+    <h3>在线音频报时设置</h3>
+
+    <div class="row">
+      <label>开启报时总开关</label>
+      <input type="checkbox" id="mainSwitch">
+    </div>
+    <div class="row">
+      <label>整点报时（h0~h23.mp3）</label>
+      <input type="checkbox" id="wholeHour">
+    </div>
+    <div class="row">
+      <label>半点报时（ban.ogg）</label>
+      <input type="checkbox" id="halfHour">
+    </div>
+
+    <div class="time-range">
+      <label>报时时间段：</label>
+      <select id="startSel"></select>
+      <span>～</span>
+      <select id="endSel"></select>
+    </div>
+
+    <button class="btn" id="testBtn">🔊 测试播放报时音频</button>
+    <div class="tip">提示：打开页面先点击屏幕一次，浏览器才允许播放音频<br>整点文件 h0.mp3‑h23.mp3；半点共用 ban.ogg</div>
+  </div>
+</div>
+
+<audio id="audioPlayer" preload="auto">
+
+<script>
+// 默认配置
+let setting = JSON.parse(localStorage.getItem("audioReportSet")||JSON.stringify({
+  main:false,
+  whole:true,
+  half:true,
+  start:6,
+  end:22
+}));
+let lastMin = -1;
+
+const mainSwitch = document.getElementById("mainSwitch");
+const wholeHour = document.getElementById("wholeHour");
+const halfHour = document.getElementById("halfHour");
+const startSel = document.getElementById("startSel");
+const endSel = document.getElementById("endSel");
+const testBtn = document.getElementById("testBtn");
+const curTimeDom = document.getElementById("curTime");
+const audioPlayer = document.getElementById("audioPlayer");
+
+// ========== 音频基础路径，在这里修改你的音频存放地址 ==========
+// 例如你的音频放在 https://xxx.com/voice/ 下面，则填 "https://xxx.com/voice/"
+const BASE_VOICE_URL = "./voice/";
+// =============================================================
+
+/**
+ * 获取音频地址
+ * @param {number} hour 小时 0‑23
+ * @param {boolean} isHalf 是否半点 true=半点 false=整点
+ */
+function getAudioUrl(hour, isHalf){
+  if(isHalf){
+    // 半点统一使用 ban.ogg
+    return BASE_VOICE_URL + "ban.ogg";
+  }else{
+    // 整点使用 h0.mp3 ~ h23.mp3
+    return BASE_VOICE_URL + `h${hour}.mp3`;
+  }
+}
+
+// 填充0‑23下拉选项
+for(let i=0;i<=23;i++){
+  startSel.innerHTML += `<option value="${i}">${i}点</option>`;
+  endSel.innerHTML += `<option value="${i}">${i}点</option>`;
+}
+
+// 读取配置渲染界面
+function loadUi(){
+  mainSwitch.checked = setting.main;
+  wholeHour.checked = setting.whole;
+  halfHour.checked = setting.half;
+  startSel.value = setting.start;
+  endSel.value = setting.end;
+}
+
+// 保存配置到本地存储
+function saveSet(){
+  setting.main = mainSwitch.checked;
+  setting.whole = wholeHour.checked;
+  setting.half = halfHour.checked;
+  setting.start = Number(startSel.value);
+  setting.end = Number(endSel.value);
+  localStorage.setItem("audioReportSet", JSON.stringify(setting));
+}
+
+// 绑定控件变更事件
+mainSwitch.onchange = saveSet;
+wholeHour.onchange = saveSet;
+halfHour.onchange = saveSet;
+startSel.onchange = saveSet;
+endSel.onchange = saveSet;
+
+/**
+ * 播放报时音频
+ * @param {number} hour
+ * @param {boolean} isHalf
+ */
+function playVoice(hour, isHalf){
+  const url = getAudioUrl(hour, isHalf);
+  audioPlayer.pause();
+  audioPlayer.src = url;
+  audioPlayer.play().catch(err=>{
+    console.error("音频播放失败:", err, "地址：", url);
+  });
+}
+
+// 测试按钮：播放当前时间对应的报时音频
+testBtn.onclick = function(){
+  const now = new Date();
+  const h = now.getHours();
+  const m = now.getMinutes();
+  playVoice(h, m === 30);
+};
+
+// 判断当前小时是否在报时时间段内（支持跨零点，如23点‑7点）
+function isInTimeRange(h){
+  const s = setting.start;
+  const e = setting.end;
+  if(s <= e){
+    return h >= s && h <= e;
+  }else{
+    return h >= s || h <= e;
+  }
+}
+
+// 主时间循环
+function tick(){
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2,"0");
+  const mm = String(now.getMinutes()).padStart(2,"0");
+  const ss = String(now.getSeconds()).padStart(2,"0");
+  curTimeDom.innerText = `${hh}:${mm}:${ss}`;
+
+  const m = now.getMinutes();
+  const h = now.getHours();
+
+  if(setting.main && lastMin !== m){
+    lastMin = m;
+    if(isInTimeRange(h)){
+      if(m===0 && setting.whole){
+        playVoice(h,false);
+      }
+      if(m===30 && setting.half){
+        playVoice(h,true);
+      }
+    }
+  }
+}
+
+loadUi();
+tick();
+setInterval(tick, 1000);
+</script>
+</body>
+</html>

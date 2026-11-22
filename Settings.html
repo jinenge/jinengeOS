@@ -1,0 +1,246 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <link rel="shortcut icon" href="images/Settings.png" type="image/x-icon">
+    <title>设置</title>
+    <style>
+        * {
+            scrollbar-width: thin;
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #050020 0%, #100035 50%, #001030 100%);
+            min-height: 100vh;
+            padding-top: 56px;
+            font-family:system-ui,-apple-system,sans-serif;
+            color:#f0f0f0;
+        }
+        /*顶部导航栏*/
+        .appbar-fixed{
+            position:fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:56px;
+            background: linear-gradient(90deg, #7928ca, #ff0080, #00c6ff);
+            box-shadow: 0 0 18px #ff008077, 0 0 35px #00c6ff55;
+            display:flex;
+            align-items:center;
+            gap:12px;
+            padding:0 12px;
+            z-index:10;
+        }
+        .back-btn{
+            width:40px;
+            height:40px;
+            border-radius:50%;
+            background:rgba(255,255,255,0.12);
+            border:none;
+            color:#fff;
+            font-size:20px;
+            cursor:pointer;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+        .title-text{
+            color:#fff;
+            text-shadow: 0 0 10px #ffffff99;
+            font-weight:600;
+            font-size:19px;
+        }
+        .wrap{
+            max-width:640px;
+            margin:16px auto 0;
+            padding:0 10px;
+        }
+        .list-container{
+            background: rgba(255,255,255,0.04);
+            border-radius: 16px;
+            padding:8px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 0 24px #7928ca33;
+        }
+        .sub-header{
+            color:#00e5ff;
+            text-shadow:0 0 8px #00e5ff88;
+            font-weight:500;
+            padding:10px 16px 4px;
+            font-size:14px;
+        }
+        .list-item{
+            display:flex;
+            align-items:center;
+            padding:12px 14px;
+            margin:4px 10px;
+            border-radius:12px;
+            cursor:pointer;
+            transition:all 0.3s ease;
+        }
+        .list-item:hover{
+            background:rgba(255,255,255,0.08);
+            box-shadow:0 0 14px #ff008066,0 0 28px #00c6ff44;
+            transform:scale(1.015);
+        }
+        .item-icon{
+            font-size:24px;
+            margin-right:14px;
+            text-shadow:0 0 10px currentColor,0 0 22px currentColor;
+        }
+        .item-content{
+            flex:1;
+        }
+        .item-title{
+            color:#ffffff;
+            font-size:15px;
+        }
+        .item-desc{
+            color:#cccccc;
+            font-size:13px;
+            margin-top:2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="appbar-fixed">
+        <button class="back-btn" onclick="goBackHome()">←</button>
+        <div class="title-text">设置</div>
+    </div>
+    <div class="wrap">
+        <div class="list-container">
+            <div class="sub-header">设备</div>
+            <div class="list-item" onclick="switchActivity('Settings-Display.html');">
+                <div class="item-icon" style="color:#00e5ff">🖥️</div>
+                <div class="item-content">
+                    <div class="item-title">显示</div>
+                    <div class="item-desc">亮度、壁纸、深色主题</div>
+                </div>
+            </div>
+            <div class="list-item" onclick="switchActivity('Settings-Apps.html');">
+                <div class="item-icon" style="color:#7bff60">📦</div>
+                <div class="item-content">
+                    <div class="item-title">应用</div>
+                    <div class="item-desc" id="appNumber"></div>
+                </div>
+            </div>
+            <div class="list-item" onclick="switchActivity('Settings-Battery.html');">
+                <div class="item-icon" style="color:#ffdd00">🔋</div>
+                <div class="item-content">
+                    <div class="item-title">电池</div>
+                    <div class="item-desc" id="batteryInfo"></div>
+                </div>
+            </div>
+            <div class="sub-header">系统</div>
+            <div class="list-item" id="devOptions" onclick="switchActivity('Settings-DevOptions.html');">
+                <div class="item-icon" style="color:#ff5c93">💻</div>
+                <div class="item-content">
+                    <div class="item-title">开发者选项</div>
+                    <div class="item-desc" id="terminal"></div>
+                </div>
+            </div>
+            <div class="list-item" onclick="switchActivity('Settings-AboutDevice.html');">
+                <div class="item-icon" style="color:#b37bff">📱</div>
+                <div class="item-content">
+                    <div class="item-title">关于设备</div>
+                    <div class="item-desc" id="versionName1"></div>
+                </div>
+            </div>
+            <div class="list-item" onclick="switchActivity('update.html');">
+                <div class="item-icon" style="color:#00ffa3">⬇️</div>
+                <div class="item-content">
+                    <div class="item-title">客户端更新</div>
+                    <div class="item-desc" id="versionName2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function gebi(id) {
+            return document.getElementById(id);
+        }
+        function postScript(script) {
+            var scriptStr = script.toString();
+            var postData = {
+                "type": "JavaScript",
+                "script": scriptStr
+            };
+            if(window.parent !== window){
+                window.parent.postMessage(JSON.stringify(postData), "/");
+            }
+        }
+        function switchActivity(url, back = false) {
+            if(window.parent !== window){
+                var postData = {
+                    "type": "switchActivity",
+                    "url": url,
+                    "back": back
+                };
+                window.parent.postMessage(JSON.stringify(postData), "/");
+            }else{
+                location.href = url;
+            }
+        }
+        function goBackHome(){
+            if(window.parent !== window){
+                const msg = {"type":"backPage"};
+                window.parent.postMessage(JSON.stringify(msg),"/");
+            }else{
+                location.href="index.html";
+            }
+        }
+        if (localStorage.getItem("darkTheme") == "true") {
+            postScript(function() {
+                if(gebi("statusBar")){
+                    gebi("statusBar").style.background = "#050020";
+                    gebi("statusBar").style.color = "#fff";
+                }
+            });
+        } else {
+            postScript(function() {
+                if(gebi("statusBar")){
+                    gebi("statusBar").style.background = "#ECEFF1";
+                    gebi("statusBar").style.color = "#000";
+                }
+            });
+        }
+        if (localStorage.getItem("devMode") != 1) {
+            gebi("devOptions").style.display = "none";
+        }
+        function getBatteryInfo() {
+            if(navigator.getBattery){
+                navigator.getBattery().then(function(battery) {
+                    gebi("batteryInfo").innerText = (battery.level * 100).toFixed(0) + "% - " + (battery.charging ? "正在充电" : "未在充电");
+                }).catch(e=>{
+                    gebi("batteryInfo").innerText = "浏览器不支持电池API";
+                });
+            }else{
+                gebi("batteryInfo").innerText = "浏览器不支持电池API";
+            }
+        }
+        window.onload = function() {
+            getBatteryInfo();
+            let versionName = localStorage.getItem("sysVersion") || "2.2.0";
+            gebi("versionName1").innerText = "当前版本： " + versionName;
+            gebi("versionName2").innerText = "当前版本： " + versionName;
+            let appList = JSON.parse(localStorage.getItem("apps")||"[]");
+            gebi("appNumber").innerText = "已安装 " + appList.length + " 个应用";
+        };
+        if(navigator.getBattery){
+            navigator.getBattery().then(function(battery) {
+                battery.onlevelchange = function() {
+                    getBatteryInfo();
+                };
+                battery.onchargingchange = function() {
+                    getBatteryInfo();
+                };
+            });
+        }
+    </script>
+    <script src="Update.js"></script>
+</body>
+</html>

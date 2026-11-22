@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <title>电池详情</title>
+    <style>
+        * {
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            scrollbar-width: thin;
+        }
+        body {
+            background: linear-gradient(135deg, #050020 0%, #100035 50%, #001030 100%);
+            min-height: 100vh;
+            color:#f0f0f0;
+            font-family:system-ui,-apple-system,sans-serif;
+            padding-top:56px;
+        }
+        /*顶部导航渐变霓虹 */
+        .appbar-fixed{
+            position:fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:56px;
+            background: linear-gradient(90deg, #7928ca, #ff0080, #00c6ff);
+            box-shadow: 0 0 18px #ff008077, 0 0 35px #00c6ff55;
+            display:flex;
+            align-items:center;
+            gap:12px;
+            padding:0 12px;
+            z-index:10;
+        }
+        .back-btn{
+            width:40px;
+            height:40px;
+            border-radius:50%;
+            background:rgba(255,255,255,0.12);
+            border:none;
+            color:#fff;
+            font-size:20px;
+            cursor:pointer;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+        .title-text{
+            color:#fff;
+            text-shadow: 0 0 10px #ffffff99;
+            font-weight:600;
+            font-size:19px;
+        }
+        .wrap{
+            max-width:640px;
+            margin:16px auto 0;
+            padding:0 10px;
+        }
+        .list-container{
+            background: rgba(255,255,255,0.04);
+            border-radius: 16px;
+            padding:8px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 0 24px #7928ca33;
+        }
+        .list-item{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            padding:14px 14px;
+            margin:4px 10px;
+            border-radius:12px;
+            cursor:pointer;
+            transition:all 0.3s ease;
+        }
+        .list-item:hover{
+            background:rgba(255,255,255,0.08);
+            box-shadow:0 0 14px #ff008066, 0 0 28px #00c6ff44;
+            transform:scale(1.015);
+        }
+        .item-title{
+            color:#ffffff;
+            font-size:15px;
+        }
+        .item-value{
+            color:#00e5ff;
+            text-shadow:0 0 6px #00e5ff66;
+            font-size:14px;
+        }
+        .divider{
+            height:1px;
+            background:rgba(255,255,255,0.12);
+            margin:0 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="appbar-fixed">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div class="title-text">电池详情</div>
+    </div>
+    <div class="wrap">
+        <div class="list-container">
+            <div class="list-item">
+                <div class="item-title">电池充电状态</div>
+                <div class="item-value" id="chargeStatus"></div>
+            </div>
+            <div class="divider"></div>
+            <div class="list-item">
+                <div class="item-title">当前电量</div>
+                <div class="item-value" id="batteryLevel"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function gebi(id) {
+            return document.getElementById(id);
+        }
+        // 【统一返回逻辑】
+        function goBack(){
+            if(window.parent !== window){
+                parent.postMessage(JSON.stringify({type:"backPage"}),"*");
+            }
+        }
+        window.addEventListener('popstate',function(e){
+            e.preventDefault();
+            goBack();
+            history.pushState(null, null, location.href);
+        });
+        history.pushState(null, null, location.href);
+
+        //读取浏览器电池API，仅充电状态、电量
+        function getBatteryInfo() {
+            if(!navigator.getBattery) {
+                gebi("chargeStatus").innerText = "浏览器不支持";
+                gebi("batteryLevel").innerText = "无数据";
+                return;
+            }
+            navigator.getBattery().then(function(battery) {
+                gebi("chargeStatus").innerText = battery.charging ? "正在充电" : "未在充电";
+                gebi("batteryLevel").innerText = (battery.level * 100).toFixed(0) + "%";
+            });
+        }
+        window.onload = function() {
+            getBatteryInfo();
+        };
+        //监听电池实时变化
+        if(navigator.getBattery) {
+            navigator.getBattery().then(function(battery) {
+                battery.onchargingchange = getBatteryInfo;
+                battery.onlevelchange = getBatteryInfo;
+            });
+        }
+    </script>
+</body>
+</html>

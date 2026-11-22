@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>多功能闹钟</title>
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+html,body{
+  width:100%;
+  height:100%;
+  font-family:system-ui, -apple-system, sans-serif;
+  color:#ffffff;
+  overflow:hidden;
+}
+body{
+  background:#050510;
+}
+/* 流动七彩渐变动画背景 */
+.rainbow-wrap{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  background:
+    linear-gradient(45deg, #ff3366, #ff9933, #ffee33, #33ff99, #33ccff, #9966ff, #ff3366);
+  background-size: 400% 400%;
+  animation: rainbowFlow 12s ease infinite;
+  opacity: 0.28;
+}
+@keyframes rainbowFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.container{
+  width:100%;
+  height:100%;
+  position:relative;
+  z-index:1;
+  overflow:hidden;
+}
+/* 右上角横竖屏切换按钮 */
+.orientation-btn{
+  position:fixed;
+  top:14px;
+  right:14px;
+  z-index: 950;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(20,20,35,0.55);
+  backdrop-filter: blur(14px);
+  color:#cfe9ff;
+  font-size: 18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  user-select:none;
+  transition: 0.25s ease;
+}
+.orientation-btn:active{
+  background: rgba(57,255,136,0.25);
+  color:#39ff88;
+  border-color: rgba(57,255,136,0.45);
+}
+/* 时钟主页 */
+.clock-main-page{
+  display:none;
+  height:100%;
+  width:100%;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding: 80px 24px 120px;
+}
+.clock-main-page.active{
+  display:flex;
+}
+.clock-main-page .big-time{
+  font-weight: 900;
+  letter-spacing: 6px;
+  color:#ffffff;
+  text-shadow:
+    0 0 25px rgba(255,255,255,0.4),
+    0 0 60px rgba(120,220,255,0.5),
+    0 0 120px rgba(255,110,210,0.4);
+  line-height: 1;
+  white-space: nowrap;
+}
+.clock-main-page .big-date{
+  font-weight: 300;
+  color:#eef6ff;
+  opacity: 0.82;
+  text-shadow: 0 0 8px rgba(100,200,255,0.25);
+  margin-top: 14px;
+}
+.clock-main-page .holiday-count{
+  margin-top:12px;
+  font-size:16px;
+  color:#ffdd77;
+  text-shadow:0 0 10px rgba(255,200,80,0.35);
+}
+/* 竖屏：按手机自适应，防止显示不全 */
+@media (orientation: portrait) {
+  .clock-main-page .big-time{
+    font-size: 80px;
+    letter-spacing: 4px;
+  }
+  .clock-main-page .big-date{
+    font-size: 20px;
+  }
+  .clock-main-page .holiday-count{
+    font-size:14px;
+  }
+}
+/* 横屏：锁定超大时钟，日期加大 */
+@media (orientation: landscape) {
+  .clock-main-page .big-time{
+    font-size: 260px !important;
+    letter-spacing: 8px;
+  }
+  .clock-main-page .big-date{
+    font-size: 26px;
+  }
+  .clock-main-page .holiday-count{
+    font-size:20px;
+  }
+}
+/* 其他页面 */
+.page{
+  display:none;
+  width:100%;
+  height:100%;
+  overflow-y:auto;
+  padding: 16px;
+  padding-bottom: 90px;
+}
+.page.active{
+  display:block;
+}
+.card{
+  background:rgba(255,255,255,0.06);
+  border-radius: 24px;
+  padding: 20px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(57,255,136,0.22);
+  backdrop-filter: blur(10px);
+}
+.toggle-add-btn{
+  display:block;
+  width:100%;
+  max-width: 360px;
+  margin:0 auto 16px;
+  padding:14px 22px;
+  border:none;
+  border-radius:18px;
+  background:#2888dd;
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+  transition:0.25s ease;
+}
+.toggle-add-btn:active{
+  opacity:0.85;
+}
+.slide-add-area{
+  max-height:0;
+  overflow:hidden;
+  transition:max-height 0.5s ease;
+}
+.slide-add-area.open{
+  max-height:1400px;
+}
+.time-picker-wrap{
+  display:flex;
+  justify-content:center;
+  gap:14px;
+  align-items:center;
+  margin:16px 0;
+}
+.time-col{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.time-col button{
+  width:48px;
+  height:40px;
+  border:none;
+  background:#1c1c30;
+  color:#39ff88;
+  border-radius:10px;
+  font-size:20px;
+  cursor:pointer;
+}
+.time-col .val{
+  width:74px;
+  text-align:center;
+  font-size:32px;
+  padding:10px 0;
+  color:#39ff88;
+  cursor:pointer;
+  border-radius:8px;
+  transition:0.2s;
+}
+.time-col .val:hover{
+  background:rgba(57,255,136,0.08);
+}
+.time-col .val input{
+  width:100%;
+  text-align:center;
+  background:transparent;
+  border:none;
+  color:#39ff88;
+  font-size:32px;
+  outline:none;
+}
+.label-small{
+  font-size:12px;
+  color:#888;
+  margin-top:4px;
+}
+/* 淡化悬浮底部 Tab */
+.tab-bar{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:rgba(12,12,22,0.62);
+  backdrop-filter: blur(18px);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display:flex;
+  justify-content:space-around;
+  padding: 8px 4px 18px;
+  z-index: 900;
+}
+.tab-item{
+  text-align:center;
+  font-size:13px;
+  color:#666;
+  cursor:pointer;
+  padding: 7px 8px;
+  border-radius: 999px;
+  transition:0.25s ease;
+  flex:1;
+  margin:0 2px;
+}
+.tab-item.clock.active{
+  background:#39ff8822;
+  color:#39ff88;
+  box-shadow:0 0 12px #39ff8833;
+}
+.tab-item.alarm.active{
+  background:#39ff8822;
+  color:#39ff88;
+  box-shadow:0 0 12px #39ff8833;
+}
+.tab-item.stopwatch.active{
+  background:#ffdd4422;
+  color:#ffdd44;
+  box-shadow:0 0 12px #ffdd4433;
+}
+.tab-item.world.active{
+  background:#44ccff22;
+  color:#44ccff;
+  box-shadow:0 0 12px #44ccff33;
+}
+.tab-item.countdown.active{
+  background:#ff66aa22;
+  color:#ff66aa;
+  box-shadow:0 0 12px #ff66aa33;
+}
+.btn{
+  padding:11px 14px;
+  border:none;
+  border-radius:14px;
+  cursor:pointer;
+  font-size:14px;
+  transition:0.2s;
+}
+.btn-primary{
+  background:#39ff88;
+  color:#081810;
+  font-weight:600;
+}
+.btn-success{
+  background:#39ff88;
+  color:#081810;
+  font-weight:600;
+}
+.btn-danger{
+  background:#222;
+  color:#ff6677;
+}
+.btn-blue{
+  background:#2888dd;
+  color:#fff;
+}
+.btn-purple{
+  background:#8844dd;
+  color:#fff;
+}
+.row-flex{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:center;
+  margin-top:12px;
+}
+.select-box,.input-text{
+  padding:10px 12px;
+  border-radius:12px;
+  background:#181828;
+  color:#fff;
+  border:none;
+  font-size:15px;
+  min-width:100px;
+}
+.select-box option{
+  background:#181828;
+  color:#fff;
+}
+.empty-tip{
+  text-align:center;
+  color:#666;
+  padding:32px 0;
+}
+.alarm-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 16px;
+  background:rgba(255,255,255,0.045);
+  border-radius:18px;
+  margin-bottom:10px;
+  border:1px solid rgba(57,255,136,0.12);
+  flex-wrap: wrap;
+  gap:10px;
+}
+.alarm-info .t{
+  font-size:26px;
+  color:#39ff88;
+}
+.alarm-info .desc{
+  font-size:12px;
+  color:#999;
+  margin-top:3px;
+}
+.toggle{
+  width:48px;
+  height:26px;
+  border-radius:999px;
+  background:#333;
+  position:relative;
+  cursor:pointer;
+  margin-right:10px;
+}
+.toggle.on{
+  background:#39ff88;
+}
+.toggle.on::after{
+  background:#081810;
+}
+.toggle::after{
+  content:"";
+  width:22px;
+  height:22px;
+  background:#fff;
+  border-radius:50%;
+  position:absolute;
+  top:2px;
+  left:2px;
+  transition:0.22s;
+}
+.toggle.on::after{
+  left:24px;
+}
+.stopwatch-display{
+  font-size:52px;
+  text-align:center;
+  color:#ffdd44;
+  margin:20px 0;
+}
+.lap-item{
+  padding:6px 0;
+  color:#aaa;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.countdown-display{
+  font-size:48px;
+  text-align:center;
+  color:#ff66aa;
+  margin:20px 0;
+}
+.world-item{
+  display:flex;
+  justify-content:space-between;
+  padding:12px 0;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.world-item:last-child{
+  border-bottom:none;
+}
+.world-city{
+  color:#ddd;
+}
+.world-time{
+  color:#44ccff;
+}
+.mask{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.88);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+  padding:20px;
+}
+.dialog{
+  width:100%;
+  max-width:360px;
+  background:#141424;
+  border-radius:28px;
+  padding:32px 26px;
+  text-align:center;
+  border:1px solid #39ff88;
+}
+.dialog h3{
+  font-size:22px;
+  color:#39ff88;
+  margin-bottom:8px;
+}
+.dialog p{
+  color:#aaa;
+  margin-bottom:24px;
+}
+.dialog-buttons{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.dialog-buttons .btn{
+  flex:1;
+  padding:13px 0;
+}
+</style>
+</head>
+<body>
+<div class="rainbow-wrap"></div>
+<!-- 右上角横竖屏切换按钮 -->
+<div class="orientation-btn" id="orientationBtn" title="切换横竖屏">
+  ⇄
+</div>
+<div class="container">
+  <!-- 超大时钟主页，增加节日倒计时 -->
+  <div id="pageClock" class="clock-main-page active">
+    <div class="big-time" id="mainBigTime">00:00:00</div>
+    <div class="big-date" id="mainBigDate"></div>
+    <div class="holiday-count" id="holidayCount">--</div>
+  </div>
+  <!-- 闹钟 -->
+  <div id="pageAlarm" class="page">
+    <button class="toggle-add-btn" id="toggleAddBtn">▼ 添加闹钟</button>
+    <div class="slide-add-area" id="slideAddBox">
+      <div class="card">
+        <div style="text-align:center;margin-bottom:10px;">添加闹钟</div>
+        <div class="time-picker-wrap">
+          <div class="time-col">
+            <button id="hUp">▲</button>
+            <div class="val" id="hValWrap">
+              <span id="hValText">07</span>
+            </div>
+            <div class="label-small">时</div>
+            <button id="hDown">▼</button>
+          </div>
+          <div class="val">:</div>
+          <div class="time-col">
+            <button id="mUp">▲</button>
+            <div class="val" id="mValWrap">
+              <span id="mValText">00</span>
+            </div>
+            <div class="label-small">分</div>
+            <button id="mDown">▼</button>
+          </div>
+        </div>
+        <div class="row-flex">
+          <input class="input-text" id="alarmLabel" placeholder="闹钟标签（起床）">
+          <select class="select-box" id="ringSelect">
+            <option value="beep">滴答蜂鸣</option>
+            <option value="alarm">警报铃声</option>
+            <option value="soft">舒缓铃声</option>
+            <option value="fast">急促闹铃</option>
+            <option value="chime">清脆钟鸣</option>
+            <option value="wave">水波舒缓</option>
+            <option value="bright">明亮提示</option>
+            <option value="bell1">复古铃铛</option>
+            <option value="bell2">叮咚门铃</option>
+            <option value="sweep">扫频警报</option>
+            <option value="melody1">短旋律A</option>
+            <option value="melody2">短旋律B</option>
+            <option value="buzz1">低频蜂鸣</option>
+            <option value="buzz2">高频哔声</option>
+            <option value="gentle">温柔唤醒</option>
+            <option value="horn">号角提示</option>
+            <option value="twinkle">闪烁音符</option>
+            <option value="rhythm">节奏提示音</option>
+            <option value="metro">节拍器</option>
+            <option value="custom">自定义本地铃声</option>
+          </select>
+          <button class="btn btn-purple" id="previewRingBtn">预览铃声</button>
+        </div>
+        <div class="row-flex">
+          <input type="file" id="customRingFile" accept="audio/*">
+        </div>
+        <div class="row-flex">
+          <select class="select-box" id="repeatSelect">
+            <option value="once">仅一次</option>
+            <option value="workday">工作日</option>
+            <option value="daily">每天</option>
+            <option value="weekend">周末</option>
+          </select>
+          <input class="input-text" id="snoozeInput" value="5" placeholder="延迟分钟">
+          <label style="font-size:13px;color:#888;">震动：</label>
+          <input type="checkbox" id="vibrateSwitch">
+          <button class="btn btn-primary" id="addAlarmBtn">添加闹钟</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="margin-bottom:10px;">闹钟列表</div>
+      <div id="alarmList"></div>
+    </div>
+  </div>
+
+  <!-- 秒表 -->
+  <div id="pageStopwatch" class="page">
+    <div class="card">
+      <div class="stopwatch-display" id="stopwatchTime">00:00:00.00</div>
+      <div class="row-flex">
+        <button class="btn btn-success" id="swStart">开始</button>
+        <button class="btn btn-blue" id="swLap">计次</button>
+        <button class="btn btn-danger" id="swReset">重置</button>
+      </div>
+      <div id="lapList" style="margin-top:16px;"></div>
+    </div>
+  </div>
+
+  <!-- 世界时间 -->
+  <div id="pageWorld" class="page">
+    <div class="card">
+      <div style="margin-bottom:12px;">世界时间</div>
+      <div id="worldList"></div>
+    </div>
+  </div>
+
+  <!-- 倒计时 -->
+  <div id="pageCountdown" class="page">
+    <div class="card">
+      <div style="margin-bottom:10px;">倒计时</div>
+      <div class="countdown-display" id="cdTime">00:00:00</div>
+      <div class="time-picker-wrap">
+        <div class="time-col">
+          <button id="cdHUp">▲</button>
+          <div class="val" id="cdHValWrap">
+            <span id="cdHValText">00</span>
+          </div>
+          <div class="label-small">时</div>
+          <button id="cdHDown">▼</button>
+        </div>
+        <div class="val">:</div>
+        <div class="time-col">
+          <button id="cdMUp">▲</button>
+          <div class="val" id="cdMValWrap">
+            <span id="cdMValText">05</span>
+          </div>
+          <div class="label-small">分</div>
+          <button id="cdMDown">▼</button>
+        </div>
+        <div class="val">:</div>
+        <div class="time-col">
+          <button id="cdSUp">▲</button>
+          <div class="val" id="cdSValWrap">
+            <span id="cdSValText">00</span>
+          </div>
+          <div class="label-small">秒</div>
+          <button id="cdSDown">▼</button>
+        </div>
+      </div>
+      <div class="row-flex">
+        <button class="btn btn-success" id="cdStart">开始</button>
+        <button class="btn btn-danger" id="cdReset">重置</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 底部 Tab -->
+<div class="tab-bar">
+  <div class="tab-item clock active" data-page="pageClock">时钟</div>
+  <div class="tab-item alarm" data-page="pageAlarm">闹钟</div>
+  <div class="tab-item stopwatch" data-page="pageStopwatch">秒表</div>
+  <div class="tab-item world" data-page="pageWorld">世界时间</div>
+  <div class="tab-item countdown" data-page="pageCountdown">倒计时</div>
+</div>
+
+<!-- 删除弹窗 -->
+<div class="mask" id="delMask">
+  <div class="dialog">
+    <h3>确认删除闹钟</h3>
+    <p id="delAlarmText"></p>
+    <div class="dialog-buttons">
+      <button class="btn btn-danger" id="cancelDel">取消</button>
+      <button class="btn btn-success" id="confirmDel">删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 响铃弹窗 -->
+<div class="mask" id="ringMask">
+  <div class="dialog">
+    <h3 id="ringTitle">闹钟响啦！</h3>
+    <p id="ringShowTime"></p>
+    <div class="dialog-buttons">
+      <button class="btn btn-success" id="snoozeBtn">延迟再响</button>
+      <button class="btn btn-danger" id="stopRingBtn">停止</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Tab 切换
+const tabs = document.querySelectorAll('.tab-item');
+const pages = {
+  pageClock: document.getElementById('pageClock'),
+  pageAlarm: document.getElementById('pageAlarm'),
+  pageStopwatch: document.getElementById('pageStopwatch'),
+  pageWorld: document.getElementById('pageWorld'),
+  pageCountdown: document.getElementById('pageCountdown')
+};
+
+tabs.forEach(tab => {
+  tab.onclick = function(){
+    tabs.forEach(t => t.classList.remove('active'));
+    for(let k in pages) pages[k].classList.remove('active');
+
+    this.classList.add('active');
+    pages[this.dataset.page].classList.add('active');
+  };
+});
+
+// 右上角全屏切换
+const orientationBtn = document.getElementById('orientationBtn');
+orientationBtn.onclick = function(){
+  if(!document.fullscreenElement){
+    if(document.documentElement.requestFullscreen){
+      document.documentElement.requestFullscreen().catch(()=>{});
+    }
+  }else{
+    if(document.exitFullscreen){
+      document.exitFullscreen().catch(()=>{});
+    }
+  }
+};
+
+//节日配置 公历节日
+const holidayList = [
+  {name:"元旦",month:1,day:1},
+  {name:"春节",month:2,day:15},
+  {name:"清明节",month:4,day:4},
+  {name:"劳动节",month:5,day:1},
+  {name:"端午节",month:6,day:19},
+  {name:"中秋节",month:9,day:25},
+  {name:"国庆节",month:10,day:1}
+];
+
+function getNextHoliday(){
+  const now=new Date();
+  const year=now.getFullYear();
+  let minDiff=null;
+  let target=null;
+  holidayList.forEach(h=>{
+    let d=new Date(year,h.month-1,h.day);
+    if(d.getTime()<now.getTime()){
+      d=new Date(year+1,h.month-1,h.day);
+    }
+    const diff=d.getTime()-now.getTime();
+    if(minDiff===null||diff<minDiff){
+      minDiff=diff;
+      target={name:h.name,days:Math.ceil(diff/(1000*60*60*24))};
+    }
+  });
+  return target;
+}
+
+function updateHolidayText(){
+  const h=getNextHoliday();
+  document.getElementById("holidayCount").innerText=`距离【${h.name}】还有 ${h.days} 天`;
+}
+
+// 添加闹钟蓝色展开按钮
+const toggleAddBtn = document.getElementById('toggleAddBtn');
+const slideAddBox = document.getElementById('slideAddBox');
+let slideOpen = false;
+
+toggleAddBtn.onclick = function(){
+  slideOpen = !slideOpen;
+
+  if(slideOpen){
+    slideAddBox.classList.add('open');
+    toggleAddBtn.innerText = '▲ 收起添加闹钟';
+  }else{
+    slideAddBox.classList.remove('open');
+    toggleAddBtn.innerText = '▼ 添加闹钟';
+  }
+};
+
+// 音频
+let audioCtx = null;
+let ringOscillators = [];
+let customAudio = null;
+let customRingUrl = null;
+
+const customRingFile = document.getElementById('customRingFile');
+
+customRingFile.onchange = function(e){
+  const file = e.target.files[0];
+  if(file){
+    if(customRingUrl) URL.revokeObjectURL(customRingUrl);
+    customRingUrl = URL.createObjectURL(file);
+  }
+};
+
+function initAudio(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function playBuiltinRing(type){
+  initAudio();
+  stopRing();
+  const now = audioCtx.currentTime;
+  ringOscillators = [];
+
+  if(type === "beep"){
+    for(let i = 0; i < 120; i++){
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.frequency.value = 880; osc.type = "sine";
+      gain.gain.setValueAtTime(0.22, now + i * 0.35);
+      gain.gain.setValueAtTime(0, now + i * 0.35 + 0.12);
+      osc.start(now + i * 0.35); osc.stop(now + i * 0.35 + 0.18);
+      ringOscillators.push(osc);
+    }
+  }else if(type === "alarm"){
+    for(let i = 0; i < 180; i++){
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.frequency.value = i % 2 === 0 ? 920 : 1100; osc.type = "square";
+      gain.gain.setValueAtTime(0.18, now + i * 0.28);
+      gain.gain.setValueAtTime(0, now + i * 0.28 + 0.14);
+      osc.start(now + i * 0.28); osc.stop(now + i * 0.28 + 0.18);
+      ringOscillators.push(osc);
+    }
+  }else if(type === "soft"){
+    const notes = [330, 392, 440, 392, 330, 294];
+    for(let i = 0; i < 60; i++){
+      const n = notes[i % notes.length];
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.frequency.value = n; osc.type = "sine";
+      gain.gain.setValueAtTime(0.14, now + i * 0.65);
+      gain.gain.setValueAtTime(0, now + i * 0.65 + 0.45);
+      osc.start(now + i * 0.65); osc.stop(now + i * 0.65 + 0.55);
+      ringOscillators.push(osc);
+    }
+  }else if(type === "fast"){
+    for(let i = 0; i < 300; i++){
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.frequency.value = 1200; osc.type = "sawtooth";
+      gain.gain.setValueAtTime(0.12, now + i * 0.12);
+      gain.gain.setValueAtTime(0, now + i * 0.12 + 0.06);
+      osc.start(now + i * 0.12); osc.stop(now + i * 0.12 + 0.09);
+      ringOscillators.push(osc);
+    }
+  }else if(type === "chime"){
+    const notes = [523, 659, 784, 1047, 784, 659, 523];
+    for(let i = 0; i < 80; i++){
+      const n = notes[i % notes.length];
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.frequency.value = n; osc.type = "sine";
+      gain.gain.setValueAtTime(0.16, now + i * 0.42);
+      gain.gain.setValueAtTime(0, now + i * 0.42 + 0.28);
+      osc.start(now + i * 0.42); osc.stop(now + i * 0.42 + 0.32);
+      ringOscillators.push(osc);
+    }
+  }else if(type === "wave"){
+    for(let i = 0; i < 100; i++){
+      const f = 220 + Math.sin(i / 12) * 90;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.frequency.value = f; osc.type = "sine";
+      gain.gain.setValueAtTime(0.11, now + i * 0.55);
+      gain.gain.setValueAtTime(0, now + i * 0.55 + 0.35);
+      osc.start(now + i * 0.55); osc.stop(now + i * 0.55 + 0.40);
+      ringOscillators.push(osc);
+    }
+  }else if(type === "bright"){
+    for(let i = 0; i < 140; i++){
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.frequency.value = 1400; osc.type = "triangle";
+      gain.gain.setValueAtTime(0.14, now + i * 0.22);
+      gain.gain.setValueAtTime(0, now + i * 0.22 + 0.10);
+      osc.start(now + i * 0.22); osc.stop(now + i * 0.22 + 0.13);
+      ringOscillators.push(osc);
+    }
+  }else if(type==="bell1"){
+    for(let i=0;i<90;i++){
+      const osc=audioCtx.createOscillator();
+      const g=audioCtx.createGain();
+      osc.connect(g);g.connect(audioCtx.destination);
+      osc.frequency.value=620+i*3;osc.type="triangle";
+      g.gain.setValueAtTime(0.13,now+i*0.4);
+      g.gain.setValueAtTime(0,now+i*0.4+0.25);
+      osc.start(now+i*0.4);osc.stop(now+i*0.4+0.3);
+      ringOscillators.push(osc);
+    }
+  }else if(type==="bell2"){
+    const nt=[880,1100,880,660];
+    for(let i=0;i<100;i++){
+      const n=nt[i%nt.length];
+      const osc=audioCtx.createOscillator();
+      const g=audioCtx.createGain();
+      osc.connect(g);g.connect(audioCtx.destination);
+      osc.frequency.value=n;osc.type="sine";
+      g.gain.setValueAtTime(0.15,now+i*0.32);
+      g.gain.setValueAtTime(0,now+i*0.32+0.18);
+      osc.start(now+i*0.32);osc.stop(now+i*0.32+0.22);
+      ringOscillators.push(osc);
+    }
+  }else if(type==="sweep"){
+    for(let i=0;i<220;i++){
+      const osc=audioCtx.createOscillator();
+      const g=audioCtx.createGain();
+      osc.connect(g);g.connect(audioCtx.destination);
+      osc.frequency.value=300+i*8;osc.type="sawtooth";
+      g.gain.setValueAtTime(0.11,now+i*0.14);
+      g.gain.setValueAtTime(0,now+i*0.14+0.07);
+      osc.start(now+i*0.14);osc.stop(now+i*0.14+0.09);
+      ringOscillators.push(osc);
+    }
+  }else if(type==="melody1"){
+    const nt=[440,494,523,587,523,494,440];
+    for(let i=0;i<70;i++){
+      const n=nt[i%nt.length];
+      const osc=audioCtx.createOscillator();
+      const g=audioCtx.createGain();
+      osc.connect(g);g.connect(audioCtx.destination);
+      osc.frequency.value=n;osc.type="sine";
+      g.gain.setValueAtTime(0.14,now+i*0.5);
+      g.gain.setValueAtTime(0,now+i*0.5+0.35);
+      osc.start(now+i*0.5);osc.stop(now+i*0.5+0.4);
+      ringOscillators.push(osc);
+    }
+  }else if(type==="melody2"){
+    const nt=[392,440,330,392,294,330];
+    for(let i=0;i<70;i++){
+      const n=nt[i%nt.length];
+      const osc=audioCtx.createOscillator();
+      const g=audioCtx.createGain();
+      osc.connect(g);g.connect(audioCtx.destination);
+      osc.frequency.value=n;osc.type="triangle";
+      g.gain.setValueAtTime(0.13,now+i*0.52);
+      g.gain.setValueAtTime(0,now+i*0.52+0.36);
+      osc.start(now+i*0.52);osc.stop(now+i*0.52+0.41);
+      ringOscillators.push(osc);
+    }
+  }else if(type==="buzz1"){
+    for(let i=0;i<160;i++){
+      const osc=audioCtx.createOscillator();
+      const g=audioCtx.createGain();
+      osc.connect(g);g.connect(audioCtx.destination);
+      osc.frequency.value=220;osc.type="square";
+      g.gain.setValueAtTime(0.10,now+i*0.3);
+      g.gain.setValueAtTime(0,now+i*0.3+0.13);
+      osc.start(now+i*0.3);osc.stop(now+i*0.3+0.16);
+      ringOscillators.push(osc);
+    }
+  }else if(type==="buzz2"){
+    for(let i=0;i<200;i++){
+      const osc=audioCtx.createOscillator();
+      const g=audioCtx.createGain();
+      osc.connect(g);g.connect(audioCtx.destination);
+      osc.frequency.value=1760;osc.type="square";
+      g.gain.setValueAtTime(0.09,now+i*0.22);
+      g.gain.setValueAtTime(0,now+i*0.22+0.09);
+      osc.start(now+i*0.22);osc.stop(now+i*0.22+0.11);
+      ringOscillators.push(osc);
+    }
+  }else if(type==="gentle"){
+    for(let i=0;i<110;i++){
+      const f=330+Math.sin(i/10)*60;
+      const osc=audioCtx.createOscillator();
+      const g=audioCtx.createGain();
+      osc.connect(g);g.connect(audioCtx.destination);
+      osc.frequency.value=f;osc.type="sine";
+      g.gain.setValueAtTime(0.10,now+i*0.6);
+      g.gain.setValueAtTime(0,now+i*0.6+0.4);
+      osc.start(now+i*0.6);osc.stop(now+i*0.6+0.44);
+      ringOscillators.push(osc);
+    }
+  }else if(type==="horn"){
+    for(let i=0;i<130;i++){
+      const osc=audioCtx.createOscillator();
+      const g=audioCtx.createGain();
+      osc.connect(g);g.connect(audioCtx.destination);
+      osc.frequency.value=440+i*4;osc.type="sawtooth";
+      g.gain.setValueAtTime(0.12,now+i*0.38);
+      g.gain.setValueAtTime(0,now+i*0.38+0.22);
+      osc.start(now+i*0.38);osc.stop(now+i*0.38+0.26);
+      ringOscillators.push(osc);
+    }
+  }else if(type==="twinkle"){
+    const nt=[1318,988,1318,1174];
+    for(let i=0;i<90;i++){
+      const n=nt[i%nt.length];
+      const osc=audioCtx.createOscillator();
+      const g=audioCtx.createGain();
+      osc.connect(g);g.connect(audioCtx.destination);
+      osc.frequency.value=n;osc.type="sine";
+      g.gain.setValueAtTime(0.13,now+i*0.34);
+      g.gain.setValueAtTime(0,now+i*0.34+0.16);
+      osc.start(now+i*0.34);osc.stop(now+i*0.34+0.20);
+      ringOscillators.push(osc);
+    }
+  }else if(type==="rhythm"){
+    for(let i=0;i<240;i++){
+      const osc=audioCtx.createOscillator();
+      const g=audioCtx.createGain();
+      osc.connect(g);g.connect(audioCtx.destination);
+      osc.frequency.value=(i%2===0?660:880);osc.type="triangle";
+      g.gain.setValueAtTime(0.11,now+i*0.20);
+      g.gain.setValueAtTime(0,now+i*0.20+0.08);
+      osc.start(now+i*0.20);osc.stop(now+i*0.20+0.10);
+      ringOscillators.push(osc);
+    }
+  }else if(type==="metro"){
+    for(let i=0;i<260;i++){
+      const osc=audioCtx.createOscillator();
+      const g=audioCtx.createGain();
+      osc.connect(g);g.connect(audioCtx.destination);
+      osc.frequency.value=1000;osc.type="sine";
+      g.gain.setValueAtTime(0.12,now+i*0.18);
+      g.gain.setValueAtTime(0,now+i*0.18+0.06);
+      osc.start(now+i*0.18);osc.stop(now+i*0.18+0.08);
+      ringOscillators.push(osc);
+    }
+  }
+}
+
+function playCustomRing(){
+  stopRing();
+  if(customRingUrl){
+    customAudio = new Audio(customRingUrl);
+    customAudio.loop = true;
+    customAudio.play().catch(e => {});
+  }
+}
+
+function playRing(ringType, useCustomUrl){
+  if(ringType === 'custom' && useCustomUrl){
+    playCustomRing();
+  }else if(ringType !== 'custom'){
+    playBuiltinRing(ringType);
+  }
+}
+
+function stopRing(){
+  ringOscillators.forEach(o => {
+    try{ o.stop(); }catch(e){}
+  });
+  ringOscillators = [];
+  if(customAudio){
+    customAudio.pause();
+    customAudio = null;
+  }
+}
+
+function doVibrate(){
+  if(navigator.vibrate) navigator.vibrate([200, 150, 200, 150, 200]);
+}
+
+// 可点击输入数字
+let h = 7, m = 0;
+let cdH = 0, cdM = 5, cdS = 0;
+
+function makeEditable(wrapId, textId, minVal, maxVal, getCurrentValue, setter){
+  const wrap = document.getElementById(wrapId);
+  wrap.onclick = function(e){
+    if(e.target.tagName === 'INPUT') return;
+    const val = getCurrentValue();
+    wrap.innerHTML = `<input type="number" min="${minVal}" max="${maxVal}" value="${String(val).padStart(2,'0')}">`;
+    const inp = wrap.querySelector('input');
+    inp.focus();
+    inp.select();
+    const finish = () => {
+      let n = Number(inp.value);
+      if(isNaN(n)) n = val;
+      n = Math.max(minVal, Math.min(maxVal, n));
+      setter(n);
+      wrap.innerHTML = `<span id="${textId}">${String(n).padStart(2,'0')}</span>`;
+    };
+    inp.onblur = finish;
+    inp.onkeydown = evt => {
+      if(evt.key === 'Enter') finish();
+    };
+  };
+}
+
+function refreshTimePicker(){
+  document.getElementById("hValText").textContent = String(h).padStart(2,"0");
+  document.getElementById("mValText").textContent = String(m).padStart(2,"0");
+}
+
+function refreshCdPicker(){
+  document.getElementById("cdHValText").textContent = String(cdH).padStart(2,"0");
+  document.getElementById("cdMValText").textContent = String(cdM).padStart(2,"0");
+  document.getElementById("cdSValText").textContent = String(cdS).padStart(2,"0");
+}
+
+// 闹钟时、分，修复按钮冒泡：加上e.stopPropagation()
+document.getElementById("hUp").onclick = (e) => {
+  e.stopPropagation();
+  h = (h + 1) % 24;
+  refreshTimePicker();
+};
+document.getElementById("hDown").onclick = (e) => {
+  e.stopPropagation();
+  h = (h - 1 + 24) % 24;
+  refreshTimePicker();
+};
+document.getElementById("mUp").onclick = (e) => {
+  e.stopPropagation();
+  m = (m + 1) % 60;
+  refreshTimePicker();
+};
+document.getElementById("mDown").onclick = (e) => {
+  e.stopPropagation();
+  m = (m - 1 + 60) % 60;
+  refreshTimePicker();
+};
+
+makeEditable("hValWrap", "hValText", 0, 23, ()=>h, (v)=>{ h = v; refreshTimePicker(); });
+makeEditable("mValWrap", "mValText", 0, 59, ()=>m, (v)=>{ m = v; refreshTimePicker(); });
+
+// 倒计时时、分、秒
+document.getElementById("cdHUp").onclick = (e) => {
+  e.stopPropagation();
+  cdH = (cdH + 1) % 24;
+  refreshCdPicker();
+};
+document.getElementById("cdHDown").onclick = (e) => {
+  e.stopPropagation();
+  cdH = (cdH - 1 + 24) % 24;
+  refreshCdPicker();
+};
+document.getElementById("cdMUp").onclick = (e) => {
+  e.stopPropagation();
+  cdM = (cdM + 1) % 60;
+  refreshCdPicker();
+};
+document.getElementById("cdMDown").onclick = (e) => {
+  e.stopPropagation();
+  cdM = (cdM - 1 + 60) % 60;
+  refreshCdPicker();
+};
+document.getElementById("cdSUp").onclick = (e) => {
+  e.stopPropagation();
+  cdS = (cdS + 1) % 60;
+  refreshCdPicker();
+};
+document.getElementById("cdSDown").onclick = (e) => {
+  e.stopPropagation();
+  cdS = (cdS - 1 + 60) % 60;
+  refreshCdPicker();
+};
+
+makeEditable("cdHValWrap", "cdHValText", 0, 23, ()=>cdH, (v)=>{ cdH = v; refreshCdPicker(); });
+makeEditable("cdMValWrap", "cdMValText", 0, 59, ()=>cdM, (v)=>{ cdM = v; refreshCdPicker(); });
+makeEditable("cdSValWrap", "cdSValText", 0, 59, ()=>cdS, (v)=>{ cdS = v; refreshCdPicker(); });
+
+// 预览铃声
+document.getElementById("previewRingBtn").onclick = function(){
+  const ring = document.getElementById("ringSelect").value;
+  if(ring === 'custom'){
+    if(!customRingUrl){
+      alert("请先选择本地音频文件");
+    }else{
+      playRing(ring, true);
+      setTimeout(stopRing, 3000);
+    }
+  }else{
+    playRing(ring, false);
+    setTimeout(stopRing, 2200);
+  }
+};
+
+// 闹钟列表
+let alarmList = JSON.parse(localStorage.getItem("alarmList") || "[]");
+
+const delMask = document.getElementById("delMask");
+const delAlarmText = document.getElementById("delAlarmText");
+const cancelDel = document.getElementById("cancelDel");
+const confirmDel = document.getElementById("confirmDel");
+let pendingDeleteIndex = null;
+
+cancelDel.onclick = function(){
+  delMask.style.display = 'none';
+  pendingDeleteIndex = null;
+};
+
+confirmDel.onclick = function(){
+  if(pendingDeleteIndex !== null){
+    alarmList.splice(pendingDeleteIndex, 1);
+    saveAlarms();
+    renderAlarms();
+  }
+  delMask.style.display = 'none';
+  pendingDeleteIndex = null;
+};
+
+const ringMask = document.getElementById("ringMask");
+const ringShowTime = document.getElementById("ringShowTime");
+const ringTitle = document.getElementById("ringTitle");
+const snoozeBtn = document.getElementById("snoozeBtn");
+const stopRingBtn = document.getElementById("stopRingBtn");
+let currentAlarm = null;
+
+function saveAlarms(){
+  localStorage.setItem("alarmList", JSON.stringify(alarmList));
+}
+
+function renderAlarms(){
+  const listEl = document.getElementById("alarmList");
+  if(alarmList.length === 0){
+    listEl.innerHTML = `<div class="empty-tip">暂无闹钟</div>`;
+    return;
+  }
+  const ringMap = {
+    beep: "滴答蜂鸣",
+    alarm: "警报铃声",
+    soft: "舒缓铃声",
+    fast: "急促闹铃",
+    chime: "清脆钟鸣",
+    wave: "水波舒缓",
+    bright: "明亮提示",
+    bell1:"复古铃铛",
+    bell2:"叮咚门铃",
+    sweep:"扫频警报",
+    melody1:"短旋律A",
+    melody2:"短旋律B",
+    buzz1:"低频蜂鸣",
+    buzz2:"高频哔声",
+    gentle:"温柔唤醒",
+    horn:"号角提示",
+    twinkle:"闪烁音符",
+    rhythm:"节奏提示音",
+    metro:"节拍器",
+    custom: "自定义本地铃声"
+  };
+  const repeatMap = {
+    once: "一次",
+    workday: "工作日",
+    daily: "每天",
+    weekend: "周末"
+  };
+  let html = "";
+  alarmList.forEach((alarm, idx) => {
+    const label = alarm.label ? alarm.label : "闹钟";
+    html += `
+      <div class="alarm-item">
+        <div class="alarm-info">
+          <div class="t">${alarm.time}</div>
+          <div class="desc">【${label}】铃声：${ringMap[alarm.ring] || "未知"}｜${repeatMap[alarm.repeat] || "一次"}｜延迟：${alarm.snoozeMin} 分钟 ${alarm.vibrate ? '｜震动开启' : ''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="toggle ${alarm.enabled ? 'on' : ''}" data-idx="${idx}"></div>
+          <button class="btn btn-danger btn-del" data-del="${idx}">删除</button>
+        </div>
+      </div>`;
+  });
+  listEl.innerHTML = html;
+  document.querySelectorAll(".toggle").forEach(t => {
+    t.onclick = () => {
+      const i = Number(t.dataset.idx);
+      alarmList[i].enabled = !alarmList[i].enabled;
+      alarmList[i].triggered = false;
+      saveAlarms();
+      renderAlarms();
+    };
+  });
+  document.querySelectorAll(".btn-del").forEach(btn => {
+    btn.onclick = () => {
+      const i = Number(btn.dataset.del);
+      pendingDeleteIndex = i;
+      delAlarmText.innerText = `闹钟：${alarmList[i].time}`;
+      delMask.style.display = 'flex';
+    };
+  });
+}
+
+document.getElementById("addAlarmBtn").onclick = function(){
+  const timeStr = `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
+  const ring = document.getElementById("ringSelect").value;
+  const repeat = document.getElementById("repeatSelect").value;
+  const label = document.getElementById("alarmLabel").value.trim();
+  const snoozeMin = Number(document.getElementById("snoozeInput").value) || 5;
+  const vibrate = document.getElementById("vibrateSwitch").checked;
+  const ringFileUrl = ring === 'custom' ? customRingUrl : null;
+  alarmList.push({
+    time: timeStr,
+    ring,
+    ringUrl: ringFileUrl,
+    repeat,
+    label,
+    snoozeMin,
+    vibrate,
+    enabled: true,
+    triggered: false
+  });
+  saveAlarms();
+  renderAlarms();
+  document.getElementById("alarmLabel").value = "";
+};
+
+function showAlarmDialog(alarm){
+  currentAlarm = alarm;
+  ringTitle.textContent = alarm.label ? alarm.label : "闹钟响啦！";
+  ringShowTime.textContent = alarm.time;
+  ringMask.style.display = "flex";
+  if(alarm.ring === 'custom' && alarm.ringUrl){
+    customAudio = new Audio(alarm.ringUrl);
+    customAudio.loop = true;
+    customAudio.play().catch(e => {});
+  }else{
+    playBuiltinRing(alarm.ring);
+  }
+  if(alarm.vibrate) doVibrate();
+}
+
+function snoozeAlarm(){
+  stopRing();
+  ringMask.style.display = "none";
+  const now = new Date();
+  now.setMinutes(now.getMinutes() + currentAlarm.snoozeMin);
+  const newTime = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+  alarmList.push({
+    time: newTime,
+    ring: currentAlarm.ring,
+    ringUrl: currentAlarm.ringUrl,
+    repeat: "once",
+    label: currentAlarm.label ? currentAlarm.label + "（延迟）" : "延迟闹钟",
+    snoozeMin: currentAlarm.snoozeMin,
+    vibrate: currentAlarm.vibrate,
+    enabled: true,
+    triggered: false
+  });
+  saveAlarms();
+  renderAlarms();
+}
+
+function closeAlarmRing(){
+  stopRing();
+  ringMask.style.display = "none";
+  alarmList.forEach(a => { a.triggered = false; });
+  saveAlarms();
+  renderAlarms();
+}
+
+snoozeBtn.onclick = snoozeAlarm;
+stopRingBtn.onclick = closeAlarmRing;
+
+// 主时钟更新
+function checkRepeat(alarm, now){
+  const wd = now.getDay();
+  if(alarm.repeat === "once") return true;
+  if(alarm.repeat === "workday") return wd >= 1 && wd <= 5;
+  if(alarm.repeat === "weekend") return wd === 0 || wd === 6;
+  if(alarm.repeat === "daily") return true;
+  return true;
+}
+
+function updateMainTime(){
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2,"0");
+  const mm = String(now.getMinutes()).padStart(2,"0");
+  const ss = String(now.getSeconds()).padStart(2,"0");
+  document.getElementById("mainBigTime").textContent = `${hh}:${mm}:${ss}`;
+  const weekArr = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
+  const dateStr = `${now.getFullYear()} 年 ${now.getMonth()+1} 月 ${now.getDate()} 日 ${weekArr[now.getDay()]}`;
+  document.getElementById("mainBigDate").textContent = dateStr;
+  updateHolidayText();
+  const checkTime = `${hh}:${mm}`;
+  const sec = now.getSeconds();
+  alarmList.forEach(alarm => {
+    if(alarm.enabled && alarm.time === checkTime && sec === 0 && !alarm.triggered && checkRepeat(alarm, now)){
+      alarm.triggered = true;
+      saveAlarms();
+      showAlarmDialog(alarm);
+    }
+  });
+}
+
+// 秒表
+let swStartTs = null;
+let swElapsed = 0;
+let swTimer = null;
+let lapNo = 0;
+const swDisplay = document.getElementById("stopwatchTime");
+const lapList = document.getElementById("lapList");
+
+function formatMs(ms){
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  const cent = Math.floor((ms % 1000) / 10);
+  return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}.${String(cent).padStart(2,"0")}`;
+}
+
+function updateStopwatch(){
+  if(swStartTs !== null) swElapsed = Date.now() - swStartTs;
+  swDisplay.textContent = formatMs(swElapsed);
+}
+
+document.getElementById("swStart").onclick = function(){
+  if(swTimer){
+    clearInterval(swTimer);
+    swTimer = null;
+    this.textContent = "开始";
+  }else{
+    if(swElapsed === 0) swStartTs = Date.now();
+    else swStartTs = Date.now() - swElapsed;
+    swTimer = setInterval(updateStopwatch, 20);
+    this.textContent = "暂停";
+  }
+};
+document.getElementById("swLap").onclick = function(){
+  lapNo++;
+  lapList.innerHTML += `<div class="lap-item">计次 ${lapNo}：${formatMs(swElapsed)}</div>`;
+};
+document.getElementById("swReset").onclick = function(){
+  clearInterval(swTimer);
+  swTimer = null;
+  swElapsed = 0;
+  swStartTs = null;
+  lapNo = 0;
+  lapList.innerHTML = "";
+  swDisplay.textContent = formatMs(0);
+  document.getElementById("swStart").textContent = "开始";
+};
+
+// 倒计时
+let cdTotal = 0;
+let cdTimer = null;
+const cdDisplay = document.getElementById("cdTime");
+
+function renderCountdown(){
+  const h = Math.floor(cdTotal / 3600);
+  const m = Math.floor((cdTotal % 3600) / 60);
+  const s = cdTotal % 60;
+  cdDisplay.textContent = `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+
+document.getElementById("cdStart").onclick = function(){
+  if(cdTimer){
+    clearInterval(cdTimer);
+    cdTimer = null;
+    this.textContent = "开始";
+  }else{
+    if(cdTotal <= 0) cdTotal = cdH * 3600 + cdM * 60 + cdS;
+    cdTimer = setInterval(() => {
+      cdTotal--;
+      renderCountdown();
+      if(cdTotal <= 0){
+        clearInterval(cdTimer);
+        cdTimer = null;
+        document.getElementById("cdStart").textContent = "开始";
+        playBuiltinRing("alarm");
+        if(navigator.vibrate) navigator.vibrate([300, 200, 300]);
+        alert("倒计时结束！");
+        stopRing();
+      }
+    }, 1000);
+    this.textContent = "暂停";
+  }
+};
+document.getElementById("cdReset").onclick = function(){
+  clearInterval(cdTimer);
+  cdTimer = null;
+  cdTotal = 0;
+  refreshCdPicker();
+  renderCountdown();
+  document.getElementById("cdStart").textContent = "开始";
+};
+
+// 世界时间
+const worldCities = [
+  {name: "北京", offset: 8},
+  {name: "东京", offset: 9},
+  {name: "纽约", offset: -5},
+  {name: "伦敦", offset: 0},
+  {name: "悉尼", offset: 10},
+  {name: "迪拜", offset: 4}
+];
+
+function renderWorldTime(){
+  const listEl = document.getElementById("worldList");
+  const now = new Date();
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+  let html = "";
+  worldCities.forEach(city => {
+    const t = new Date(utc + city.offset * 3600000);
+    const hh = String(t.getHours()).padStart(2,"0");
+    const mm = String(t.getMinutes()).padStart(2,"0");
+    const ss = String(t.getSeconds()).padStart(2,"0");
+    html += `
+      <div class="world-item">
+        <div class="world-city">${city.name}</div>
+        <div class="world-time">${hh}:${mm}:${ss}</div>
+      </div>`;
+  });
+  listEl.innerHTML = html;
+}
+
+// 初始化
+refreshTimePicker();
+refreshCdPicker();
+renderAlarms();
+updateMainTime();
+renderWorldTime();
+
+setInterval(() => {
+  updateMainTime();
+  renderWorldTime();
+}, 1000);
+</script>
+
+</body>
+</html>

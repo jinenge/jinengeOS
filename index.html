@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta name="baidu-site-verification" content="codeva-s3YK7rGX15" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>进恩哥系统</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system}
+.boot{
+  position:fixed;
+  inset:0;
+  background:linear-gradient(135deg,#0d0d1a,#12123a,#1a1a5c);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+.boot-logo{
+  width:90px;
+  height:90px;
+  margin-bottom:24px;
+  border-radius:14px;
+  opacity:0;
+  /* 2秒后开始霓虹呼吸 */
+  animation:logoFade 2s ease-in-out forwards, neonBlink 2.2s infinite ease-in-out 2s;
+}
+.logo{
+  font-size:24px;
+  font-weight:bold;
+  margin-bottom:40px;
+  opacity:0;
+  animation:logoFade 2s ease-in-out forwards;
+}
+.progress-wrap{
+  width:220px;
+  height:6px;
+  background:rgba(255,255,255,0.15);
+  border-radius:999px;
+  overflow:hidden;
+}
+.progress{
+  width:0%;
+  height:100%;
+  background:#ffffff;
+  border-radius:999px;
+  animation:progress 5s linear forwards;
+}
+.tip{
+  margin-top:12px;
+  font-size:12px;
+  color:#aaa;
+  opacity:0;
+  animation:fade 7s ease forwards;
+}
+@keyframes logoFade{
+  0%{opacity:0;transform:scale(0.8);}
+  100%{opacity:1;transform:scale(1);}
+}
+/*霓虹呼吸发光*/
+@keyframes neonBlink{
+  0%{box-shadow:0 0 8px #5066ff,0 0 16px #7b3cff,0 0 28px #3928ff;}
+  50%{box-shadow:0 0 16px #5066ff,0 0 32px #7b3cff,0 0 48px #3928ff;}
+  100%{box-shadow:0 0 8px #5066ff,0 0 16px #7b3cff,0 0 28px #3928ff;}
+}
+/* 七彩进度动画：宽度+颜色同步变化 */
+@keyframes progress {
+  0%{width:0%;background:#ff0000;}
+  20%{width:20%;background:#ff9900;}
+  40%{width:40%;background:#ffff00;}
+  60%{width:60%;background:#00cc00;}
+  80%{width:80%;background:#0099ff;}
+  100%{width:100%;background:#9933ff;}
+}
+/* 七彩淡入：透明度+颜色渐变 */
+@keyframes fade {
+  0%{opacity:0;color:red;}
+  25%{opacity:0.4;color:orange;}
+  50%{opacity:0.7;color:yellow;}
+  75%{opacity:0.9;color:#00cc66;}
+  100%{opacity:1;color:#6633ff;}
+}
+.linux-boot {
+  background: #000;
+  padding: 10px;
+  font-family: Consolas, "Monospace";
+  color: #39ff14;
+  width: 100%;
+  max-width: 600px;
+  height: 220px;
+  overflow-y: auto; /* 开启垂直滚动 */
+  overflow-x: hidden;
+}
+.boot-log {
+  line-height: 1.35;
+  font-size: 12px;
+}
+.boot-tip {
+  margin-top:6px;
+  border-right:3px solid #39ff14;
+  animation: blink 1s infinite;
+  white-space:nowrap;
+}
+@keyframes blink {
+  0%,100% {border-color:#39ff14}
+  50% {border-color:transparent}
+}
+/* 自定义滚动条美化 */
+.linux-boot::-webkit-scrollbar{
+  width:6px;
+}
+.linux-boot::-webkit-scrollbar-thumb{
+  background:#39ff14;
+  border-radius:3px;
+}
+.linux-boot::-webkit-scrollbar-track{
+  background:#111;
+}
+</style>
+</head>
+<body>
+<div class="boot">
+  <svg class="boot-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+   <!-- 这里href填你的logo图片文件名，和index.html同一目录 -->
+   <image href="favicon.png" x="0" y="0" width="200" height="200" preserveAspectRatio="xMidYMid meet" />
+ </svg>
+  <div class="logo">进恩哥系统</div>
+  <div class="progress-wrap">
+    <div class="progress"></div>
+  </div>
+<div class="linux-boot" id="bootContainer">
+  <div class="boot-log" id="log"></div>
+  <div class="boot-tip">正在加载核心服务…</div>
+</div>
+</div>
+<script>
+const logs = [
+  "[    0.000000] Linux version 6.8.0‑custom‑enkernel (build@enkernel‑build) #1 SMP",
+  "[    0.001200] Command line: root=/dev/sda2 splash quiet loglevel=3",
+  "[    0.002500] CPU: AMD‑Simulated CPU model, 4 cores",
+  "[    0.004100] Memory: 2048MB simulated RAM available",
+  "[    0.006000] Zone ranges: DMA Normal HighMem",
+  "[    0.010000] Kernel command line parsed complete",
+  "[    0.020000] PCI: Probing PCI hardware",
+  "[    0.040000] PCI: Enumerated bus 0000:00",
+  "[    0.080000] ACPI: Found DSDT table, enabling power management",
+  "[    0.120000] usb‑core: registered new device driver usb",
+  "[    0.160000] ehci‑pci 0000:00:02.0: USB EHCI host controller found",
+  "[    0.220000] sd 0:0:0:0: [sda] Virtual disk 16.0 GiB",
+  "[    0.240000] sda: sda1 sda2 sda3",
+  "[    0.300000] EXT4‑fs (sda2): journal load complete",
+  "[    0.400000] EXT4‑fs (sda2): mounted filesystem with ordered data mode",
+  "[  OK  ] Mounted /sys.",
+  "[  OK  ] Mounted /proc.",
+  "[  OK  ] Mounted /dev.",
+  "[  OK  ] Mounted /dev/pts.",
+  "[  OK  ] Mounted /run.",
+  "[ INFO ] Loading squashfs system‑image.squashfs ...",
+  "[  OK  ] Loop device /dev/loop0 bound to system‑image.squashfs",
+  "[  OK  ] Mounted squashfs root‑image to /mnt/live",
+  "[ INFO ] Loading overlayfs upper/lower layers",
+  "[  OK  ] Overlay filesystem mounted to /",
+  "[  OK  ] Started udev Kernel Device Manager.",
+  "[ INFO ] udev: Populating /dev from sysfs",
+  "[  OK  ] udev rule processing finished",
+  "[ INFO ] Loading system hardware drivers...",
+  "[  OK  ] Loaded network stack module.",
+  "[  OK  ] Loaded e1000 virtual network driver",
+  "[  OK  ] Started SysFS init service.",
+  "[ INFO ] Starting network subsystems",
+  "[  OK  ] Started systemd‑networkd",
+  "[ INFO ] Waiting for network link‑up",
+  "[  OK  ] Network interface eth0 up (dhcp)",
+  "[ INFO ] Initializing core service",
+  "[ INFO ] Starting dbus‑daemon system bus",
+  "[  OK  ] D‑Bus message bus started",
+  "[ INFO ] Starting polkit authorization service",
+  "[  OK  ] PolicyKit service ready",
+  "[ INFO ] Starting user session manager",
+  "[  OK  ] Core service loaded successfully",
+  "[ INFO ] Starting graphical boot agent...",
+  "[  OK  ] Boot agent ready, entering user environment"
+];
+const logDom = document.getElementById('log');
+const bootContainer = document.getElementById('bootContainer');
+let index = 0;
+function addLog(){
+  if(index < logs.length){
+    logDom.innerHTML += logs[index]+'<br>';
+    // 自动滚动到底部，看到最新日志
+    bootContainer.scrollTop = bootContainer.scrollHeight;
+    index++;
+    setTimeout(addLog,120);
+  }else{
+    setTimeout(()=>{
+      logDom.innerHTML='';
+      index=0;
+      addLog();
+    },3500);
+  }
+}
+addLog();
+</script>
+<audio id="startAudio" preload="auto">
+  <source src="./Loading.mp3" type="audio/mpeg">
+
+<script>
+const audio = document.getElementById('startAudio');
+audio.volume = 0.7;
+let playFlag = false;
+// 本地文件直接尝试自动播放
+setTimeout(()=>{
+  audio.play().then(()=>{playFlag=true}).catch(()=>{});
+},500)
+// 浏览器禁止自动播放时，点击页面播放
+document.body.addEventListener('click',()=>{
+    if(!playFlag){
+        playFlag = true;
+        audio.currentTime = 0;
+        audio.play().catch(e=>{});
+    }
+},{once:true})
+// 7秒跳转
+setTimeout(()=>{
+    window.location.href = "Desktop.html";
+},7000)
+</script>
+</body>
+</html>

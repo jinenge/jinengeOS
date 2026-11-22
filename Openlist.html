@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Openlist</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+    background:#050a1a;
+    color:#fff;
+    min-height:100vh;
+    padding:20px 16px;
+    font-family:system-ui,sans-serif;
+}
+.back-btn{
+    font-size:24px;
+    color:#88ccff;
+    cursor:pointer;
+    padding:4px 8px;
+    display:inline-block;
+    margin-bottom:30px;
+}
+.tip{
+    text-align:center;
+    margin-top:80px;
+}
+.tip h2{
+    color:#ffffff;
+    margin-bottom:12px;
+}
+.tip p{
+    color:#b8c8d8;
+    font-size:15px;
+}
+</style>
+</head>
+<body>
+<div class="back-btn" onclick="goBack()">← 返回</div>
+<div class="tip">
+    <h2>Openlist</h2>
+    <p>正在跳转至Openlist云盘…</p>
+</div>
+<script>
+// 统一返回函数
+function goBack(){
+  if(window.parent !== window){
+    parent.postMessage(JSON.stringify({type:"backPage"}),"*");
+  }
+}
+window.addEventListener('popstate',function(e){
+  e.preventDefault();
+  goBack();
+  history.pushState(null, null, location.href);
+});
+history.pushState(null, null, location.href);
+
+// 延迟跳转，给iframe返回机制留出时间；如果想立刻跳转把timeout改成0
+setTimeout(()=>{
+    window.location.href="https://openlist.jinenge.us.kg";
+},800);
+</script>
+</body>
+</html>
